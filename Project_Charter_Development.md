@@ -35,12 +35,12 @@ Le projet Learn2Trade a pour but de rendre l’apprentissage du trading accessib
 
 **Stakeholders**  
 - **Interne :**  
-  - Julien Pulon (Front-end, UX, SEO, Stratégies)  
+  - Julien Pulon (Front-end, UX, Stratégies)  
   - Thomas Rousseau (Back-end, API, Stratégies)  
 - **Externe :**  
-  - Instructeurs (validation pédagogique)  
+  - Instructeurs SUI (validation pédagogique)  
   - Utilisateurs cibles (débutants, étudiants, amateurs crypto)  
-  - Fournisseurs d’API (CoinGecko, Binance, Exchange Rates)  
+  - Fournisseurs d’API (CoinGecko, Binance, Exchange Rates, lightweightChart)  
 
 **Team Roles & Responsibilities**
 
