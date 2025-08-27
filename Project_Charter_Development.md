@@ -62,14 +62,14 @@ Le projet Learn2Trade a pour but de rendre l’apprentissage du trading accessib
 - Simulation d’achat/vente virtuel.  
 - Historique des transactions et portefeuille.  
 - Graphiques interactifs (PnL, évolution).  
-- Stratégie DCA automatique.  
-- Mode gamification (classement des traders).  
 
 **Out-of-Scope (MVP)**  
 - Trading réel avec argent.  
 - Intégration d’actifs trop nombreux (focus sur USD/EUR, BTC, ETH).  
 - Stratégies complexes de trading quantitatif.  
 - Fonctionnalités sociales avancées (chat, partage public).  
+- Stratégie DCA automatique.  
+- Mode gamification (classement des traders).  
 
 ---
 
