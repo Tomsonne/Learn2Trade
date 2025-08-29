@@ -1,5 +1,9 @@
-# 📘 Project Charter – Learn2Trade
+<p align="center">
+  <img src="images/logo_L2T.png" alt="Logo" width="200"/>
+</p>
 
+# 📘 Project Charter – Learn2Trade
+_
 ## 0. Project Objectives
 
 **Purpose**  
