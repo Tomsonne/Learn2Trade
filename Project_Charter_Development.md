@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/logo_L2T.png" alt="Logo" width="200"/>
+  <img src="images/Logo_L2T.png" alt="Logo" width="200"/>
 </p>
 
 # 📘 Project Charter – Learn2Trade
