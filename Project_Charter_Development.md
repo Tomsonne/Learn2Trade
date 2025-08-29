@@ -68,7 +68,7 @@ Le projet Learn2Trade a pour but de rendre l’apprentissage du trading accessib
 - Intégration d’actifs trop nombreux (focus sur USD/EUR, BTC, ETH).  
 - Stratégies complexes de trading quantitatif.  
 - Fonctionnalités sociales avancées (chat, partage public).  
-- Stratégie DCA automatique.  
+- Stratégie DCA automatique  
 - Mode gamification (classement des traders).  
 
 ---
@@ -78,7 +78,7 @@ Le projet Learn2Trade a pour but de rendre l’apprentissage du trading accessib
 | Risque               | Description | Solution |
 |-----------------------|-------------|------------|
 | **Techniques**        | Intégration API temps réel instable ou limitée. Apprentissage de nouveaux frameworks.| Prévoir fallback avec API alternative, mock data pour tests. Limiter les nouvelles technologies a implémenter et commencer a regarder des tutos.|
-| **Complexité Stratégies** | Stratégies automatiques trop complexes pour MVP. | Se limiter à RSI, DCA et MA simples. |
+| **Complexité Stratégies** | Stratégies automatiques trop complexes pour MVP. | Se limiter à RSI et MA simples. |
 | **Adoption Utilisateur** | Risque que l’interface soit trop technique pour les débutants. | Tests UX en continu avec feedback utilisateurs. |
 | **Time Management**   | Délais serrés (3 mois). | Sprint planning Agile, milestones clairs. |
 
@@ -126,8 +126,7 @@ Le projet Learn2Trade a pour but de rendre l’apprentissage du trading accessib
   - Premiers graphiques (Recharts/Chart.js).  
 
 - **Semaine 8 - 9** :  
-  - Implémentation stratégie **RSI automatique**.  
-  - Implémentation stratégie **DCA**.  
+  - Implémentation stratégie **RSI automatique**.    
   - Implémentation stratégie **MA crossover (50/200)**.
   - Tests unitaires backend (logiques des stratégies). 
   - Backtests avec données historiques.  
@@ -140,9 +139,7 @@ Le projet Learn2Trade a pour but de rendre l’apprentissage du trading accessib
   - Feedback visuel après trade (succès/échec).  
 
 - **Semaine 11** :  
-  - Ajout d’une section **actualités financières** (via NewsAPI).  
-  - Leaderboard (classement par ROI).  
-  - Début gamification (badges/récompenses).  
+  - Ajout d’une section **actualités financières** (via NewsAPI).    
 
 ---
 
