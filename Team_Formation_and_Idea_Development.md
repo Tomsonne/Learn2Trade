@@ -75,10 +75,10 @@ Une application simple et intuitive pour apprendre à trader USD, EUR, BTC et ET
 
 ### Fonctionnalités clés (MVP)  
 - Authentification sécurisée, email + mot de passe (JWT + bcrypt).  
-- Dashboard prix temps réel (USD/EUR, BTC/USD, ETH/USD) + leaderboard gamification + infos finance (API externe).  
+- Dashboard prix temps réel (USD/EUR, BTC/USD, ETH/USD)+ infos finance (API externe).  
 - Simulation d’ordres (mode simulation).  
 - Historique des transactions + graphiques.  
-- Stratégies automatiques RSI / DCA / MA.  
+- Stratégies automatiques RSI / MA.  
 - News économiques.  
 
 ### Résultats attendus  
