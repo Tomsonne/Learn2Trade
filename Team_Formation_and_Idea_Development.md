@@ -1,3 +1,6 @@
+<p align="center">
+  <img src="images/Logo_L2T.png" alt="Logo" width="200"/>
+</p>
 # Idea Development Documentation
 
 ## 0. Formation de l’équipe  
