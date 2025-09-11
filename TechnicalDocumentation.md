@@ -90,13 +90,41 @@ Le document final comprend :
 ---
 
 ## 1. Architecture Système
-**Frontend :** React + Tailwind, état avec Redux Toolkit ou Zustand, graphiques via Recharts/Chart.js, SSE/WS pour flux en direct.  
-**Backend :** Flask + Flask-RESTx, Flask-JWT-Extended, bcrypt, APScheduler pour tâches périodiques, SSE/Flask-SocketIO.  
-**Base de données :** PostgreSQL.  
-**Cache (optionnel) :** Redis pour prix/news et rate limiting.  
-**APIs externes :** CoinGecko, exchangerate.host, CryptoPanic RSS, Google News RSS.  
-**Infra :** Docker Compose (`api`, `db`, `frontend`, `redis`).  
-**Diagramme :**
+
+### 🌐 Frontend
+- **React + Tailwind** : React est aujourd’hui la librairie front-end la plus utilisée et recherchée dans le monde du travail (startups comme grands groupes). Il permet de construire des interfaces modulaires et performantes. Tailwind CSS accélère le développement d’interfaces modernes sans multiplier les fichiers CSS et correspond aux standards actuels de design.
+- **État global** : Redux Toolkit (référence industrielle pour les projets complexes, facile à auditer et tester) ou Zustand (solution plus légère et moderne, très populaire pour les MVPs).
+- **Graphiques** : Recharts/Chart.js, deux bibliothèques open source largement utilisées en entreprise pour la visualisation de données financières.
+- **Temps réel** : SSE pour sa simplicité, WebSocket si besoin de communications bidirectionnelles (standard dans les applications de trading professionnelles).
+
+### ⚙️ Backend
+- **Flask + Flask-RESTx** : Flask est un framework Python reconnu pour sa simplicité et sa rapidité de mise en place. Python reste un langage clé du monde professionnel (data, finance, IA), ce qui facilite la maintenance et le recrutement. Flask-RESTx fournit une documentation Swagger intégrée, pratique pour les équipes.
+- **Flask-JWT-Extended + bcrypt** : respect des bonnes pratiques de sécurité exigées dans l’industrie (authentification stateless avec JWT, stockage sécurisé des mots de passe).
+- **APScheduler** : gestion fiable de tâches récurrentes (rafraîchissement prix/news, exécution de stratégies) sans ajouter de complexité inutile.
+- **SSE / Flask-SocketIO** : standards industriels pour le temps réel, déjà utilisés dans la finance (push de prix ou carnet d’ordres).
+
+### 🗄️ Base de données
+- **PostgreSQL** : base relationnelle robuste et largement utilisée en production. Supporte très bien les contraintes d’intégrité (FK, check), la précision numérique (NUMERIC pour montants financiers) et l’extension (JSONB). Un choix qui correspond aux attentes des entreprises.
+
+### 🚀 Cache (optionnel)
+- **Redis** : outil de cache incontournable dans le monde professionnel (finance, e-commerce, SaaS). Il réduit la latence, protège des quotas API et gère le rate limiting. Même si optionnel dans un MVP, il prépare le projet à une montée en charge.
+
+### 🔗 APIs externes
+- **CoinGecko** : référence open source pour les données crypto, sans coût, largement utilisée par les développeurs.
+- **exchangerate.host** : API gratuite et fiable pour le forex, parfaite pour un MVP.
+- **CryptoPanic RSS** : agrégateur de news crypto connu, sans authentification, utile pour contextualiser les signaux de trading.
+- **Google News RSS** : API simple et universelle pour couvrir le forex, conforme aux besoins d’un projet éducatif.
+
+### 🛠️ Infrastructure
+- **Docker Compose** : standard de facto en entreprise pour le déploiement local et la CI/CD. Il garantit une cohérence entre environnements (dev, staging, production) et prépare la transition vers Kubernetes si nécessaire.
+
+---
+✅ **Justification globale :**  
+Chaque choix technique est aligné sur deux axes :  
+1. **Employabilité** : toutes les briques choisies (React, Redux, Flask, PostgreSQL, Docker) sont des technologies très demandées sur le marché, ce qui valorise le projet dans un CV ou un portfolio.  
+2. **Simplicité et évolutivité** : la stack reste légère pour un MVP, mais elle respecte les standards industriels et peut évoluer vers une architecture plus robuste si le projet devait être porté en production.
+
+
 <p align="center">
   <img src="images/high_level_diagram.png" alt="high_level_diagram" width="400"/>
 </p>
