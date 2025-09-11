@@ -375,7 +375,6 @@ Chaque objet représente une bougie avec les champs suivants :
 ```
 
 
-```
 ## 5. Plan SCM et QA
 ### SCM
 - GitHub avec branches `main` (stable), `thomas/*`, `julien/*`.  
