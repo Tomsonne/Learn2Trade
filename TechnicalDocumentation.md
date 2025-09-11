@@ -192,26 +192,27 @@ CREATE TABLE news_cache (
   symbols TEXT[]
 );
 ```
-1) Diagramme de classe
+1. Diagramme de classe
 <p align="center">
   <img src="images/diagramme_classe.png" alt="Diagramme classe" width="400"/>
 </p>
-2) ER diagramme
+2. ER diagramme
 <p align="center">
   <img src="images/er_diagram.png" alt="ER diagramme" width="400"/>
 </p>
 ---
 
 ## 3. Diagrammes de Séquence
-1) Flux d’authentification
+
+1. Flux d’authentification
   <p align="center">
     <img src="images/authentification_user.png" alt="diagramme auth" width="400"/>
 </p>
-2) Mise à jour prix
+2. Mise à jour prix
   <p align="center">
     <img src="images/maj.png" alt="maj price" width="400"/>
 </p>
-3) Placement d’un ordre
+3. Placement d’un ordre
   <p align="center">
     <img src="images/trade_user.png" alt="placement ordre" width="400"/>
 </p>
