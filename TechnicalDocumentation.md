@@ -266,8 +266,7 @@ CREATE TABLE news_cache (
   `GET /latest?base=USD&symbols=EUR`
 
 ---
-
-### 4.2 API Interne (Projet)
+# 4.2 API Interne (Projet)
 
 **Base URL :** `/api/v1`  
 
@@ -283,75 +282,71 @@ CREATE TABLE news_cache (
 
 ---
 
-#### Authentification
-- **POST** `/auth/signup`  
-  - Entrée : `{email,password}`  
-  - Sortie : `{user_id,email}`  
+## Endpoints
 
-- **POST** `/auth/login`  
-  - Entrée : `{email,password}`  
-  - Sortie : `{access_token,refresh_token,token_type}`  
+| Domaine | Méthode | Chemin | Entrée | Sortie (Succès) | Erreurs possibles |
+|---------|---------|--------|--------|-----------------|------------------|
+| **Auth** | POST | `/auth/signup` | `{email,password}` | `{user_id,email}` | `400 INVALID_EMAIL`, `400 WEAK_PASSWORD`, `409 EMAIL_EXISTS`, `500 SERVER_ERROR` |
+| **Auth** | POST | `/auth/login` | `{email,password}` | `{access_token,refresh_token,token_type}` | `401 INVALID_CREDENTIALS`, `500 SERVER_ERROR` |
+| **Marché** | GET | `/prices` | `symbols=BTC,ETH&vs=usd,eur` | `{timestamp,prices,source}` | `503 PROVIDER_UNAVAILABLE`, `500 SERVER_ERROR` |
+| **Marché** | GET | `/forex` | `base=USD&symbols=EUR` | `{timestamp,base,rates,source}` | `503 PROVIDER_UNAVAILABLE`, `400 INVALID_SYMBOL` |
+| **Marché** | GET | `/charts/candles` | `symbol=BTCUSD&interval=1h&limit=500` | `[{t,o,h,l,c,v},...]` (voir explication ci-dessous) | `400 INVALID_PARAMS`, `503 PROVIDER_UNAVAILABLE` |
+| **News** | GET | `/news/crypto` | `q=BTC,ETH&limit&lang` | `[{title,url,published_at,source,tickers},...]` | `503 NEWS_API_DOWN`, `204 NO_CONTENT` |
+| **News** | GET | `/news/forex` | `q="EUR USD forex"&limit&lang` | `[{title,url,published_at,source,tickers},...]` | `503 NEWS_API_DOWN`, `204 NO_CONTENT` |
+| **Ordres** | POST | `/orders` | `{symbol,side,quantity,type="market",strategy_tag}` | `{order_id,symbol,side,filled_qty,avg_price,created_at}` | `400 INVALID_ORDER`, `401 UNAUTHORIZED`, `500 SERVER_ERROR` |
+| **Ordres** | GET | `/orders` | `symbol,limit,cursor` | `[{order_id,symbol,side,filled_qty,avg_price},...]` | `401 UNAUTHORIZED`, `500 SERVER_ERROR` |
+| **Portefeuille** | GET | `/portfolio` | — | `{cash,positions,equity}` | `401 UNAUTHORIZED`, `500 SERVER_ERROR` |
+| **Trades** | GET | `/trades` | `symbol,from,to,limit` | `[{trade_id,symbol,side,qty,price_open,price_close,pnl},...]` | `401 UNAUTHORIZED`, `500 SERVER_ERROR` |
+| **Stratégies** | GET | `/strategies` | — | `[{key,enabled,params},...]` | `401 UNAUTHORIZED`, `500 SERVER_ERROR` |
+| **Stratégies** | PUT | `/strategies/{key}` | `{enabled,params}` | `{key,enabled,params}` | `400 INVALID_PARAMS`, `401 UNAUTHORIZED` |
 
----
-
-#### Données de Marché
-- **GET** `/prices`  
-  - Query : `symbols=BTC,ETH&vs=usd,eur`  
-  - Sortie : prix spot + timestamp + source  
-
-- **GET** `/forex`  
-  - Query : `base=USD&symbols=EUR`  
-  - Sortie : taux FX + timestamp + source  
-
-- **GET** `/charts/candles`  
-  - Query : `symbol=BTCUSD&interval=1h&limit=500`  
-  - Sortie : tableau OHLCV  
 
 ---
 
-#### Actualités
-- **GET** `/news/crypto`  
-  - Query : `q=BTC,ETH&limit&lang`  
-  - Sortie : tableau d’articles crypto  
+## Explication des bougies (`/charts/candles`)
 
-- **GET** `/news/forex`  
-  - Query : `q="EUR USD forex"&limit&lang`  
-  - Sortie : tableau d’articles forex  
+La sortie `[{t,o,h,l,c,v},...]` correspond à une série temporelle de **bougies (candlesticks)**.  
+Chaque objet représente une bougie avec les champs suivants :
+
+| Abréviation | Signification | Exemple | Description |
+|-------------|---------------|---------|-------------|
+| **t** | timestamp | `1693824000` | Date/heure (Unix ou ISO). |
+| **o** | open | `62500` | Prix d’ouverture. |
+| **h** | high | `63200` | Plus haut prix atteint. |
+| **l** | low | `62000` | Plus bas prix atteint. |
+| **c** | close | `62800` | Prix de clôture. |
+| **v** | volume | `123.4` | Volume échangé pendant l’intervalle. |
+
+### Exemple concret
+
+```json
+{
+  "status": "ok",
+  "data": [
+    {
+      "t": 1693824000,
+      "o": 62500,
+      "h": 63200,
+      "l": 62000,
+      "c": 62800,
+      "v": 123.4
+    },
+    {
+      "t": 1693827600,
+      "o": 62800,
+      "h": 63000,
+      "l": 62650,
+      "c": 62700,
+      "v": 95.7
+    }
+  ],
+  "source": "coingecko"
+}
+```
 
 ---
 
-#### Ordres & Portefeuille (Simulation)
-- **POST** `/orders`  
-  - Entrée : `{symbol,side,quantity,type="market",strategy_tag}`  
-  - Sortie : résumé d’ordre exécuté  
-
-- **GET** `/orders`  
-  - Query : `symbol,limit,cursor`  
-  - Sortie : liste paginée d’ordres  
-
-- **GET** `/portfolio`  
-  - Sortie : positions, cash (sim), equity  
-
-- **GET** `/trades`  
-  - Query : `symbol,from,to,limit`  
-  - Sortie : historique d’exécutions  
-
----
-
-#### Stratégies & Bot
-- **GET** `/strategies`  
-  - Sortie : liste `{key,enabled,params}`  
-
-- **PUT** `/strategies/{key}`  
-  - Entrée : `{enabled,params}`  
-  - Sortie : stratégie sauvegardée  
-
-- **GET** `/bot/status`  
-  - Sortie : état du bot (`running`, `last_run`)  
-
----
-
-#### Exemple de réponse : `/prices`
+## Exemple de succès (`/prices`)
 
 ```json
 {
@@ -365,6 +360,21 @@ CREATE TABLE news_cache (
     "source": "coingecko"
   }
 }
+```
+
+## Exemple d’erreur (`/prices` avec API externe indisponible)
+
+```json
+{
+  "status": "error",
+  "error": {
+    "code": "503 PROVIDER_UNAVAILABLE",
+    "message": "Service de prix temporairement indisponible"
+  }
+}
+```
+
+
 ```
 ## 5. Plan SCM et QA
 ### SCM
