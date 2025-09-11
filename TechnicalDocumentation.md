@@ -1,4 +1,6 @@
-# Étape 3 : Documentation Technique
+<p align="center">
+  <img src="images/Logo_L2T.png" alt="Logo" width="400"/>
+</p>
 ---
 
 ## Livrable : Documentation Technique
@@ -21,44 +23,62 @@ Le document final comprend :
 *En tant qu’invité, je veux créer un compte avec email et mot de passe afin de sauvegarder ma progression.*  
 ✅ Succès : compte créé, redirection vers tableau de bord.  
 ❌ Erreurs : email déjà utilisé, mot de passe trop faible, serveur indisponible.  
-**Maquette :** `connexion_user.png`
+**Maquette :**
+<p align="center">
+  <img src="images/connexion_user.png" alt="Connexion" width="400"/>
+</p>
 
-2) **Sécurité (Sessions JWT)**  
+3) **Sécurité (Sessions JWT)**  
 *En tant qu’utilisateur, je veux rester connecté de manière sécurisée afin de protéger mon compte.*  
 ✅ Succès : token d’accès court, refresh token en cookie httpOnly.  
 ❌ Erreurs : token expiré/invalide → `401 Unauthorized`.
 
-3) **Voir les prix en temps réel**  
+4) **Voir les prix en temps réel**  
 *En tant qu’utilisateur, je veux voir les prix BTC/USD, ETH/USD, EUR/USD afin de décider quand trader.*  
 ✅ Actualisation toutes les 1–10s (polling ou SSE/WS).  
 ❌ API externe indisponible → données fictives ou bannière.  
 **Maquette :** `page_trade.png`
+<p align="center">
+  <img src="images/page_trade.png" alt="Trade" width="400"/>
+</p>
 
-4) **Passer des ordres simulés**  
+6) **Passer des ordres simulés**  
 *En tant qu’utilisateur, je veux passer des ordres Buy/Sell en mode simulation sans risque financier.*  
 ✅ Ordre exécuté au prix du marché, portefeuille/historique mis à jour.  
 ❌ Erreurs : quantité invalide, symbole inconnu, erreur serveur → `400/500`.  
-**Maquette :** `page_trade.png`
+**Maquette :**
+<p align="center">
+  <img src="images/page_trade.png" alt="place order" width="400"/>
+</p>
 
-5) **Portefeuille & Historique**  
+8) **Portefeuille & Historique**  
 *En tant qu’utilisateur, je veux voir mes positions ouvertes et mes trades passés pour analyser mes performances.*  
 ✅ Affichage du portefeuille et de l’historique.  
 ❌ Erreurs : non connecté, base indisponible.  
-**Maquette :** `page_trade_historique.png`
+**Maquette :**
+<p align="center">
+  <img src="images/page_trade_historique.png" alt="portfolio history" width="400"/>
+</p>
 
-6) **Activer Stratégies Automatiques (RSI, MA Crossover)**  
+10) **Activer Stratégies Automatiques (RSI, MA Crossover)**  
 *En tant qu’utilisateur, je veux activer/désactiver des stratégies automatiques afin de comprendre leur fonctionnement.*  
 ✅ Stratégie activée, indicateur ON, ordres simulés exécutés.  
 ❌ Erreurs : paramètres invalides, stratégie déjà active, calcul indicateur échoué.  
-**Maquette :** `page_strategie_RSI.png`
+**Maquette :**
+<p align="center">
+  <img src="images/page_strategie_RSI.png" alt="Strategies" width="400"/>
+</p>
 
 #### Should Have
 7) **Voir les actualités financières (BTC, ETH, USD, EUR)**  
 ✅ Liste d’articles récents avec titre, source, date et lien.  
 ❌ API de news hors ligne, quota dépassé.  
-**Maquette :** `page_news.png`
+**Maquette :**
+<p align="center">
+  <img src="images/page_news.png" alt="News" width="400"/>
+</p>
 
-8) **Stop-Loss / Take-Profit**  
+9) **Stop-Loss / Take-Profit**  
 ✅ SL/TP enregistrés et déclenchés en simulation.  
 ❌ Valeurs invalides, erreur de liquidité fictive.
 
@@ -71,19 +91,21 @@ Le document final comprend :
 
 ## 1. Architecture Système
 **Frontend :** React + Tailwind, état avec Redux Toolkit ou Zustand, graphiques via Recharts/Chart.js, SSE/WS pour flux en direct.  
-**Backend :** Flask + Flask-RESTx, Flask-JWT-Extended, bcrypt/Argon2id, APScheduler pour tâches périodiques, SSE/Flask-SocketIO.  
-**Base de données :** PostgreSQL (SQLAlchemy).  
+**Backend :** Flask + Flask-RESTx, Flask-JWT-Extended, bcrypt, APScheduler pour tâches périodiques, SSE/Flask-SocketIO.  
+**Base de données :** PostgreSQL.  
 **Cache (optionnel) :** Redis pour prix/news et rate limiting.  
 **APIs externes :** CoinGecko, exchangerate.host, CryptoPanic RSS, Google News RSS.  
 **Infra :** Docker Compose (`api`, `db`, `frontend`, `redis`).  
-**Diagramme :** `high_level_diagram.png`
-
+**Diagramme :**
+<p align="center">
+  <img src="images/high_level_diagram.png" alt="high_level_diagram" width="400"/>
+</p>
 ---
 
 ## 2. Composants, Classes & Base de Données
 ### A) Services/Méthodes (extraits clés)
 #### Utilisateur (User)
-- `create_user(email, raw_password)` → crée l’utilisateur + **hash** (Argon2id ou bcrypt cost élevé), unicité email (lower/citext), `is_admin=false`.
+- `create_user(email, raw_password)` → crée l’utilisateur + **hash** (bcrypt), unicité email (lower/citext), `is_admin=false`.
 - `update_user(id, patch)` → modifie email/flags ; revalide l’email si changé.
 - `delete_user(id)` → cascade sur `trades`, `strategies`, `positions`.
 - `define_password(user_id, raw_password)` → réinitialise (appelle `hash_password()`).
@@ -170,13 +192,29 @@ CREATE TABLE news_cache (
   symbols TEXT[]
 );
 ```
-
+1) Diagramme de classe
+<p align="center">
+  <img src="images/diagramme_classe.png" alt="Diagramme classe" width="400"/>
+</p>
+2) ER diagramme
+<p align="center">
+  <img src="images/er_diagram.png" alt="ER diagramme" width="400"/>
+</p>
 ---
 
 ## 3. Diagrammes de Séquence
-1) **Flux d’authentification** — `authentification_user.png`  
-2) **Mise à jour prix** — `maj.png`  
-3) **Placement d’un ordre** — `trade_user.png`  
+1) Flux d’authentification
+  <p align="center">
+    <img src="images/authentification_user.png" alt="diagramme auth" width="400"/>
+</p>
+2) Mise à jour prix
+  <p align="center">
+    <img src="images/maj.png" alt="maj price" width="400"/>
+</p>
+3) Placement d’un ordre
+  <p align="center">
+    <img src="images/trade_user.png" alt="placement ordre" width="400"/>
+</p>
 
 ---
 
@@ -302,12 +340,13 @@ CREATE TABLE news_cache (
 ## 5. Plan SCM et QA
 ### SCM
 - GitHub avec branches `main` (stable), `thomas/*`, `julien/*`.  
-- PRs obligatoires 2 fois/semaine, revues chaque vendredi.  
+- PRs obligatoires 2 fois/semaine, reviews chaque vendredi.
+- Commit en anglais sur le main uniquement quand la fonction est fonctionnelle et testée localement. 
 
 ### QA
 - **Backend** : tests `pytest`.  
 - **Frontend** : tests `Jest`.  
-- **API** : Postman/Newman.  
+- **API** : Postman.  
 - **CI/CD** : GitHub Actions pour lint + tests sur PR.  
 
 ---
