@@ -1,4 +1,4 @@
-export function loadconfig () {
+export function loadConfig () {
   return {
     port: Number(process.env.port || 8000),
     nodeEnv: process.env.NODE_ENV || 'development',
