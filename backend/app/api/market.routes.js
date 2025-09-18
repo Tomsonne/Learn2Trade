@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { getPrices, getForex } from '../services/market.service.js'
 const router = Router()
 router.get('/prices', async (req, res) => {
   try {
