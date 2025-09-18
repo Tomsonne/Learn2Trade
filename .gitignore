@@ -1,0 +1,63 @@
+# --- OS / éditeurs ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Node / JS ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+*.log
+
+# Builds / bundlers
+dist/
+build/
+coverage/
+.cache/
+.parcel-cache/
+.esbuild/
+.vite/
+
+# Frameworks divers (au cas où)
+.next/
+.nuxt/
+.svelte-kit/
+.storybook/
+
+# --- Env / secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Frontend (Vite/React) ---
+*.local
+*.map
+
+# --- Backend (Node) ---
+# (ne PAS ignorer package-lock.json : on le garde)
+#package-lock.json
+
+# --- Python (si restes de l'ancien backend) ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+.mypy_cache/
+.pytest_cache/
+
+# --- Docker ---
+*.pid
+*.seed
+docker-compose.override.yml
+
+# --- DB / données locales (si présents en dossier) ---
+/data/
+pgdata/
