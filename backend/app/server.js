@@ -3,7 +3,6 @@ import cors from 'cors'
 import { loadConfig } from './core/config.js'
 import v1Router from './api/index.js'
 
-dotenv.config()
 const cfg = loadConfig()
 const app = express()
 
