@@ -18,3 +18,5 @@ export async function getForex() {
     source: 'demo'
   }
 }
+
+//récupération prix (CoinGecko, Forex API).

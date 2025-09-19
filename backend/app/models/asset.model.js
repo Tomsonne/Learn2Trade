@@ -1,0 +1,1 @@
+//actifs supportés (BTCUSD, EURUSD, etc.).

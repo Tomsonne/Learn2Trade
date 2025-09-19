@@ -1,0 +1,1 @@
+//schéma utilisateur (email, hash, portefeuille).
