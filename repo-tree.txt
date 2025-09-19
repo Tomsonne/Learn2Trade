@@ -1,0 +1,40 @@
+.
+├── .gitignore
+├── ProjectCharterDevelopment.md
+├── Team_Formation_and_Idea_Development.md
+├── TechnicalDocumentation.md
+├── backend
+│   ├── .env
+│   ├── .env.example
+│   ├── Dockerfile
+│   ├── app
+│   │   ├── api
+│   │   │   ├── index.js
+│   │   │   └── market.routes.js
+│   │   ├── core
+│   │   │   └── config.js
+│   │   ├── server.js
+│   │   └── services
+│   │       └── market.service.js
+│   ├── package-lock.json
+│   └── package.json
+├── images
+│   ├── Logo_L2T.png
+│   ├── authentification_user.png
+│   ├── connexion_user.png
+│   ├── diagramme_classe.png
+│   ├── er_diagram.png
+│   ├── favicon.png
+│   ├── high_level_diagram.png
+│   ├── maj.png
+│   ├── page_acceuil.png
+│   ├── page_dashboards.png
+│   ├── page_news.png
+│   ├── page_sombre.png
+│   ├── page_strategie_RSI.png
+│   ├── page_trade.png
+│   ├── page_trade_historique.png
+│   └── trade_user.png
+└── repo-tree.txt
+
+7 directories, 31 files
