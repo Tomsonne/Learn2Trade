@@ -1,0 +1,5 @@
+docker-compose down -v
+arrete et supprime le conteneur 
+
+docker-compose up --build
+construit le conteneur et rejoue schema.sql

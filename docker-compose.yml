@@ -1,0 +1,30 @@
+services:
+  backend:
+    build: ./backend
+    container_name: learn2trade_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+
+  db:
+    image: postgres:16
+    container_name: learn2trade_db
+    restart: always
+    environment:
+      POSTGRES_USER: l2t_user
+      POSTGRES_PASSWORD: l2t_pass
+      POSTGRES_DB: learn2trade
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/db/init:/docker-entrypoint-initdb.d
+
+volumes:
+  postgres_data:
