@@ -1,23 +1,50 @@
 .
-├── .gitignore
 ├── ProjectCharterDevelopment.md
 ├── Team_Formation_and_Idea_Development.md
 ├── TechnicalDocumentation.md
 ├── backend
-│   ├── .env
-│   ├── .env.example
 │   ├── Dockerfile
 │   ├── app
 │   │   ├── api
+│   │   │   ├── auth.routes.js
 │   │   │   ├── index.js
-│   │   │   └── market.routes.js
+│   │   │   ├── market.routes.js
+│   │   │   ├── middlewares
+│   │   │   ├── order.routes.js
+│   │   │   └── user.routes.js
+│   │   ├── controllers
+│   │   │   ├── auth.controller.js
+│   │   │   ├── market.controller.js
+│   │   │   ├── order.controller.js
+│   │   │   └── user.controller.js
 │   │   ├── core
-│   │   │   └── config.js
+│   │   │   ├── config.js
+│   │   │   └── db.js
+│   │   ├── models
+│   │   │   ├── asset.model.js
+│   │   │   ├── order.model.js
+│   │   │   ├── position.model.js
+│   │   │   └── user.model.js
 │   │   ├── server.js
-│   │   └── services
-│   │       └── market.service.js
+│   │   ├── services
+│   │   │   ├── auth.service.js
+│   │   │   ├── market.service.js
+│   │   │   ├── order.service.js
+│   │   │   └── user.service.js
+│   │   └── validators
+│   │       └── market.validators.js
+│   ├── db
+│   │   └── init
+│   │       └── schema.sql
 │   ├── package-lock.json
-│   └── package.json
+│   ├── package.json
+│   └── test
+│       ├── auth.test.js
+│       ├── market.test.js
+│       ├── order.test.js
+│       └── user.test.js
+├── commande.txt
+├── docker-compose.yml
 ├── images
 │   ├── Logo_L2T.png
 │   ├── authentification_user.png
@@ -37,4 +64,4 @@
 │   └── trade_user.png
 └── repo-tree.txt
 
-7 directories, 31 files
+14 directories, 51 files
