@@ -2,9 +2,8 @@ import express from 'express'
 import cors from 'cors'
 import { loadConfig } from './core/config.js'
 import v1Router from './api/index.js'
-import sequelize from './app/core/db.js';
-import User from './models/user.model.js';
-import Strategy from './models/strategy.model.js';
+import sequelize from './core/db.js';
+import { syncDB } from './core/bootstrapModels.js';
 
 const cfg = loadConfig()
 const app = express()
@@ -31,3 +30,4 @@ app.listen(cfg.port, () => {
 sequelize.sync()
   .then(() => console.log('✅ Database synced'))
   .catch(err => console.error('❌ Error syncing DB', err));
+

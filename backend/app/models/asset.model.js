@@ -16,10 +16,13 @@ const Asset = sequelize.define('Asset', {
   },
 
   kind: {
-    type: DataTypes.Enum('crypto', 'forex', 'index'),
+    type: DataTypes.ENUM('crypto', 'forex', 'index'),
     allowNull: false,
   },
-  tableName: 'assets',
-  timestamps: false,
-});
+ },
+{
+    tableName: 'assets',
+    timestamps: false,
+    underscored: true,
+  });
 export default Asset;

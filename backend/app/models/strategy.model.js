@@ -33,10 +33,8 @@ const Strategy = sequelize.define('Strategy', {
 
 
 }, {
-  tableName: 'strategies',
+  tableName: 'strategy',
   timestamps: true,
-  indexes: [{ unique: true,  fields: ['type'] } ],
-
 });
 
 export default Strategy;

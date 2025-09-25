@@ -56,7 +56,7 @@ const Trade = sequelize.define('Trade', {
     allowNull: true,
   },
 }, {
-  tableName: 'Trades',
+  tableName: 'trades',
   underscored: true,
   timestamps: false,
 });
