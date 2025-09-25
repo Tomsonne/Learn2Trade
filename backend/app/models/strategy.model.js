@@ -8,23 +8,35 @@ const Strategy = sequelize.define('Strategy', {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
-  name: {
+
+  user_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+
+  type: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  description: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
-  parameters: {
+
+  params: {
     type: DataTypes.JSONB, // utile pour dire quel parametre de la strategie 
     allowNull: true,
+    defaultValue: {},
   },
+
+  is_enabled: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
+
+
 }, {
   tableName: 'strategies',
   timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: 'modified_at',
+  indexes: [{ unique: true,  fields: ['type'] } ],
+
 });
 
 export default Strategy;

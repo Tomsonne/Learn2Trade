@@ -1,1 +1,0 @@
-//ordres de trading virtuels.

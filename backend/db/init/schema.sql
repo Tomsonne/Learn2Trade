@@ -20,8 +20,9 @@ CREATE TABLE assets (
   kind TEXT NOT NULL CHECK (kind IN ('crypto','forex','index'))
 );
 
+
 -- Stratégies configurées par l’utilisateur
-CREATE TABLE strategies (
+CREATE TABLE strategy (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   type TEXT NOT NULL CHECK (type IN ('RSI','MA_CROSS')),
@@ -45,7 +46,7 @@ CREATE TABLE strategy_signals (
 );
 
 -- Transactions (trades simulés)
-CREATE TABLE trades (
+CREATE TABLE trade (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   strategy_id UUID REFERENCES strategies(id) ON DELETE SET NULL,
