@@ -3,12 +3,18 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../core/db.js'; // connexion à Postgres
 
 const Asset = sequelize.define('Asset', {
+  id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+      },
 
   symbol: {
-
     type: DataTypes.STRING,
-    primaryKey: true, //remplace l'id
+    allowNull: false,
+    unique: true,
   },
+
   kind: {
     type: DataTypes.Enum('crypto', 'forex', 'index'),
     allowNull: false,
