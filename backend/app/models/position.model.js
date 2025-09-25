@@ -8,14 +8,11 @@ const Position = sequelize.define('Position', {
     type: DataTypes.UUID,
     allowNull: false,
     primaryKey: true,
-    references: { model: 'users', key: 'id'},
-    onDelete: 'CASCADE',
   },
   asset_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     primaryKey: true,
-    references: {model:'assets', key: 'id'},
   },
   quantity: {
     type: DataTypes.DECIMAL(24, 10),
@@ -33,6 +30,6 @@ const Position = sequelize.define('Position', {
     tableName: 'positions',
     underscored: true,
     timestamps: false,
-
+    indexes: [{ fields: ['user_id'] }, { fields: ['asset_id'] }],
 });
 export default Position;

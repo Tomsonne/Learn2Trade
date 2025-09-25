@@ -16,3 +16,4 @@ const Asset = sequelize.define('Asset', {
   tableName: 'assets',
   timestamps: false,
 });
+export default Asset;
