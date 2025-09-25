@@ -10,6 +10,7 @@ CREATE TABLE users (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   is_admin BOOLEAN NOT NULL DEFAULT false,
   cash NUMERIC(24,10) NOT NULL DEFAULT 10000 -- solde de départ pour la simulation
+
 );
 
 -- Actifs supportés
@@ -29,7 +30,11 @@ CREATE TABLE strategies (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+
 -- Signaux générés par une stratégie
+
+-- Signaux & exécutions liées à une stratégie
+
 CREATE TABLE strategy_signals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   strategy_id UUID NOT NULL REFERENCES strategies(id) ON DELETE CASCADE,
@@ -54,7 +59,9 @@ CREATE TABLE trades (
   close_at TIMESTAMPTZ NULL
 );
 
+
 -- Positions (portefeuille de l’utilisateur)
+
 CREATE TABLE positions (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   asset_id INT NOT NULL REFERENCES assets(id),
@@ -63,7 +70,9 @@ CREATE TABLE positions (
   PRIMARY KEY (user_id, asset_id)
 );
 
+
 -- Cache news (optionnel MVP)
+
 CREATE TABLE news_cache (
   id BIGSERIAL PRIMARY KEY,
   source TEXT,

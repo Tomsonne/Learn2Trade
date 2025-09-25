@@ -2,6 +2,9 @@ import express from 'express'
 import cors from 'cors'
 import { loadConfig } from './core/config.js'
 import v1Router from './api/index.js'
+import sequelize from './app/core/db.js';
+import User from './models/user.model.js';
+import Strategy from './models/strategy.model.js';
 
 const cfg = loadConfig()
 const app = express()
@@ -23,3 +26,8 @@ app.use((_req, res) => res.status(404).json({
 app.listen(cfg.port, () => {
   console.log(`Learn2Trade backend (Node) on http://localhost:${cfg.port}`)
 })
+
+
+sequelize.sync()
+  .then(() => console.log('✅ Database synced'))
+  .catch(err => console.error('❌ Error syncing DB', err));
