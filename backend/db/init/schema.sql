@@ -1,3 +1,4 @@
+-- Extensions nécessaires
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS citext;
 
@@ -29,6 +30,7 @@ CREATE TABLE strategies (
 );
 
 -- Signaux & exécutions liées à une stratégie
+
 CREATE TABLE strategy_signals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   strategy_id UUID NOT NULL REFERENCES strategies(id) ON DELETE CASCADE,
