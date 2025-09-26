@@ -50,4 +50,48 @@
   - Inscription / connexion utilisateurs  
   - Récupération des actifs disponibles  
   - Enregistrement de trades  
-- Mise en place de **tests unitaires simples** pour valider la cohérence backend ↔ base de données.  
+- Mise en place de **tests unitaires simples** pour valider la cohérence backend ↔ base de données.
+
+
+  # 📄 Weekly Progress Report – Learn2Trade  
+
+## ✅ Semaine du 22 au 26 Septembre 2025  
+
+### 1. Réorganisation de l’arborescence backend  
+- Refonte de la structure du dossier backend pour mieux séparer les responsabilités :  
+  - `models/` → définitions des classes Sequelize.  
+  - `services/` → logique métier (prévu, pas encore implémenté).  
+  - `controllers/` → gestion des appels API (prévu).  
+  - `api/` → définition des routes.  
+  - `core/` → configuration DB & serveur.  
+  - `test/` → tests unitaires Jest.  
+- Objectif : obtenir une architecture claire et scalable pour l’implémentation des futures fonctionnalités.  
+
+---
+
+### 2. Implémentation des classes modèles  
+- Création des classes Sequelize pour les entités principales (`User`, `Asset`, `Strategy`, `Trade`, `Position`, `News`).  
+- Ajout de hooks de validation et de normalisation simples (ex : `symbol` toujours en majuscules, `kind` en minuscules).  
+- Définition des relations entre entités (ex: un `User` peut avoir plusieurs `Trades`).  
+
+---
+
+### 3. Tests unitaires de base  
+- Mise en place de **tests Jest** pour vérifier la bonne création et cohérence des modèles.  
+- Validation des contraintes principales (unicité des emails, normalisation des champs).  
+- Tests exécutés sur une base **SQLite en mode test** → tous les cas prévus passent avec succès.  
+
+---
+
+## 🎯 Résultats de la semaine  
+- Une **arborescence projet ajustée et claire**, prête pour accueillir la logique métier.  
+- **Classes Sequelize implémentées** et reliées au schéma DB.  
+- **Tests unitaires initiaux validés** confirmant la cohérence des modèles.  
+
+---
+
+## 🔜 Prochaines étapes  
+- Implémenter progressivement les **méthodes dans les services** (ex: création utilisateur, enregistrement trade).  
+- Commencer les **premiers endpoints REST** (authentification, récupération d’actifs).  
+- Étendre la couverture de tests pour inclure la logique métier et les endpoints.  
+
