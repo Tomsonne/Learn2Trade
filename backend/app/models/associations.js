@@ -2,7 +2,6 @@ import User from './user.model.js';
 import Asset from './asset.model.js';
 import Position from './position.model.js';
 import Strategy from './strategy.model.js';
-import StrategySignal from './strategySignal.model.js';
 import Trade from './trade.model.js';
 
 export function applyAssociations() {
@@ -50,35 +49,6 @@ export function applyAssociations() {
   Strategy.belongsTo(User, {
     foreignKey: { name: 'user_id', allowNull: false },
     as: 'user',
-  });
-
-  /**
-   * STRATEGY 1 → N STRATEGY_SIGNAL
-   * Une stratégie peut générer plusieurs signaux.
-   * Un signal est toujours lié à une seule stratégie.
-   */
-  Strategy.hasMany(StrategySignal, {
-    foreignKey: { name: 'strategy_id', allowNull: false },
-    onDelete: 'CASCADE',
-    as: 'signals',
-  });
-  StrategySignal.belongsTo(Strategy, {
-    foreignKey: { name: 'strategy_id', allowNull: false },
-    as: 'strategy',
-  });
-
-  /**
-   * ASSET 1 → N STRATEGY_SIGNAL
-   * Un actif peut être concerné par plusieurs signaux.
-   * Un signal concerne toujours un seul actif.
-   */
-  Asset.hasMany(StrategySignal, {
-    foreignKey: { name: 'asset_id', allowNull: false },
-    as: 'signals',
-  });
-  StrategySignal.belongsTo(Asset, {
-    foreignKey: { name: 'asset_id', allowNull: false },
-    as: 'asset',
   });
 
   /**

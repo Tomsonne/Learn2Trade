@@ -74,7 +74,7 @@ CREATE TABLE positions (
 
 -- Cache news (optionnel MVP)
 
-CREATE TABLE news_cache (
+CREATE TABLE news (
   id BIGSERIAL PRIMARY KEY,
   source TEXT,
   title TEXT,
