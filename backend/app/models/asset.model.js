@@ -1,8 +1,25 @@
-// app/models/asset.model.js
-import { DataTypes } from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
 import sequelize from '../core/db.js';
 
-const Asset = sequelize.define('Asset', {
+class Asset extends Model {
+  static associate(models) {
+    // ASSET 1 → N POSITION
+    this.hasMany(models.Position, {
+      foreignKey: { name: 'asset_id', allowNull: false },
+      onUpdate: 'CASCADE',
+      as: 'positions',
+    });
+
+    // ASSET 1 → N TRADE
+    this.hasMany(models.Trade, {
+      foreignKey: { name: 'asset_id', allowNull: false },
+      onUpdate: 'CASCADE',
+      as: 'trades',
+    });
+  }
+}
+
+Asset.init({
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -15,12 +32,12 @@ const Asset = sequelize.define('Asset', {
     validate: { notEmpty: true },
   },
   kind: {
-
-    type: DataTypes.STRING(16),                 // aligné avec TEXT du schema.sql
+    type: DataTypes.STRING(16),
     allowNull: false,
     validate: { isIn: [['crypto', 'forex', 'index']] },
   },
 }, {
+  sequelize,
   tableName: 'assets',
   underscored: true,
   timestamps: false,
