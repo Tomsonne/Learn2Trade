@@ -11,7 +11,7 @@
     "test:watch": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "test:unit": "cross-env NODE_ENV=test DB_DIALECT=sqlite NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
     "test:int": "cross-env NODE_ENV=test DB_DIALECT=postgres NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
-    "dev": "nodemon --watch app --ext js,json --exec node app/server.js",
+    "dev": "npx nodemon --watch app --ext js,json --exec node app/server.js",
     "start": "node app/server.js",
     "lint": "eslint ."
   },

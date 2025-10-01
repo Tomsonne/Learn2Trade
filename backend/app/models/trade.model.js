@@ -91,3 +91,5 @@ Trade.init(
     timestamps: false,
   }
 );
+
+export default Trade;

@@ -5,6 +5,7 @@ export function loadConfig() {
     port: Number(process.env.PORT || 8000),
     corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
     db: {
+      url: process.env.DATABASE_URL,
       dialect: process.env.DB_DIALECT || 'sqlite',
       host: process.env.DB_HOST,
       port: process.env.DB_PORT ? Number(process.env.DB_PORT) : undefined,
