@@ -1,17 +1,4 @@
 services:
-  backend:
-    build: ./backend
-    container_name: learn2trade_backend
-    ports:
-      - "8000:8000"
-    env_file:
-      - ./backend/.env
-    depends_on:
-      - db
-    volumes:
-      - ./backend:/usr/src/app
-      - /usr/src/app/node_modules
-
   db:
     image: postgres:16
     container_name: learn2trade_db
@@ -25,6 +12,33 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U l2t_user -d learn2trade"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: learn2trade_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    # ✅ une SEULE section environment (fusion des variables)
+    environment:
+      - DB_DIALECT=postgres
+      - DATABASE_URL=postgres://l2t_user:l2t_pass@db:5432/learn2trade
+      - DB_SYNC=alter
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+    # Si ton Dockerfile ne définit pas de CMD, décommente :
+    # command: ["npm", "run", "dev"]
 
 volumes:
   postgres_data:
