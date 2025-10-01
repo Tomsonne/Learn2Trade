@@ -3,35 +3,47 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import sequelize from '../core/db.js';
+import { Model as SequelizeModel } from 'sequelize';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const models = {};
 
-// Charger tous les *.model.js du dossier courant (sauf index.js)
-const files = fs.readdirSync(__dirname).filter(
-  (f) => f.endsWith('.model.js') && f !== 'index.js'
-);
+// Charge tous les *.model.js (sauf index.js)
+const files = fs
+  .readdirSync(__dirname)
+  .filter((f) => f.endsWith('.model.js') && f !== 'index.js');
 
 for (const file of files) {
   const moduleUrl = pathToFileURL(path.join(__dirname, file)).href;
   const mod = await import(moduleUrl);
-  // Chaque fichier doit faire `export default class ModelName extends Model {}`
-  const ModelClass = mod.default;
-  if (!ModelClass?.init) {
-    // pas un modèle Sequelize valide, on skip
+  const Exported = mod?.default;
+
+  if (!Exported) continue;
+
+  // Accepte :
+  // - classes (extends Model) -> prototype instanceof SequelizeModel
+  // - modèles "define" (ModelCtor) -> prototype instanceof SequelizeModel aussi
+  const looksLikeSequelizeModel =
+    typeof Exported === 'function' &&
+    Exported.prototype instanceof SequelizeModel;
+
+  if (!looksLikeSequelizeModel) {
+    // Pas un modèle Sequelize : on ignore
     continue;
   }
-  models[ModelClass.name] = ModelClass;
+
+  // Le nom de modèle Sequelize est fiable (Exported.name)
+  models[Exported.name] = Exported;
 }
 
-// Appeler associate quand tous les modèles sont là
-Object.values(models).forEach((ModelClass) => {
-  if (typeof ModelClass.associate === 'function') {
-    ModelClass.associate(models);
+// Appeler associate() quand tous les modèles sont là
+for (const Exported of Object.values(models)) {
+  if (typeof Exported.associate === 'function') {
+    Exported.associate(models);
   }
-});
+}
 
 export { sequelize };
 export default models;

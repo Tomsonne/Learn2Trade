@@ -1,56 +1,60 @@
-import { DataTypes, Model } from 'sequelize';
+// app/models/asset.model.js
+import { Model, DataTypes } from 'sequelize';
 import sequelize from '../core/db.js';
 
-class Asset extends Model {
+export default class Asset extends Model {
   static associate(models) {
-    // ASSET 1 → N POSITION
-    this.hasMany(models.Position, {
-      foreignKey: { name: 'asset_id', allowNull: false },
-      onUpdate: 'CASCADE',
-      as: 'positions',
-    });
+    // Récupère Position
+    const Position = models.Position;
 
-    // ASSET 1 → N TRADE
-    this.hasMany(models.Trade, {
+    // Vérif robuste: Position doit être une sous-classe de Sequelize.Model
+    const isSequelizeModel =
+      typeof Position === 'function' &&
+      Object.getPrototypeOf(Position?.prototype)?.constructor?.name === 'Model';
+
+    if (!isSequelizeModel) {
+      console.warn(
+        '[ASSOC] Asset.hasMany(Position) ignoré: Position invalide ->',
+        Position && (Position.name || typeof Position)
+      );
+      return;
+    }
+
+    // Association (clé asset_id côté Position)
+    Asset.hasMany(Position, {
       foreignKey: { name: 'asset_id', allowNull: false },
-      onUpdate: 'CASCADE',
-      as: 'trades',
+      as: 'positions',
     });
   }
 }
 
-Asset.init({
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
-  },
-  symbol: {
-    type: DataTypes.STRING(32),
-    allowNull: false,
-    unique: true,
-    validate: { notEmpty: true },
-  },
-  kind: {
-    type: DataTypes.STRING(16),
-    allowNull: false,
-    validate: { isIn: [['crypto', 'forex', 'index']] },
-  },
-}, {
-  sequelize,
-  tableName: 'assets',
-  underscored: true,
-  timestamps: false,
-  indexes: [
-    { unique: true, fields: ['symbol'] },
-    { fields: ['kind'] },
-  ],
-  hooks: {
-    beforeValidate(asset) {
-      if (asset.symbol) asset.symbol = asset.symbol.toUpperCase().trim();
-      if (asset.kind) asset.kind = asset.kind.toLowerCase().trim();
+Asset.init(
+  {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    symbol: {
+      type: DataTypes.STRING(32),
+      allowNull: false,
+      unique: true,
+      validate: { notEmpty: true },
+    },
+    kind: {
+      type: DataTypes.STRING(16),
+      allowNull: false,
+      validate: { isIn: [['crypto', 'forex', 'index']] },
     },
   },
-});
-
-export default Asset;
+  {
+    sequelize,
+    modelName: 'Asset',
+    tableName: 'assets',
+    underscored: true,
+    timestamps: false,
+    hooks: {
+      beforeValidate(asset) {
+        if (asset.symbol) asset.symbol = asset.symbol.toUpperCase().trim();
+        if (asset.kind) asset.kind = asset.kind.toLowerCase().trim();
+      },
+    },
+    indexes: [{ unique: true, fields: ['symbol'] }, { fields: ['kind'] }],
+  }
+);
