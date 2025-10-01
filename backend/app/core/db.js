@@ -1,27 +1,38 @@
-// app/core/db.js
 import { Sequelize } from 'sequelize';
+import { loadConfig } from './config.js';
 
-const DIALECT = process.env.DB_DIALECT || 'postgres';
+const cfg = loadConfig();
+const isSQLite = (cfg.db.dialect || '').toLowerCase() === 'sqlite';
+
 let sequelize;
 
-if (process.env.NODE_ENV === 'test' && DIALECT === 'sqlite') {
-  // ✅ Tests unitaires : SQLite en mémoire
+// === IMPORTANT ===
+// Si SQLite → utiliser la forme objet, SANS host/user/password
+if (isSQLite) {
   sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: ':memory:',
-    logging: false,
+    storage: cfg.db.storage || 'dev.sqlite',
+    logging: cfg.db.logging,
+  });
+} else if (cfg.db.url) {
+  // Postgres via DATABASE_URL
+  sequelize = new Sequelize(cfg.db.url, {
+    dialect: 'postgres',
+    logging: cfg.db.logging,
+    dialectOptions: cfg.db.ssl ? { ssl: { require: true, rejectUnauthorized: false } } : {},
   });
 } else {
-  // ✅ Dev/Prod/Intégration Postgres
+  // Postgres/MySQL/etc via champs séparés
   sequelize = new Sequelize(
-    process.env.PG_DATABASE,
-    process.env.PG_USER,
-    process.env.PG_PASSWORD,
+    cfg.db.database || '',
+    cfg.db.username || '',
+    String(cfg.db.password ?? ''),
     {
-      host: process.env.PG_HOST || 'localhost',
-      port: +(process.env.PG_PORT || 5432),
-      dialect: 'postgres',
-      logging: false,
+      dialect: cfg.db.dialect,
+      host: cfg.db.host,
+      port: cfg.db.port,
+      logging: cfg.db.logging,
+      dialectOptions: cfg.db.ssl ? { ssl: { require: true, rejectUnauthorized: false } } : {},
     }
   );
 }
