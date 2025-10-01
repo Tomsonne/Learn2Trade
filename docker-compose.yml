@@ -5,12 +5,12 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ./backend/.env
+      - ./backend/.env       # ✅ une seule fois
     depends_on:
       - db
     volumes:
       - ./backend:/usr/src/app
-      - /usr/src/app/node_modules
+      # - /usr/src/app/node_modules   # ❌ à éviter, sinon ça masque tes deps
 
   db:
     image: postgres:16
