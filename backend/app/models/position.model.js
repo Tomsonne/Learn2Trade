@@ -11,12 +11,6 @@ class Position extends Model {
       foreignKey: { name: "user_id", allowNull: false },
       as: "user",
     });
-    models.User.hasMany(this, {
-      foreignKey: { name: "user_id", allowNull: false },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
-      as: "positions",
-    });
 
     /**
      * POSITION ↔ ASSET
@@ -25,11 +19,7 @@ class Position extends Model {
       foreignKey: { name: "asset_id", allowNull: false },
       as: "asset",
     });
-    models.Asset.hasMany(this, {
-      foreignKey: { name: "asset_id", allowNull: false },
-      onUpdate: "CASCADE",
-      as: "positions",
-    });
+
   }
 }
 

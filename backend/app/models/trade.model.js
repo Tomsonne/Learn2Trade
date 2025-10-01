@@ -11,11 +11,6 @@ class Trade extends Model {
       foreignKey: { name: "user_id", allowNull: false },
       as: "user",
     });
-    models.User.hasMany(this, {
-      foreignKey: { name: "user_id", allowNull: false },
-      onDelete: "CASCADE",
-      as: "trades",
-    });
 
     /**
      * TRADE ↔ STRATEGY (nullable)
@@ -24,11 +19,7 @@ class Trade extends Model {
       foreignKey: { name: "strategy_id", allowNull: true },
       as: "strategy",
     });
-    models.Strategy.hasMany(this, {
-      foreignKey: { name: "strategy_id", allowNull: true },
-      onDelete: "SET NULL",
-      as: "trades",
-    });
+    
 
     /**
      * TRADE ↔ ASSET
@@ -36,10 +27,6 @@ class Trade extends Model {
     this.belongsTo(models.Asset, {
       foreignKey: { name: "asset_id", allowNull: false },
       as: "asset",
-    });
-    models.Asset.hasMany(this, {
-      foreignKey: { name: "asset_id", allowNull: false },
-      as: "trades",
     });
   }
 }

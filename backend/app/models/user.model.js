@@ -13,10 +13,7 @@ class User extends Model {
       onUpdate: "CASCADE",
       as: "positions",
     });
-    models.Position.belongsTo(this, {
-      foreignKey: { name: "user_id", allowNull: false },
-      as: "user",
-    });
+
 
     /**
      * USER 1 → N STRATEGY
@@ -26,10 +23,6 @@ class User extends Model {
       onDelete: "CASCADE",
       as: "strategies",
     });
-    models.Strategy.belongsTo(this, {
-      foreignKey: { name: "user_id", allowNull: false },
-      as: "user",
-    });
 
     /**
      * USER 1 → N TRADE
@@ -38,10 +31,6 @@ class User extends Model {
       foreignKey: { name: "user_id", allowNull: false },
       onDelete: "CASCADE",
       as: "trades",
-    });
-    models.Trade.belongsTo(this, {
-      foreignKey: { name: "user_id", allowNull: false },
-      as: "user",
     });
   }
 }
