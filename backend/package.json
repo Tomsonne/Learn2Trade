@@ -1,21 +1,23 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --watch app --ext js,json --exec node app/server.js",
-    "start": "node app/server.js",
-    "lint": "eslint ."
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "description": "",
   "type": "module",
+  "main": "index.js",
+  "license": "ISC",
+  "keywords": [],
+  "scripts": {
+ "test": "cross-env NODE_ENV=test DB_DIALECT=sqlite NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
+  "test:watch": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --watch",
+  "test:unit": "cross-env NODE_ENV=test DB_DIALECT=sqlite NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
+  "test:int": "cross-env NODE_ENV=test DB_DIALECT=postgres NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
+  "dev": "nodemon --watch app --ext js,json --exec node app/server.js",
+  "start": "node app/server.js",
+  "lint": "eslint ."
+},
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^17.2.2",
+    "dotenv": "^16.4.5",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "morgan": "^1.10.1",
@@ -24,11 +26,15 @@
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
+    "cross-env": "^10.0.0",
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.6.0",
-    "nodemon": "^3.1.10"
+    "jest": "^30.1.3",
+    "nodemon": "^3.1.10",
+    "sqlite3": "^5.1.7",
+    "supertest": "^7.1.4"
   }
 }
