@@ -16,9 +16,13 @@ const Asset = sequelize.define('Asset', {
   },
 
   kind: {
-    type: DataTypes.ENUM('crypto', 'forex', 'index'),
+    type: DataTypes.STRING(16),
     allowNull: false,
-  },
+    validate: {
+      isIn: [['crypto', 'forex', 'index']],
+    },
+  }
+  
  },
 {
     tableName: 'assets',
