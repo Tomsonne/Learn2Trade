@@ -3,7 +3,7 @@ import cors from 'cors';
 import { loadConfig } from './core/config.js';
 import v1Router from './api/index.js';
 import sequelize from './core/db.js';
-// import { syncDB } from './core/bootstrapModels.js'; // si tu veux l'utiliser
+// import { syncDB } from './core/bootstrapModels.js';
 
 const cfg = loadConfig();
 const app = express();
@@ -17,7 +17,7 @@ app.get('/healthz', (_req, res) => res.json({ status: 'ok' }));
 // API v1
 app.use('/api/v1', v1Router);
 
-// 404 (doit rester après les routes)
+// 404 (doit rester après les routes, réponse propre quand la route n’existe pas.)
 app.use((_req, res) => {
   res.status(404).json({ status: 'error', error: { code: 'NOT_FOUND', message: 'Route not found' } });
 });
@@ -25,7 +25,7 @@ app.use((_req, res) => {
 async function start() {
   try {
     await sequelize.authenticate();
-    // await syncDB(); // ou bien:
+    // await syncDB(); // attendre que la DB soit OK avant de listen, et logguer les erreurs.
     await sequelize.sync();
 
     app.listen(cfg.port, () => {
