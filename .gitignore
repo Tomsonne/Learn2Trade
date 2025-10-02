@@ -61,3 +61,6 @@ docker-compose.override.yml
 # --- DB / données locales (si présents en dossier) ---
 /data/
 pgdata/
+
+# Ignore local SQLite DBs
+backend/*.sqlite
