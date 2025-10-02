@@ -64,3 +64,4 @@ pgdata/
 
 # Ignore local SQLite DBs
 backend/*.sqlite
+backend/*.sqlite3
