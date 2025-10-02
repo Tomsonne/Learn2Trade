@@ -30,7 +30,7 @@ router.get('/ohlc', async (req, res) => {
     const code = msg === 'SYMBOL_UNSUPPORTED' ? 400 : 503;
     res.status(code).json({ status: 'error', error: { code: msg, message: msg } });
   }
-}); // 👈 this line was missing
+});
 
 router.get('/range', async (req, res) => {
   try {
