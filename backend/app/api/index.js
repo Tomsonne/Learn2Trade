@@ -2,6 +2,7 @@ import { Router } from 'express'
 import marketRoutes from './market.routes.js'
 
 const router = Router()
-router.use(marketRoutes) // prix et forex
+// monte les routes sous /api/v1/market/
+router.use('/market', marketRoutes) // prix et forex
 
 export default router
