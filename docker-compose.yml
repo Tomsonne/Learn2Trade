@@ -31,12 +31,17 @@ services:
     image: node:20-alpine
     container_name: learn2trade_frontend
     working_dir: /usr/src/app
-    command: sh -c "npm ci --no-audit && npm run dev -- --host 0.0.0.0 --port 5173"
+    command: sh -lc "npm ci --no-audit && npx vite --host 0.0.0.0 --port 5173 --strictPort --debug"
+    stdin_open: true
+    tty: true
     ports:
       - "5173:5173"
     environment:
       # Depuis le conteneur front, on parle au backend par son nom de service Docker
       - VITE_API_BASE=http://backend:8000/api/v1
+      # Chokidar utilise les notifications natives (inotify/fsevents). Dans montages Docker ces notifications ne passent pas bien → les changements de fichiers ne sont pas détectés.
+      #Mettre CHOKIDAR_USEPOLLING=1 force un mode “polling” (scrute périodiquement les fichiers) → fiable dans Docker,un peu plus d’utilisation CPU.
+      - CHOKIDAR_USEPOLLING=1
     volumes:
       - ./frontend:/usr/src/app
       # Persiste les deps pour éviter de ré-installer à chaque démarrage
