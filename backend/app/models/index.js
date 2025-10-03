@@ -4,6 +4,9 @@ import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import sequelize from '../core/db.js';
 import { Model as SequelizeModel } from 'sequelize';
+export { default as User } from "./user.model.js";
+
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

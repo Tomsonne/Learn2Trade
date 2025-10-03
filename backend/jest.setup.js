@@ -4,7 +4,6 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import sequelize from './app/core/db.js';
-import { applyAssociations } from './app/models/associations.js';
 
 // __dirname en ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -19,7 +18,6 @@ const { default: Asset }    = await import('./app/models/asset.model.js');
 const { default: Position } = await import('./app/models/position.model.js');
 const { default: Strategy } = await import('./app/models/strategy.model.js');
 
-applyAssociations();
 
 beforeAll(async () => {
   if (DIALECT === 'sqlite') {

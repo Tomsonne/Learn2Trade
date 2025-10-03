@@ -18,6 +18,7 @@ if (isSQLite) {
 
   console.log("🔌 DB utilisée : SQLite");
   console.log("📂 Fichier :", cfg.db.storage || "dev.sqlite");
+
 } else if (cfg.db.url) {
   // Mode Postgres via DATABASE_URL
   sequelize = new Sequelize(cfg.db.url, {

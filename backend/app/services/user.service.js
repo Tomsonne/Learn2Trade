@@ -1,6 +1,6 @@
 // app/services/user.service.js
 import bcrypt from "bcrypt";
-import { User } from "../models/user.model.js"; // import du modèle Sequelize (User)
+import { User } from "../models/index.js";
 import { ValidationError } from "../utils/errors.js"; // tu peux créer une classe custom pour gérer les erreurs
 
 // ==== CRÉER USER ======
@@ -126,6 +126,8 @@ export async function deleteUser(id) {
 // ======================
 // ==== CHECK ADMIN =====
 // ======================
-export function isAdmin(user) {
-    return user && user.is_admin === true;
+export async function isAdmin(id) {
+    const user = await User.findByPk(id);
+    if (!user) return false;
+    return user.is_admin === true;
 }
