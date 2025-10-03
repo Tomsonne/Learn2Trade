@@ -1,0 +1,56 @@
+import { Link, useNavigate } from 'react-router-dom';
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.classList.toggle('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}
+(function initTheme(){
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark') document.documentElement.classList.add('dark');
+})();
+
+function Logo() {
+  return (
+    <Link to="/" className="flex items-center gap-2">
+      {/* petit logo inline pour éviter d'importer un asset */}
+      <svg className="size-8 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <rect x="3" y="3" width="18" height="18" rx="4" strokeWidth="1.5"/>
+        <path d="M7 14l3-3 3 3 4-5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+      <span className="text-xl font-semibold tracking-tight">
+        <span className="text-emerald-600">Learn</span>
+        <span className="ml-1">2Trade</span>
+      </span>
+    </Link>
+  );
+}
+
+export default function Header() {
+  const navigate = useNavigate();
+  return (
+    <header className="sticky top-0 z-20 bg-white/70 dark:bg-gray-900/70 backdrop-blur border-b border-gray-200 dark:border-gray-800">
+      <div className="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between">
+        <Logo />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleTheme}
+            aria-label="Basculer thème"
+            className="inline-flex items-center justify-center rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            {/* icône lune/soleil minimaliste */}
+            <svg className="size-5 text-gray-600 dark:text-gray-300" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/>
+            </svg>
+          </button>
+          <button
+            onClick={() => navigate('/login')}
+            className="inline-flex items-center rounded-full bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition"
+          >
+            Connexion
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+}
