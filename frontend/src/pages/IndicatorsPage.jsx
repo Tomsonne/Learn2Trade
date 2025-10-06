@@ -1,27 +1,13 @@
 import React, { useMemo, useState } from "react";
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, ReferenceLine, AreaChart, Area } from "recharts";
-import { BookOpen, TrendingUp, TrendingDown, BarChart3, Target, AlertTriangle, CheckCircle, Info } from "lucide-react";
+import {
+  LineChart, Line, XAxis, YAxis, ResponsiveContainer, ReferenceLine, AreaChart, Area
+} from "recharts";
+import {
+  BookOpen, TrendingUp, TrendingDown, BarChart3, Target, AlertTriangle, CheckCircle, Info
+} from "lucide-react";
+import { useMarketSeries } from "../hooks/useMarketSeries.js";
 
-// --- Utils & fake data -------------------------------------------------------
-const generateIndicatorData = () => {
-  const data = [];
-  for (let i = 0; i < 50; i++) {
-    const price = 43000 + Math.sin(i * 0.15) * 3000 + (Math.random() - 0.5) * 500;
-    const ma20 = price - 100 + Math.sin(i * 0.1) * 200;
-    const ma50 = price - 200 + Math.sin(i * 0.08) * 300;
-    const rsi = 50 + Math.sin(i * 0.2) * 25 + (Math.random() - 0.5) * 10;
-
-    data.push({
-      time: new Date(Date.now() - (50 - i) * 60000).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
-      price: Math.round(price),
-      ma20: Math.round(ma20),
-      ma50: Math.round(ma50),
-      rsi: Math.max(0, Math.min(100, rsi)),
-    });
-  }
-  return data;
-};
-
+/* ------------------------- Glossaire & Stratégies ------------------------- */
 const glossaryTerms = [
   {
     term: "RSI (Relative Strength Index)",
@@ -116,63 +102,45 @@ const strategies = [
   },
 ];
 
-// --- Signals helpers ---------------------------------------------------------
+/* ------------------------------- Helpers UI ------------------------------- */
 const getRSISignal = (rsi) => {
   if (rsi > 70)
-    return {
-      text: "Surachat – Risque de correction",
-      color: "text-red-600",
-      bg: "bg-red-50",
-      icon: TrendingDown,
-    };
+    return { text: "Surachat – Risque de correction", color: "text-red-600", bg: "bg-red-50", icon: TrendingDown };
   if (rsi < 30)
-    return {
-      text: "Survente – Potentiel de rebond",
-      color: "text-green-600",
-      bg: "bg-green-50",
-      icon: TrendingUp,
-    };
-  return {
-    text: "Zone neutre",
-    color: "text-gray-600",
-    bg: "bg-gray-50",
-    icon: BarChart3,
-  };
+    return { text: "Survente – Potentiel de rebond", color: "text-green-600", bg: "bg-green-50", icon: TrendingUp };
+  return { text: "Zone neutre", color: "text-gray-600", bg: "bg-gray-50", icon: BarChart3 };
 };
 
 const getMASignal = (ma20, ma50) => {
-  if (ma20 > ma50)
-    return {
-      text: "Tendance Haussière",
-      color: "text-green-600",
-      bg: "bg-green-50",
-      icon: TrendingUp,
-    };
-  if (ma20 < ma50)
-    return {
-      text: "Tendance Baissière",
-      color: "text-red-600",
-      bg: "bg-red-50",
-      icon: TrendingDown,
-    };
+  if (ma20 > ma50) return { text: "Tendance Haussière", color: "text-green-600", bg: "bg-green-50", icon: TrendingUp };
+  if (ma20 < ma50) return { text: "Tendance Baissière", color: "text-red-600", bg: "bg-red-50", icon: TrendingDown };
   return { text: "Tendance Neutre", color: "text-gray-600", bg: "bg-gray-50", icon: BarChart3 };
 };
 
-// --- Component ---------------------------------------------------------------
+/* -------------------------------- Component ------------------------------- */
 export function IndicatorsPage() {
-  // Génère une seule fois pour éviter un "shuffle" à chaque rendu
-  const [indicatorData] = useState(() => generateIndicatorData());
   const [activeSection, setActiveSection] = useState("course");
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
 
-  const currentData = indicatorData[indicatorData.length - 1] || {};
-  const currentRSI = currentData.rsi ?? 50;
-  const currentPrice = currentData.price ?? 43000;
-  const currentMA20 = currentData.ma20 ?? 42900;
-  const currentMA50 = currentData.ma50 ?? 42800;
+  // ✅ LIVE data via backend
+  const { data: series = [], loading, error } = useMarketSeries({
+    symbol: "BTC",     // ou id: "bitcoin"
+    vs: "usd",
+    range: "1d",
+    refreshMs: 60_000,
+  });
 
-  const rsiSignal = useMemo(() => getRSISignal(currentRSI), [currentRSI]);
-  const maSignal = useMemo(() => getMASignal(currentMA20, currentMA50), [currentMA20, currentMA50]);
+  const currentData = series[series.length - 1] || {};
+  const currentRSI   = currentData?.rsi ?? null;
+  const currentPrice = currentData?.price ?? null;
+  const currentMA20  = currentData?.ma20 ?? null;
+  const currentMA50  = currentData?.ma50 ?? null;
+
+  const nf  = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
+  const fmt = (v) => (v == null ? "—" : nf.format(Number(v)));
+
+  const rsiSignal = useMemo(() => getRSISignal(currentRSI ?? 50), [currentRSI]);
+  const maSignal  = useMemo(() => getMASignal(currentMA20 ?? 0, currentMA50 ?? 0), [currentMA20, currentMA50]);
 
   const menuItems = [
     { id: "course", label: "Cours pour Débutants", icon: BookOpen },
@@ -181,6 +149,7 @@ export function IndicatorsPage() {
     { id: "glossary", label: "Glossaire", icon: Info },
   ];
 
+  /* ----------------------------- Sections UI ----------------------------- */
   const renderCourseSection = () => (
     <div className="space-y-8">
       <div className="bg-card rounded-2xl p-8 border border-border">
@@ -220,21 +189,15 @@ export function IndicatorsPage() {
               <div className="space-y-3 text-sm text-green-700 dark:text-green-300">
                 <div className="flex items-start gap-2">
                   <TrendingUp className="w-4 h-4 mt-0.5" />
-                  <div>
-                    <strong>Tendance haussière :</strong> Succession de sommets et creux de plus en plus hauts
-                  </div>
+                  <div><strong>Tendance haussière :</strong> Succession de sommets et creux de plus en plus hauts</div>
                 </div>
                 <div className="flex items-start gap-2">
                   <TrendingDown className="w-4 h-4 mt-0.5" />
-                  <div>
-                    <strong>Tendance baissière :</strong> Succession de sommets et creux de plus en plus bas
-                  </div>
+                  <div><strong>Tendance baissière :</strong> Succession de sommets et creux de plus en plus bas</div>
                 </div>
                 <div className="flex items-start gap-2">
                   <BarChart3 className="w-4 h-4 mt-0.5" />
-                  <div>
-                    <strong>Tendance latérale :</strong> Prix évoluent dans une fourchette horizontale
-                  </div>
+                  <div><strong>Tendance latérale :</strong> Prix évoluent dans une fourchette horizontale</div>
                 </div>
               </div>
             </div>
@@ -270,22 +233,10 @@ export function IndicatorsPage() {
               <div className="space-y-3 text-sm text-purple-700 dark:text-purple-300">
                 <p>La gestion du risque est plus importante que l'analyse elle-même !</p>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Ne risquez jamais plus de 2% de votre capital par trade</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Toujours placer un stop-loss avant d'entrer</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Ratio risque/rendement minimum 1:2</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Tenir un journal de trading</span>
-                  </div>
+                  <div className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-500" /><span>Ne risquez jamais plus de 2% de votre capital par trade</span></div>
+                  <div className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-500" /><span>Toujours placer un stop-loss avant d'entrer</span></div>
+                  <div className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-500" /><span>Ratio risque/rendement minimum 1:2</span></div>
+                  <div className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-500" /><span>Tenir un journal de trading</span></div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
                   Contenu éducatif uniquement. Ce n’est pas un conseil en investissement. Testez en démo avant le réel.
@@ -323,15 +274,13 @@ export function IndicatorsPage() {
             >
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-medium text-card-foreground">{strategy.title}</h3>
-                <span
-                  className={`text-xs px-2 py-1 rounded-full ${
-                    strategy.level === "Débutant"
-                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                      : strategy.level === "Intermédiaire"
-                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
-                      : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                  }`}
-                >
+                <span className={`text-xs px-2 py-1 rounded-full ${
+                  strategy.level === "Débutant"
+                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                    : strategy.level === "Intermédiaire"
+                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                    : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                }`}>
                   {strategy.level}
                 </span>
               </div>
@@ -344,15 +293,9 @@ export function IndicatorsPage() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-medium text-accent-foreground">{selectedStrategy.title}</h3>
             <div className="flex gap-4 text-sm">
-              <span className="text-muted-foreground">
-                Risque: <strong>{selectedStrategy.risk}</strong>
-              </span>
-              <span className="text-muted-foreground">
-                Timeframe: <strong>{selectedStrategy.timeframe}</strong>
-              </span>
-              <span className="text-muted-foreground">
-                Succès: <strong>{selectedStrategy.successRate}</strong>
-              </span>
+              <span className="text-muted-foreground">Risque: <strong>{selectedStrategy.risk}</strong></span>
+              <span className="text-muted-foreground">Timeframe: <strong>{selectedStrategy.timeframe}</strong></span>
+              <span className="text-muted-foreground">Succès: <strong>{selectedStrategy.successRate}</strong></span>
             </div>
           </div>
 
@@ -399,12 +342,16 @@ export function IndicatorsPage() {
 
   const renderLiveSection = () => {
     const RsiIcon = rsiSignal.icon;
-    const MaIcon = maSignal.icon;
+    const MaIcon  = maSignal.icon;
 
     return (
       <div className="space-y-6">
-        {/* Current Signals */}
+        {loading && <div className="text-sm text-muted-foreground">Mise à jour des données temps réel…</div>}
+        {error   && <div className="text-sm text-red-600">Erreur données live : {error}</div>}
+
+        {/* RSI & MA cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* RSI */}
           <div className="bg-card rounded-2xl p-6 border border-border">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium text-card-foreground">Signal RSI</h3>
@@ -413,10 +360,12 @@ export function IndicatorsPage() {
                 <span className={`text-sm font-medium ${rsiSignal.color}`}>{rsiSignal.text}</span>
               </div>
             </div>
-            <div className="text-3xl font-medium text-card-foreground mb-2">{Number(currentRSI).toFixed(1)}</div>
+            <div className="text-3xl font-medium text-card-foreground mb-2">
+              {currentRSI == null ? "—" : Number(currentRSI).toFixed(1)}
+            </div>
             <div className="h-32">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={indicatorData.slice(-20)}>
+                <LineChart data={series.slice(-20)}>
                   <XAxis dataKey="time" hide />
                   <YAxis domain={[0, 100]} hide />
                   <ReferenceLine y={70} stroke="#ef4444" strokeDasharray="5 5" />
@@ -427,27 +376,33 @@ export function IndicatorsPage() {
             </div>
           </div>
 
+          {/* MA */}
           <div className="bg-card rounded-2xl p-6 border border-border">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium text-card-foreground">Signal Moyennes Mobiles</h3>
+              <div className="text-sm text-muted-foreground mb-2">Prix actuel : {fmt(currentPrice)}</div>
               <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${maSignal.bg}`} title={maSignal.text}>
                 <MaIcon className={`w-4 h-4 ${maSignal.color}`} />
                 <span className={`text-sm font-medium ${maSignal.color}`}>{maSignal.text}</span>
               </div>
             </div>
+
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <div className="text-xl font-medium text-card-foreground">{currentMA20.toLocaleString()}€</div>
+                <div className="text-xl font-medium text-card-foreground">{fmt(currentMA20)}</div>
                 <div className="text-sm text-muted-foreground">MA20</div>
+                {currentMA20 == null && <div className="text-xs text-muted-foreground">En cours de calcul…</div>}
               </div>
               <div>
-                <div className="text-xl font-medium text-card-foreground">{currentMA50.toLocaleString()}€</div>
+                <div className="text-xl font-medium text-card-foreground">{fmt(currentMA50)}</div>
                 <div className="text-sm text-muted-foreground">MA50</div>
+                {currentMA50 == null && <div className="text-xs text-muted-foreground">En cours de calcul…</div>}
               </div>
             </div>
+
             <div className="h-32">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={indicatorData.slice(-20)}>
+                <LineChart data={series.slice(-20)}>
                   <XAxis dataKey="time" hide />
                   <YAxis hide />
                   <Line type="monotone" dataKey="ma20" stroke="#f59e0b" strokeWidth={2} dot={false} />
@@ -458,19 +413,13 @@ export function IndicatorsPage() {
           </div>
         </div>
 
-        {/* Live Chart */}
+        {/* Graph principal */}
         <div className="bg-card rounded-2xl p-6 border border-border">
           <h3 className="text-lg font-medium text-card-foreground mb-6">Graphique BTC/USD - Analyse Temps Réel</h3>
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={indicatorData}>
-                <XAxis
-                  dataKey="time"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: "currentColor" }}
-                  className="text-muted-foreground"
-                />
+              <AreaChart data={series}>
+                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "currentColor" }} className="text-muted-foreground" />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "currentColor" }} className="text-muted-foreground" />
                 <Area type="monotone" dataKey="price" stroke="#007aff" strokeWidth={2} fill="#007aff" fillOpacity={0.1} />
                 <Line type="monotone" dataKey="ma20" stroke="#f59e0b" strokeWidth={2} dot={false} />
@@ -478,7 +427,9 @@ export function IndicatorsPage() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
-          <p className="text-xs text-muted-foreground mt-3">Données simulées à des fins pédagogiques.</p>
+          <p className="text-xs text-muted-foreground mt-3">
+            {series.length ? "Données temps réel via backend (CoinGecko)." : "En attente de données…"}
+          </p>
         </div>
       </div>
     );
@@ -511,6 +462,7 @@ export function IndicatorsPage() {
     </div>
   );
 
+  /* ------------------------------- Layout ------------------------------- */
   return (
     <div className="space-y-6">
       {/* Navigation */}
