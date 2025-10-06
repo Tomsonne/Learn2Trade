@@ -1,14 +1,16 @@
-// HMR test
-import { Outlet } from 'react-router-dom';
-import Header from './components/Header.jsx';
-import Footer from './components/Footer.jsx';
+// src/App.jsx
+import Header from "./components/Header.jsx";
+import Footer from "./components/Footer.jsx";
+import { Outlet } from "react-router-dom";
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <>
       <Header />
+      {/* ici s’affichent les pages enfants déclarées dans le router */}
       <Outlet />
       <Footer />
-    </div>
+    </>
   );
 }
+
