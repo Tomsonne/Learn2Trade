@@ -1,11 +1,9 @@
-import React, { useMemo, useState } from "react";
-import {
-  LineChart, Line, XAxis, YAxis, ResponsiveContainer, ReferenceLine, AreaChart, Area
-} from "recharts";
-import {
-  BookOpen, TrendingUp, TrendingDown, BarChart3, Target, AlertTriangle, CheckCircle, Info
-} from "lucide-react";
+import React, { useMemo, useState, useEffect } from "react";
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, ReferenceLine, AreaChart, Area } from "recharts";
+import { BookOpen, TrendingUp, TrendingDown, BarChart3, Target, AlertTriangle, CheckCircle, Info } from "lucide-react";
 import { useMarketSeries } from "../hooks/useMarketSeries.js";
+import CandleChart from "../components/CandleChart.jsx"; //import par défaut
+
 
 /* ------------------------- Glossaire & Stratégies ------------------------- */
 const glossaryTerms = [
@@ -119,17 +117,24 @@ const getMASignal = (ma20, ma50) => {
 
 /* -------------------------------- Component ------------------------------- */
 export function IndicatorsPage() {
-  const [activeSection, setActiveSection] = useState("course");
-  const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
-
-  // ✅ LIVE data via backend
+  const [activeSection, setActiveSection] = useState("live");
+  // LIVE data via backend
   const { data: series = [], loading, error } = useMarketSeries({
     symbol: "BTC",     // ou id: "bitcoin"
     vs: "usd",
     range: "1d",
+    preferOHLCFor1d: true, 
     refreshMs: 60_000,
   });
+  // Debug: vérifie la forme d’un point
+  useEffect(() => {
+    if (series.length) console.log("SAMPLE row:", series[0]);
+  }, [series]);
 
+  const hasOHLC = useMemo(
+    () => series.some(d => d?.o != null && d?.h != null && d?.l != null && d?.c != null),
+    [series]
+  );
   const currentData = series[series.length - 1] || {};
   const currentRSI   = currentData?.rsi ?? null;
   const currentPrice = currentData?.price ?? null;
@@ -414,27 +419,28 @@ export function IndicatorsPage() {
         </div>
 
         {/* Graph principal */}
-        <div className="bg-card rounded-2xl p-6 border border-border">
-          <h3 className="text-lg font-medium text-card-foreground mb-6">Graphique BTC/USD - Analyse Temps Réel</h3>
-          <div className="h-96">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={series}>
-                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "currentColor" }} className="text-muted-foreground" />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "currentColor" }} className="text-muted-foreground" />
-                <Area type="monotone" dataKey="price" stroke="#007aff" strokeWidth={2} fill="#007aff" fillOpacity={0.1} />
-                <Line type="monotone" dataKey="ma20" stroke="#f59e0b" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="ma50" stroke="#8b5cf6" strokeWidth={2} dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
+        <div className="h-96">
+            {hasOHLC ? (
+              // Chandelier si o/h/l/c présents
+              <CandleChart data={series} currency="USD" />
+            ) : (
+              // Fallback en courbe si pas d’OHLC
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={series}>
+                  <XAxis dataKey="time" axisLine={false} tickLine={false} />
+                  <YAxis axisLine={false} tickLine={false} />
+                  <Area type="monotone" dataKey="price" stroke="#007aff" strokeWidth={2} fill="#007aff" fillOpacity={0.1} />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </div>
+
           <p className="text-xs text-muted-foreground mt-3">
-            {series.length ? "Données temps réel via backend (CoinGecko)." : "En attente de données…"}
+            {hasOHLC ? "Données OHLC (bougies)." : "Pas d’OHLC, affichage en courbe."}
           </p>
         </div>
-      </div>
     );
-  };
-
+  }
   const renderGlossarySection = () => (
     <div className="space-y-6">
       <div className="bg-card rounded-2xl p-6 border border-border">

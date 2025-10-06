@@ -12,6 +12,7 @@ export function useMarketSeries({
   range = "1d",     // "1d", "7d", "30d" → days
   refreshMs = 60_000,
   id,               // "bitcoin" | "ethereum" (optionnel → mappé vers symbol)
+  preferOHLCFor1d = false,
 } = {}) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,8 +35,11 @@ export function useMarketSeries({
   const base = (import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api/v1").replace(/\/$/, "");
 
   // Si 1d → on préfère la granularité minute via /market/range
+  const is1d = String(range).toLowerCase() === "1d";
   let url = "";
-  if (String(range).toLowerCase() === "1d") {
+  
+  if (is1d && !preferOHLCFor1d) {
+    // 1d → granularité minute via /range (prices[][])
     const nowSec  = Math.floor(Date.now() / 1000);
     const fromSec = nowSec - 24 * 60 * 60;
     url = `${base}/market/range?symbol=${encodeURIComponent(finalSymbol)}&vs=${encodeURIComponent(vs)}&from=${fromSec}&to=${nowSec}`;
