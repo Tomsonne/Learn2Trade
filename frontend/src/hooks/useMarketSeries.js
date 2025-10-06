@@ -69,33 +69,38 @@ export function useMarketSeries({
         // --- normalisation payload ---
         let rows = [];
 
-        // {status:'ok', data:[{t,o,h,l,c}, ...]}  -> /market/ohlc
-        if (json && json.status === "ok" && Array.isArray(json.data)) {
-          if (json.data.length && typeof json.data[0] === "object" && "t" in json.data[0]) {
-            rows = json.data.map(({ t, c, o }) => ({ ts: t, price: (c ?? o) }));
+        // /market/ohlc : {status:'ok', data:[{t,o,h,l,c}, ...]}
+        if (json && json.status === "ok" && Array.isArray(json.data) && json.data.length) {
+          if (typeof json.data[0] === "object" && !Array.isArray(json.data[0]) && "t" in json.data[0]) {
+            rows = json.data.map(({ t, o, h, l, c }) => ({
+              ts: t, price: c ?? o, o, h, l, c
+            }));
           } else if (Array.isArray(json.data[0])) {
-            rows = json.data.map(([ts, o, h, l, c]) => ({ ts, price: c ?? o }));
+            rows = json.data.map(([ts, o, h, l, c]) => ({
+              ts, price: (c ?? o), o, h, l, c
+            }));
           }
         }
-        // {status:'ok', data:{prices:[[ms,price], ...]}} -> /market/range
+        // /market/range : {status:'ok', data:{prices:[[ms,price], ...]}}
         else if (json && json.status === "ok" && json.data?.prices && Array.isArray(json.data.prices)) {
-          rows = json.data.prices.map(([ts, p]) => ({ ts, price: p }));
+          rows = json.data.prices.map(([ts, p]) => ({
+            ts, price: p, o: null, h: null, l: null, c: null
+          }));
         }
         // compat additionnelle
         else if (Array.isArray(json?.ohlc)) {
-          rows = json.ohlc.map(([ts, o, h, l, c]) => ({ ts, price: c }));
+          rows = json.ohlc.map(([ts, o, h, l, c]) => ({ ts, price: c, o, h, l, c }));
         } else if (Array.isArray(json?.prices)) {
-          rows = json.prices.map(([ts, p]) => ({ ts, price: p }));
+          rows = json.prices.map(([ts, p]) => ({ ts, price: p, o: null, h: null, l: null, c: null }));
         } else if (Array.isArray(json)) {
           if (json.length && typeof json[0] === "object" && !Array.isArray(json[0]) && "t" in json[0]) {
-            rows = json.map(({ t, o, h, l, c }) => ({ ts: t, price: c ?? o }));
+            rows = json.map(({ t, o, h, l, c }) => ({ ts: t, price: (c ?? o), o, h, l, c }));
           } else {
-            rows = json.map(([ts, o, h, l, c]) => ({ ts, price: c ?? o }));
+            rows = json.map(([ts, o, h, l, c]) => ({ ts, price: (c ?? o), o, h, l, c }));
           }
         } else {
           throw new Error("Payload inconnu");
         }
-
         // Indicateurs
         const close = rows.map((r) => r.price);
         const ma20  = sma(close, 20);
@@ -105,6 +110,12 @@ export function useMarketSeries({
         const points = rows.map((r, i) => ({
           time: new Date(r.ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
           price: Number(r.price),
+          // OHLC (si dispo, sinon null)
+          o: r.o != null ? Number(r.o) : null,
+          h: r.h != null ? Number(r.h) : null,
+          l: r.l != null ? Number(r.l) : null,
+          c: r.c != null ? Number(r.c) : null,
+          // Indicateurs (utiles pour tes autres cartes)
           ma20: ma20[i] != null ? Number(ma20[i].toFixed(2)) : null,
           ma50: ma50[i] != null ? Number(ma50[i].toFixed(2)) : null,
           rsi:  rsi14[i] != null ? Math.max(0, Math.min(100, Number(rsi14[i].toFixed(2)))) : null,
