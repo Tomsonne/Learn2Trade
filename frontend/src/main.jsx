@@ -7,7 +7,7 @@ import "./index.css";
 import App from "./App.jsx";
 import Homepage from "./pages/Homepage.jsx";
 import NewsPage from "./pages/NewsPage.jsx";
-
+import { IndicatorsPage } from "./pages/IndicatorsPage.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -15,7 +15,8 @@ const router = createBrowserRouter([
     // errorElement: <ErrorPage />, // (optionnel) pour gérer joliment les erreurs
     children: [
       { index: true, element: <Homepage /> }, // route "/"
-      { path: "news", element: <NewsPage /> } // route "/news"
+      { path: "news", element: <NewsPage /> }, // route "/news"
+      { path: "learn", element: <IndicatorsPage /> },
     ],
   },
 ]);
