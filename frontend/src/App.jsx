@@ -1,16 +1,16 @@
-// src/App.jsx
+// src/App.jsx (avec Router v6 et RouterProvider)
+import { Outlet } from "react-router-dom";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
-import { Outlet } from "react-router-dom";
 
 export default function App() {
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <Header />
-      {/* ici s’affichent les pages enfants déclarées dans le router */}
-      <Outlet />
+      <main className="flex-1">
+        <Outlet />
+      </main>
       <Footer />
-    </>
+    </div>
   );
 }
-
