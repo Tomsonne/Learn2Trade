@@ -10,6 +10,7 @@ services:
       - db
     volumes:
       - ./backend:/usr/src/app
+      - backend_node_modules:/usr/src/app/node_modules
       # - /usr/src/app/node_modules   # ❌ à éviter
 
   db:
@@ -52,3 +53,4 @@ services:
 volumes:
   postgres_data:
   frontend_node_modules:
+  backend_node_modules:

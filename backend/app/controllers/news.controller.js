@@ -19,6 +19,7 @@ export async function getNews(req, res) {
   }
 }
 
+
 export async function refreshCoinDesk(_req, res) {
   try {
     const savedCount = await refreshNewsFromCoinDesk();

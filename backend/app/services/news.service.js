@@ -2,7 +2,9 @@
 import { Op } from 'sequelize';
 import News from '../models/news.model.js';
 
-const COINDESK_RSS = 'https://www.coindesk.com/arc/outboundfeeds/rss/';
+//const COINDESK_RSS = 'https://www.coindesk.com/arc/outboundfeeds/rss/';
+const COINDESK_RSS = 'https://www.coindesk.com/arc/outboundfeeds/rss';
+
 
 function extractSymbols(text) {
   if (!text) return [];

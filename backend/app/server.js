@@ -41,9 +41,9 @@ async function start() {
     await sequelize.sync(); // synchronisation douce
     console.log("✅ Sequelize sync done");
 
-    app.listen(cfg.port, () => {
-      console.log(`✅ Learn2Trade backend (Node) on http://localhost:${cfg.port}`);
-    });
+    app.listen(cfg.port, "0.0.0.0", () => {
+      console.log(`✅ Learn2Trade backend (Node) on http://0.0.0.0:${cfg.port}`);
+    });       
   } catch (err) {
     console.error("❌ Failed to start server:", err);
     process.exit(1);

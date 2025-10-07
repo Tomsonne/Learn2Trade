@@ -10,10 +10,10 @@ export default defineConfig({
     hmr: { clientPort: 5173 },
     proxy: {
       "/api": {
-        target: "http://localhost:8000",
+        target: "http://learn2trade_backend:8000",
         changeOrigin: true,
       },
-    },
+    },    
   },
 })
 

@@ -10,6 +10,8 @@ CREATE TABLE users (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   is_admin BOOLEAN NOT NULL DEFAULT false,
   cash NUMERIC(24,10) NOT NULL DEFAULT 10000 -- solde de départ pour la simulation
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+
 
 );
 
@@ -29,6 +31,7 @@ CREATE TABLE strategy (
   params JSONB NOT NULL,
   is_enabled BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  updated_at TIMESTAMPTZ DEFAULT NOW() 
 );
 
 
