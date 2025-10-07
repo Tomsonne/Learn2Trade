@@ -6,3 +6,5 @@ construit le conteneur et rejoue schema.sql
 
 node backend/test/user.test.js
 etre dans Learn2Trade et lancer puis sur dbeaver regarder sa classe
+
+

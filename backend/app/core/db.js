@@ -18,6 +18,8 @@ if (isSQLite) {
 
   console.log("🔌 DB utilisée : SQLite");
   console.log("📂 Fichier :", cfg.db.storage || "dev.sqlite");
+  console.log("🔧 Configuration base de données :", cfg.db);
+
 
 } else if (cfg.db.url) {
   // Mode Postgres via DATABASE_URL
