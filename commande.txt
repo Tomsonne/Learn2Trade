@@ -8,3 +8,4 @@ node backend/test/user.test.js
 etre dans Learn2Trade et lancer puis sur dbeaver regarder sa classe
 
 
+lancer container docker : docker compose build --no-cache && docker compose up

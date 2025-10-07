@@ -1,18 +1,74 @@
 /* Active Tailwind v4 */
 @import "tailwindcss";
 
-/*variables globales */
+/* ── palette sémantique ─────────────────────────────────────────── */
 :root {
-  --brand: 34 197 94;         /* emerald-500 (R G B) */
-  --surface: 255 255 255;     /* blanc */
-  --surface-dark: 17 24 39;   /* gray-900 */
+  /* surfaces & texte (clair) */
+  --bg:            255 255 255;     /* blanc */
+  --surface:       248 250 252;     /* slate-50 */
+  --text:          15 23 42;        /* slate-900 */
+  --muted:         100 116 139;     /* slate-500 */
+  --border:        226 232 240;     /* slate-200 */
+
+  /* marque & accent */
+  --brand:         34 197 94;       /* emerald-500 */
+  --primary:       37 99 235;       /* blue-600 */
 }
 
-html, body, #root { height: 100%; }
+/* mode sombre (via <html class="dark">) */
+.dark {
+  --bg:            2 6 23;          /* slate-950 */
+  --surface:       15 23 42;        /* slate-900 */
+  --text:          241 245 249;     /* slate-100 */
+  --muted:         148 163 184;     /* slate-400 */
+  --border:        30 41 59;        /* slate-800 */
 
-/*classes perso */
-.btn       { display:inline-flex; align-items:center; justify-content:center; padding:.65rem 1.1rem; border-radius:9999px; font-weight:600; transition:opacity .15s ease; }
-.btn:hover { opacity:.95; }
-.btn-primary { background: rgb(37 99 235); color:white; }                /* équiv. bg-blue-600 */
-.btn-outline { border:1px solid rgb(229 231 235); }                       /* équiv. border-gray-200 */
-.btn-outline:hover { background: rgb(243 244 246); }                      /* équiv. hover:bg-gray-100 */
+  --brand:         16 185 129;      /* emerald-500-ish */
+  --primary:       59 130 246;      /* blue-500/600 */
+}
+
+/* base doc */
+html, body, #root { height: 100%; }
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--text));
+}
+
+/* ── utilitaires légers ─────────────────────────────────────────── */
+.bg-app      { background: rgb(var(--bg)); }
+.bg-surface  { background: rgb(var(--surface)); }
+.text-app    { color: rgb(var(--text)); }
+.text-muted  { color: rgb(var(--muted)); }
+.border-app  { border-color: rgb(var(--border)); }
+
+/* ── boutons ───────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .65rem 1.1rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: opacity .15s ease, background-color .15s ease, border-color .15s ease;
+}
+
+.btn-primary {
+  color: #fff;
+  background: rgb(var(--primary));
+}
+.btn-primary:hover { opacity: .95; }
+
+.btn-outline {
+  color: rgb(var(--text));
+  border: 1px solid rgb(var(--border));
+  background: transparent;
+}
+.btn-outline:hover {
+  background: rgb(var(--surface));
+}
+
+.btn-brand {
+  color: #fff;
+  background: rgb(var(--brand));
+}
+.btn-brand:hover { opacity: .95; }
