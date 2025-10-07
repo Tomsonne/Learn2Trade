@@ -112,6 +112,7 @@ export function useMarketSeries({
         const rsi14 = rsi(close, 14);
 
         const points = rows.map((r, i) => ({
+          ts: r.ts, // <-- garde le timestamp en ms
           time: new Date(r.ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
           price: Number(r.price),
           // OHLC (si dispo, sinon null)
