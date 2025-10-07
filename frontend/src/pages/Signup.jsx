@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { signup } from "../api.Js";   // fonction qu’on ajoute dans api.js
+import { signup } from "../api.js";   // fonction qu’on ajoute dans api.js
 import { useAuthStore } from "../store";
 
 export default function Signup() {

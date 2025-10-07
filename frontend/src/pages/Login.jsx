@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { login } from "../api.Js";   // on suppose que tu as api.js
+import { login } from "../api.js";   // on suppose que tu as api.js
 import { useAuthStore } from "../store"; // store Zustand
 
 export default function Login() {
