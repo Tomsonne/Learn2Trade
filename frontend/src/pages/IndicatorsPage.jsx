@@ -69,7 +69,7 @@ export function IndicatorsPage() {
   // Cartes
   const currentData = series[series.length - 1] || {};
   const currentRSI = currentData?.rsi ?? null;
-  const currentPrice = currentData?.price ?? null;
+  const currentPrice = series.at(-1)?.price ?? null;
   const currentMA20 = currentData?.ma20 ?? null;
   const currentMA50 = currentData?.ma50 ?? null;
 
