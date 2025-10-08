@@ -32,15 +32,18 @@ export function IndicatorsPage() {
   const [activeSection, setActiveSection] = useState("live");
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
   const [tf, setTf] = useState("1h"); // timeframe UI
+  const [symbol, setSymbol] = useState("BTC");
 
   // LIVE data via backend (range dépend de tf)
   const { data: series = [], loading, error } = useMarketSeries({
-    symbol: "BTC",
+    symbol,
     vs: "usd",
-    range: RANGE_BY_TF[tf] ?? "1d",
+    tf,
+    days: RANGE_BY_TF[tf], // si tu veux l’utiliser plus tard dans le hook
     preferOHLCFor1d: true,
     refreshMs: 60_000,
   });
+
 
   // Debug
   useEffect(() => {
@@ -72,6 +75,7 @@ export function IndicatorsPage() {
   const currentPrice = series.at(-1)?.price ?? null;
   const currentMA20 = currentData?.ma20 ?? null;
   const currentMA50 = currentData?.ma50 ?? null;
+
 
   const nf = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
   const fmt = (v) => (v == null ? "—" : nf.format(Number(v)));
@@ -128,6 +132,18 @@ export function IndicatorsPage() {
         {/* Graph principal */}
         <div className="bg-card rounded-2xl p-6 border border-border">
           <h3 className="text-lg font-medium text-card-foreground mb-6">Graphique BTC/USD — Chandeliers</h3>
+
+            <div className="flex items-center gap-2 mb-4">
+              <label className="text-sm font-medium text-muted-foreground">Symbole :</label>
+              <select
+                value={symbol}
+                onChange={(e) => setSymbol(e.target.value)}
+                className="border rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#007aff]"
+              >
+                <option value="BTC">BTC/USD</option>
+                <option value="ETH">ETH/USD</option>
+              </select>
+            </div>
 
           {/* Toolbar timeframe */}
           {candles.length >= 2 && (

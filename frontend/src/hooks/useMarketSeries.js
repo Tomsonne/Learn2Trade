@@ -3,14 +3,14 @@ import { useEffect, useState } from "react";
 import { sma, rsi } from "../lib/indicators.js";
 
 const DAYS_BY_TF = {
-  '1h':  1,   // on utilisera /range (24h)
-  '4h':  7,
-  '12h': 14,
-  '1d':  90,  // ajuste si tu veux
+  '1h':  7,   // on utilisera /ohlc (7 jours → 30 min)
+  '4h':  30,
+  '12h': 30,
+  '1d':  30,  // ajuste si tu veux
 };
 
 export function useMarketSeries({
-  symbol = "BTC",
+  symbol,
   vs = "usd",
   tf = "1h",
   refreshMs = 60_000,
@@ -23,16 +23,22 @@ export function useMarketSeries({
   const base = (import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api/v1").replace(/\/$/, "");
   const days = DAYS_BY_TF[tf] ?? 1;
 
-  // 1h → /range (24h en minutes). Sinon → /ohlc (days)
-  const is1h = tf === "1h";
+  // 1h → /ohlc (7 jours = bougies 30 min). Sinon → /ohlc (days)
   let url = "";
+  let dayss;
 
-  if (is1h && !preferOHLCFor1d) {
-    const nowSec = Math.floor(Date.now() / 1000);
-    const fromSec = nowSec - 24 * 60 * 60;
-    url = `${base}/market/range?symbol=${encodeURIComponent(symbol)}&vs=${encodeURIComponent(vs)}&from=${fromSec}&to=${nowSec}`;
+  if (tf === "1h") {
+    // On récupère 7 jours de données en bougies 30 min
+    dayss = 7;
+    url = `${base}/market/ohlc?symbol=${encodeURIComponent(symbol)}&vs=${encodeURIComponent(vs)}&days=${dayss}`;
+  } else if (tf === "4h" || tf === "12h") {
+    // On garde 30 jours pour les TF plus larges (bougies quotidiennes)
+    dayss = 30;
+    url = `${base}/market/ohlc?symbol=${encodeURIComponent(symbol)}&vs=${encodeURIComponent(vs)}&days=${dayss}`;
   } else {
-    url = `${base}/market/ohlc?symbol=${encodeURIComponent(symbol)}&vs=${encodeURIComponent(vs)}&days=${days}`;
+    // pour 1d on peut aller plus loin
+    dayss = 30;
+    url = `${base}/market/ohlc?symbol=${encodeURIComponent(symbol)}&vs=${encodeURIComponent(vs)}&days=${dayss}`;
   }
 
   useEffect(() => {
@@ -42,7 +48,8 @@ export function useMarketSeries({
 
     const load = async () => {
       try {
-        setLoading(true); setError(null);
+        setLoading(true);
+        setError(null);
         const res = await fetch(url, { headers: { accept: "application/json" }, signal: ctrl.signal });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
@@ -52,26 +59,47 @@ export function useMarketSeries({
         // /market/ohlc → {status:'ok', data:[{t,o,h,l,c}, ...]} ou [[t,o,h,l,c],...]
         if (json?.status === "ok" && Array.isArray(json.data) && json.data.length) {
           if (!Array.isArray(json.data[0])) {
-            rows = json.data.map(({ t, o, h, l, c }) => ({ ts: t, o:+o, h:+h, l:+l, c:+c, price:+(c ?? o) }));
+            rows = json.data.map(({ t, o, h, l, c }) => ({
+              ts: t,
+              o: +o,
+              h: +h,
+              l: +l,
+              c: +c,
+              price: +(c ?? o),
+            }));
           } else {
-            rows = json.data.map(([t,o,h,l,c]) => ({ ts:t, o:+o, h:+h, l:+l, c:+c, price:+(c ?? o) }));
+            rows = json.data.map(([t, o, h, l, c]) => ({
+              ts: t,
+              o: +o,
+              h: +h,
+              l: +l,
+              c: +c,
+              price: +(c ?? o),
+            }));
           }
         }
         // /market/range → {status:'ok', data:{prices:[[ms,price], ...]}}
         else if (json?.status === "ok" && Array.isArray(json.data?.prices)) {
-          rows = json.data.prices.map(([ts, p]) => ({ ts, o:null,h:null,l:null,c:null, price:+p }));
+          rows = json.data.prices.map(([ts, p]) => ({ ts, o: null, h: null, l: null, c: null, price: +p }));
         }
         // compat
         else if (Array.isArray(json?.ohlc)) {
-          rows = json.ohlc.map(([t,o,h,l,c]) => ({ ts:t, o:+o, h:+h, l:+l, c:+c, price:+(c ?? o) }));
+          rows = json.ohlc.map(([t, o, h, l, c]) => ({
+            ts: t,
+            o: +o,
+            h: +h,
+            l: +l,
+            c: +c,
+            price: +(c ?? o),
+          }));
         } else if (Array.isArray(json?.prices)) {
-          rows = json.prices.map(([ts,p]) => ({ ts, o:null,h:null,l:null,c:null, price:+p }));
+          rows = json.prices.map(([ts, p]) => ({ ts, o: null, h: null, l: null, c: null, price: +p }));
         } else {
           throw new Error("Payload inconnu");
         }
 
         // Indicateurs (sur price = close)
-        const close = rows.map(r => r.price);
+        const close = rows.map((r) => r.price);
         const ma20 = sma(close, 20);
         const ma50 = sma(close, 50);
         const rsi14 = rsi(close, 14);
@@ -79,11 +107,14 @@ export function useMarketSeries({
         const points = rows.map((r, i) => ({
           ts: r.ts,
           time: new Date(r.ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
-          price: r.price,   // <-- TOUJOURS la close
-          o: r.o, h: r.h, l: r.l, c: r.c,
+          price: r.price, // <-- TOUJOURS la close
+          o: r.o,
+          h: r.h,
+          l: r.l,
+          c: r.c,
           ma20: ma20[i] ?? null,
           ma50: ma50[i] ?? null,
-          rsi:  rsi14[i] ?? null,
+          rsi: rsi14[i] ?? null,
         }));
 
         if (!aborted) setData(points);
@@ -96,8 +127,12 @@ export function useMarketSeries({
 
     load();
     if (refreshMs > 0) timer = setInterval(load, refreshMs);
-    return () => { aborted = true; ctrl.abort(); if (timer) clearInterval(timer); };
-  }, [url, refreshMs]);
+    return () => {
+      aborted = true;
+      ctrl.abort();
+      if (timer) clearInterval(timer);
+    };
+  }, [url, refreshMs, symbol, vs, tf]);
 
   return { data, loading, error };
 }
