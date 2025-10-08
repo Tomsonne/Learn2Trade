@@ -17,7 +17,7 @@ export default function Signup() {
       const data = await signup(email, password);
       if (data.access_token) {
         setAuth(data.user, data.access_token);
-        navigate("/dashboard");
+        navigate("/learn");
       } else {
         setError(data.message || "Erreur lors de l'inscription");
       }

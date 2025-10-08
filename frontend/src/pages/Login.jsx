@@ -17,7 +17,7 @@ export default function Login() {
       const data = await login(email, password);
       if (data.access_token) {
         setAuth(data.user, data.access_token);
-        navigate("/dashboard"); // ou autre page protégée
+        navigate("/learn"); // ou autre page protégée
       } else {
         setError(data.message || "Identifiants invalides");
       }
