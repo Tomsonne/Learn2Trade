@@ -134,16 +134,24 @@ export function IndicatorsPage() {
           <h3 className="text-lg font-medium text-card-foreground mb-6">Graphique BTC/USD — Chandeliers</h3>
 
             <div className="flex items-center gap-2 mb-4">
-              <label className="text-sm font-medium text-muted-foreground">Symbole :</label>
+              <label
+                htmlFor="symbol"
+                className="text-sm font-medium text-[hsl(var(--foreground))]"
+              >
+                Symbole :
+              </label>
               <select
+                id="symbol"
                 value={symbol}
                 onChange={(e) => setSymbol(e.target.value)}
-                className="border rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#007aff]"
+                className="border border-[hsl(var(--input))] rounded-md px-3 py-1 text-sm
+                           bg-[hsl(var(--background))] text-[hsl(var(--foreground))]
+                           focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
               >
                 <option value="BTC">BTC/USD</option>
                 <option value="ETH">ETH/USD</option>
               </select>
-            </div>
+        </div>
 
           {/* Toolbar timeframe */}
           {candles.length >= 2 && (
