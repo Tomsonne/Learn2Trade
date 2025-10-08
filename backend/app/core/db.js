@@ -1,69 +1,37 @@
-// backend/app/core/db.js
+// app/core/db.js
 import { Sequelize } from "sequelize";
-import { loadConfig } from "./config.js";
+import dotenv from "dotenv";
 
-const cfg = loadConfig();
-const isSQLite = (cfg.db.dialect || "").toLowerCase() === "sqlite";
+dotenv.config();
 
-let sequelize;
+// 🔌 Récupère l’URL complète depuis .env
+const databaseUrl = process.env.DATABASE_URL;
 
-// === IMPORTANT ===
-// Mode SQLite → utiliser la forme objet, SANS host/user/password
-if (isSQLite) {
-  sequelize = new Sequelize({
-    dialect: "sqlite",
-    storage: cfg.db.storage || "dev.sqlite",
-    logging: cfg.db.logging,
-  });
-
-  console.log("🔌 DB utilisée : SQLite");
-  console.log("📂 Fichier :", cfg.db.storage || "dev.sqlite");
-  console.log("🔧 Configuration base de données :", cfg.db);
-
-
-} else if (cfg.db.url) {
-  // Mode Postgres via DATABASE_URL
-  sequelize = new Sequelize(cfg.db.url, {
-    dialect: "postgres",
-    logging: cfg.db.logging,
-    dialectOptions: cfg.db.ssl
-      ? { ssl: { require: true, rejectUnauthorized: false } }
-      : {},
-  });
-
-  console.log("🔌 DB utilisée via URL :", cfg.db.url);
-} else {
-  // Mode Postgres/MySQL/etc via champs séparés
-  sequelize = new Sequelize(
-    cfg.db.database || "",
-    cfg.db.username || "",
-    String(cfg.db.password ?? ""),
-    {
-      dialect: cfg.db.dialect,
-      host: cfg.db.host,
-      port: cfg.db.port,
-      logging: cfg.db.logging,
-      dialectOptions: cfg.db.ssl
-        ? { ssl: { require: true, rejectUnauthorized: false } }
-        : {},
-    }
-  );
-
-  console.log(
-    "🔌 DB utilisée :",
-    cfg.db.database || "(non défini)",
-    "sur",
-    (cfg.db.host || "localhost") + ":" + (cfg.db.port || 5432)
-  );
+if (!databaseUrl) {
+  console.error("❌ Erreur : aucune DATABASE_URL trouvée dans le .env");
+  process.exit(1);
 }
 
-// Toujours afficher le dialect sélectionné
-console.log("🔌 Dialect :", sequelize.getDialect());
+// 🧩 Crée l’instance Sequelize
+const sequelize = new Sequelize(databaseUrl, {
+  dialect: "postgres",
+  logging: false, // mets true si tu veux voir les requêtes SQL
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false, // nécessaire pour Supabase
+    },
+  },
+});
 
-
-console.log("ENV → DATABASE_URL:", process.env.DATABASE_URL);
-console.log("ENV → DB_USERNAME:", process.env.DB_USERNAME);
-console.log("🔧 cfg.db =", cfg.db);
-
+// 🚀 Test de connexion
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("✅ Connexion établie avec Supabase PostgreSQL !");
+  } catch (error) {
+    console.error("❌ Erreur connexion Supabase :", error.message);
+  }
+})();
 
 export default sequelize;
