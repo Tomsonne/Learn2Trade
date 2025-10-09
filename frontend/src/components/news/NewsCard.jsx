@@ -35,7 +35,11 @@ export default function NewsCard({
           {title}
         </h3>
 
-        {excerpt && <p className="mt-1 text-sm text-slate-600 line-clamp-2">{excerpt}</p>}
+        {excerpt && (
+            <div className="prose prose-slate dark:prose-invert prose-sm max-w-none prose-p:my-1 prose-a:no-underline hover:prose-a:underline">
+            <p className="line-clamp-2">{excerpt}</p>
+            </div>
+        )}
 
         <div className="mt-2 text-xs text-slate-500">
           {source} {publishedAt && `• ${formatPublished(publishedAt)}`}
