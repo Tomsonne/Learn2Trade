@@ -9,6 +9,9 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import NewsPage from "./pages/NewsPage.jsx";
 import { IndicatorsPage } from "./pages/IndicatorsPage.jsx";
+import History from "./pages/History.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
+import Trades from "./pages/Trades.jsx";
 
 const router = createBrowserRouter([
   {
@@ -19,6 +22,9 @@ const router = createBrowserRouter([
       { path: "login", element: <Login /> },
       { path: "news", element: <NewsPage /> },
       { path: "learn", element: <IndicatorsPage /> },
+      { path: "trades", element: <Trades />},
+      {path: "history", element: <History /> },
+      {path: "dashboard", element: <Dashboard />}
     ],
   },
   { path: "signup", element: <Signup /> },
