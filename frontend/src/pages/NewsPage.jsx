@@ -13,11 +13,14 @@ export default function NewsPage() {
   const [items, setItems]   = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
+  const [tab, setTab] = useState("ALL");              // ← état du filtre
 
-  // --- charge les news (réutilisable par bouton / interval / focus)
   const fetchNews = useCallback(async () => {
     const base = (import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api/v1").replace(/\/$/, "");
-    const url  = `${base}/news?limit=10`;
+    const params = new URLSearchParams({ limit: "10" });
+    if (tab !== "ALL") params.set("symbols", tab);    // ← envoie le filtre au backend
+
+    const url  = `${base}/news?${params.toString()}`;
 
     setLoading(true);
     setError(null);
@@ -26,7 +29,21 @@ export default function NewsPage() {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const json = await r.json();
       const list = Array.isArray(json) ? json : (json?.data ?? []);
-      setItems(list);
+
+      // ← filtre côté client aussi, si besoin
+      let filtered = list;
+      if (tab !== "ALL") {
+        filtered = list.filter((n) => {
+          const sym = Array.isArray(n.symbols)
+            ? n.symbols
+            : (typeof n.symbols === "string"
+                ? (() => { try { return JSON.parse(n.symbols); } catch { return []; } })()
+                : []);
+          return sym.includes(tab);
+        });
+      }
+
+      setItems(filtered);
     } catch (e) {
       console.error("Fetch /news failed:", e);
       setError(e.message || "Erreur de chargement");
@@ -34,9 +51,8 @@ export default function NewsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [tab]); // ← refetch quand le filtre change
 
-  // --- premier chargement + auto-refresh + refresh au retour d’onglet
   useEffect(() => {
     fetchNews();                                 // initial
     const id = setInterval(fetchNews, 5 * 60 * 1000); // 5 min
@@ -60,8 +76,14 @@ export default function NewsPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-3 p-4">
-      <div className="mb-2 flex items-center gap-2">
+      <div className="mb-2 flex flex-wrap items-center gap-2">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Actualités du Marché</h2>
+
+        {/* Filtres */}
+        <div className="ml-2">
+          <SymbolFilter options={TABS} value={tab} onChange={setTab} />
+        </div>
+
         <button
           onClick={fetchNews}
           className="ml-auto rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100 dark:border-gray-700 dark:hover:bg-gray-700"
@@ -76,7 +98,9 @@ export default function NewsPage() {
       )}
 
       {!loading && !items.length && (
-        <div className="text-sm text-slate-500 dark:text-slate-400">Aucune news.</div>
+        <div className="text-sm text-slate-500 dark:text-slate-400">
+          Aucune news {tab !== "ALL" ? `pour ${tab}` : ""}.
+        </div>
       )}
 
       {items.map((n, i) => (
