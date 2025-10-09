@@ -1,6 +1,13 @@
 // src/pages/NewsPage.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import NewsCard from "../components/news/NewsCard.jsx";
+import SymbolFilter from "../components/news/SymbolFilter.jsx";
+
+const TABS = [
+  { label: "Tous", value: "ALL" },
+  { label: "BTC",  value: "BTC" },
+  { label: "ETH",  value: "ETH" },
+];
 
 export default function NewsPage() {
   const [items, setItems]   = useState([]);
