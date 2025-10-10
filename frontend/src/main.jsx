@@ -15,6 +15,8 @@ import Trades from "./pages/Trades.jsx";
 
 const router = createBrowserRouter([
   {path: "/", element: <Homepage />},
+  { path: "signup", element: <Signup /> },
+  { path: "login", element: <Login /> },
     {element: <App />,
     children: [
       { index: true, element: <Homepage /> },
@@ -26,8 +28,6 @@ const router = createBrowserRouter([
       {path: "dashboard", element: <Dashboard />}
     ],
   },
-  { path: "signup", element: <Signup /> },
-  { path: "login", element: <Login /> },
 ]);
 
 createRoot(document.getElementById("root")).render(
