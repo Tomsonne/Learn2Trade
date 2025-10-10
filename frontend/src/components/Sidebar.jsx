@@ -23,7 +23,7 @@ function SidebarItem({ to, label, Icon, active }) {
       }`}
       aria-current={active ? "page" : undefined}
     >
-      <Icon className="h-4 w-4 shrink-0" />
+      {Icon ? <Icon className="h-4 w-4 shrink-0" /> : null}
       <span className="truncate">{label}</span>
     </Link>
   );
@@ -43,7 +43,7 @@ export default function SidebarLayout({ items = DEFAULT_ITEMS, children }) {
               key={it.to}
               to={it.to}
               label={it.label}
-              Icon={it.icon}
+              icon={it.icon}
               active={isActive(it.to)}
             />
           ))}
