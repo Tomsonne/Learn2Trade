@@ -3,13 +3,13 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis } from "recharts";
 import { BookOpen, TrendingUp, TrendingDown, BarChart3, Target, Info } from "lucide-react";
 import { useMarketSeries } from "../hooks/useMarketSeries.js";
 import CandleLite from "../components/CandleLite.jsx";
-import { TF, resampleOHLC } from "../utils/ohlc.js";
 import { glossaryTerms } from "../data/glossary.js";
 import { strategies } from "../data/strategies.js";
 import StrategiesSection from "../components/StrategiesSection.jsx";
 import RsiCard from "../components/cards/RsiCard.jsx";
 import MaCard from "../components/cards/MaCard.jsx";
 import CourseSection from "../components/CourseSection.jsx";
+import { useSpotPrice } from "../hooks/useSpotPrice.js";
 
 /* ------------------------------- Helpers UI ------------------------------- */
 const getRSISignal = (v) => {
@@ -34,50 +34,65 @@ export function IndicatorsPage() {
   const [tf, setTf] = useState("1h"); // timeframe UI
   const [symbol, setSymbol] = useState("BTC");
 
-  // LIVE data via backend (range dépend de tf)
+  // Prix spot unique (sert au hook + à l'affichage)
+  const { price: spot } = useSpotPrice({ symbol, vs: "usd", refreshMs: 60_000 });
+
+  // LIVE data via backend (range dépend de tf) + patch dernière bougie avec le spot
   const { data: series = [], loading, error } = useMarketSeries({
     symbol,
     vs: "usd",
     tf,
-    days: RANGE_BY_TF[tf], // si tu veux l’utiliser plus tard dans le hook
+    days: RANGE_BY_TF[tf], // (peut être ignoré par le hook selon implémentation)
     preferOHLCFor1d: true,
     refreshMs: 60_000,
+    spotPrice: spot, // ✅ unifie le prix entre TF
   });
-
 
   // Debug
   useEffect(() => {
     if (series.length) console.log("SAMPLE row:", series[0]);
   }, [series]);
 
-  // Base OHLC en ms
-  const baseOHLC = useMemo(
+  // 🔹 Chandeliers pour lightweight-charts (time en SECONDES)
+  const candles = useMemo(
     () =>
       series
-        .filter(d => d?.ts != null && d?.o != null && d?.h != null && d?.l != null && d?.c != null)
-        .map(d => ({ ts: +d.ts, o: +d.o, h: +d.h, l: +d.l, c: +d.c })),
+        .filter(d =>
+          Number.isFinite(d?.ts) &&
+          Number.isFinite(d?.o) &&
+          Number.isFinite(d?.h) &&
+          Number.isFinite(d?.l) &&
+          Number.isFinite(d?.c)
+        )
+        .map(d => ({
+          time: Math.floor(Number(d.ts) / 1000),
+          open: Number(d.o),
+          high: Number(d.h),
+          low:  Number(d.l),
+          close:Number(d.c),
+        })),
     [series]
   );
 
-  // Resampling selon TF
-  const bucketSec = TF[tf] ?? TF["1h"];
-  const ohlcTF = useMemo(() => resampleOHLC(baseOHLC, bucketSec), [baseOHLC, bucketSec]);
-
-  // Format pour lightweight-charts
-  const candles = useMemo(
-    () => ohlcTF.map(r => ({ time: Math.floor(r.ts / 1000), open: r.o, high: r.h, low: r.l, close: r.c })),
-    [ohlcTF]
-  );
-
-  // Cartes
+  // ----- Cartes (RSI, MA, Prix) -----
   const currentData = series[series.length - 1] || {};
-  const currentRSI = currentData?.rsi ?? null;
-  const currentPrice = series.at(-1)?.price ?? null;
+
+  // RSI = dernière valeur non nulle (calculée dans le hook)
+  const currentRSI = useMemo(() => {
+    for (let i = series.length - 1; i >= 0; i--) {
+      const v = series[i]?.rsi;
+      if (v != null && Number.isFinite(v)) return v;
+    }
+    return null;
+  }, [series]);
+
+  // Prix affiché = spot (unique, indépendant du TF)
+  const currentPrice = (typeof spot === "number" ? spot : null);
+
   const currentMA20 = currentData?.ma20 ?? null;
   const currentMA50 = currentData?.ma50 ?? null;
 
-
-  const nf = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
+  const nf  = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
   const fmt = (v) => (v == null ? "—" : nf.format(Number(v)));
 
   const rsiSignal = useMemo(() => getRSISignal(currentRSI ?? 50), [currentRSI]);
@@ -131,27 +146,29 @@ export function IndicatorsPage() {
 
         {/* Graph principal */}
         <div className="bg-card rounded-2xl p-6 border border-border">
-          <h3 className="text-lg font-medium text-card-foreground mb-6">Graphique BTC/USD — Chandeliers</h3>
+          {/* Header + badge prix spot (identique tous TF) */}
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-medium text-card-foreground">Graphique {symbol}/USD — Chandeliers</h3>
+            <span className="px-3 py-1 rounded-full text-sm bg-[#007aff]/10 text-[#007aff] border border-[#007aff]/30">
+              Prix spot : {currentPrice != null ? fmt(currentPrice) : "—"}
+            </span>
+          </div>
 
-            <div className="flex items-center gap-2 mb-4">
-              <label
-                htmlFor="symbol"
-                className="text-sm font-medium text-[hsl(var(--foreground))]"
-              >
-                Symbole :
-              </label>
-              <select
-                id="symbol"
-                value={symbol}
-                onChange={(e) => setSymbol(e.target.value)}
-                className="border border-[hsl(var(--input))] rounded-md px-3 py-1 text-sm
-                           bg-[hsl(var(--background))] text-[hsl(var(--foreground))]
-                           focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
-              >
-                <option value="BTC">BTC/USD</option>
-                <option value="ETH">ETH/USD</option>
-              </select>
-        </div>
+          {/* Sélecteurs */}
+          <div className="flex items-center gap-2 mb-4">
+            <label htmlFor="symbol" className="text-sm font-medium text-[hsl(var(--foreground))]">Symbole :</label>
+            <select
+              id="symbol"
+              value={symbol}
+              onChange={(e) => setSymbol(e.target.value)}
+              className="border border-[hsl(var(--input))] rounded-md px-3 py-1 text-sm
+                         bg-[hsl(var(--background))] text-[hsl(var(--foreground))]
+                         focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
+            >
+              <option value="BTC">BTC/USD</option>
+              <option value="ETH">ETH/USD</option>
+            </select>
+          </div>
 
           {/* Toolbar timeframe */}
           {candles.length >= 2 && (
@@ -174,11 +191,19 @@ export function IndicatorsPage() {
 
           <div className="h-96">
             {candles.length >= 2 ? (
-              <CandleLite data={candles} height={384} />
+              /* ✅ Remount du chart quand symbol/tf change */
+              <CandleLite key={`${symbol}-${tf}`} data={candles} height={384} />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={series}>
-                  <XAxis dataKey="time" axisLine={false} tickLine={false} />
+                  {/* Axe X numérique basé sur ts (ms) */}
+                  <XAxis
+                    dataKey="ts"
+                    type="number"
+                    domain={['dataMin', 'dataMax']}
+                    axisLine={false}
+                    tickLine={false}
+                  />
                   <YAxis axisLine={false} tickLine={false} />
                   <Area type="monotone" dataKey="price" stroke="#007aff" strokeWidth={2} fill="#007aff" fillOpacity={0.1} />
                 </AreaChart>
