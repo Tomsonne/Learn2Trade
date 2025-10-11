@@ -1,30 +1,135 @@
-import React from "react";
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis } from "recharts";
+import React, { useMemo } from "react";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ReferenceLine,
+  Legend,
+} from "recharts";
 
-export default function MaCard({ series, maSignal, fmt, ma20, ma50, price }) {
+export default function MaCard({
+  series,
+  maSignal,
+  fmt,          // (v:number)=>string
+  price,        // spot (optionnel)
+  tf = "1h",
+  height = 220,
+}) {
   const Icon = maSignal.icon;
+
+  // données propres -> { x: time(sec), ma20, ma50 }
+  const data = useMemo(() => {
+    const arr = (Array.isArray(series) ? series : [])
+      .filter(d => Number.isFinite(d?.time) && (Number.isFinite(d?.ma20) || Number.isFinite(d?.ma50)))
+      .map(d => ({
+        x: Number(d.time),
+        ma20: Number.isFinite(d.ma20) ? Number(d.ma20) : null,
+        ma50: Number.isFinite(d.ma50) ? Number(d.ma50) : null,
+      }));
+    return arr.slice(-300);
+  }, [series]);
+
+  // domaine Y avec petite marge
+  const [yMin, yMax] = useMemo(() => {
+    const vals = [];
+    for (const p of data) {
+      if (Number.isFinite(p.ma20)) vals.push(p.ma20);
+      if (Number.isFinite(p.ma50)) vals.push(p.ma50);
+    }
+    if (!vals.length) return [0, 1];
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+    const pad = Math.max((max - min) * 0.1, (min || 1) * 0.01);
+    return [min - pad, max + pad];
+  }, [data]);
+
+  // format ticks X selon TF
+  const fmtTickX = useMemo(() => {
+    const tFmt = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    const dFmt = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit" });
+    return (x) => (tf === "1d" ? dFmt.format(new Date(x * 1000)) : tFmt.format(new Date(x * 1000)));
+  }, [tf]);
+
+  const tickCountX = tf === "1h" ? 5 : tf === "4h" ? 6 : tf === "12h" ? 6 : 7;
+
   return (
     <div className="bg-card rounded-2xl p-6 border border-border">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-card-foreground">Signal Moyennes Mobiles</h3>
-        <div className="text-sm text-muted-foreground mb-2">Prix actuel : {fmt(price)}</div>
+        <div>
+          <h3 className="text-lg font-medium text-card-foreground">Signal Moyennes Mobiles</h3>
+          <div className="text-sm text-muted-foreground mt-1">
+            Prix actuel : {price != null ? fmt(price) : "—"}
+          </div>
+        </div>
         <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${maSignal.bg}`} title={maSignal.text}>
           <Icon className={`w-4 h-4 ${maSignal.color}`} />
           <span className={`text-sm font-medium ${maSignal.color}`}>{maSignal.text}</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div><div className="text-xl font-medium text-card-foreground">{fmt(ma20)}</div><div className="text-sm text-muted-foreground">MA20</div></div>
-        <div><div className="text-xl font-medium text-card-foreground">{fmt(ma50)}</div><div className="text-sm text-muted-foreground">MA50</div></div>
-      </div>
-
-      <div className="h-32">
+      <div style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={series.slice(-20)}>
-            <XAxis dataKey="time" hide /><YAxis hide />
-            <Line type="monotone" dataKey="ma20" stroke="#f59e0b" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="ma50" stroke="#8b5cf6" strokeWidth={2} dot={false} />
+          <LineChart data={data} margin={{ top: 8, right: 12, bottom: 6, left: 12 }}>
+            <CartesianGrid stroke="rgba(148,163,184,.18)" />
+
+            <XAxis
+              dataKey="x"
+              type="number"
+              scale="time"
+              domain={["dataMin", "dataMax"]}
+              tickFormatter={fmtTickX}
+              tick={{ fontSize: 11, fill: "rgba(148,163,184,.9)" }}
+              tickCount={tickCountX}
+              minTickGap={24}
+              axisLine={false}
+              tickLine={false}
+            />
+
+            <YAxis
+              domain={[yMin, yMax]}
+              tickFormatter={(v) => fmt(Number(v))}
+              width={56}
+              tick={{ fontSize: 11, fill: "rgba(148,163,184,.9)" }}
+              axisLine={false}
+              tickLine={false}
+            />
+
+            {/* repère du prix spot si dispo */}
+            {Number.isFinite(price) && (
+              <ReferenceLine
+                y={price}
+                stroke="#60a5fa"
+                strokeDasharray="6 6"
+                ifOverflow="extendDomain"
+              />
+            )}
+
+            {/* MA20 & MA50 (couleurs différentes, connectNulls) */}
+            <Line
+              type="monotone"
+              name="MA20"
+              dataKey="ma20"
+              stroke="#f59e0b"     // amber
+              strokeWidth={2}
+              dot={false}
+              connectNulls
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              name="MA50"
+              dataKey="ma50"
+              stroke="#38bdf8"     // sky
+              strokeWidth={2}
+              dot={false}
+              connectNulls
+              isAnimationActive={false}
+            />
+
+            <Legend verticalAlign="bottom" height={24} wrapperStyle={{ paddingTop: 4 }} />
           </LineChart>
         </ResponsiveContainer>
       </div>
