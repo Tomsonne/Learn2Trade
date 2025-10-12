@@ -135,6 +135,49 @@ export function IndicatorsPage() {
 
         <div className="bg-card rounded-2xl p-6 border border-border">
           <h3 className="text-lg font-medium text-card-foreground mb-6">Graphique BTC/USD — Chandeliers</h3>
+<<<<<<< HEAD
+=======
+
+            <div className="flex items-center gap-2 mb-4">
+              <label
+                htmlFor="symbol"
+                className="text-sm font-medium text-[hsl(var(--foreground))]"
+              >
+                Symbole :
+              </label>
+              <select
+                id="symbol"
+                value={symbol}
+                onChange={(e) => setSymbol(e.target.value)}
+                className="border border-[hsl(var(--input))] rounded-md px-3 py-1 text-sm
+                           bg-[hsl(var(--background))] text-[hsl(var(--foreground))]
+                           focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
+              >
+                <option value="BTC">BTC/USD</option>
+                <option value="ETH">ETH/USD</option>
+              </select>
+        </div>
+
+          {/* Toolbar timeframe */}
+          {candles.length >= 2 && (
+            <div className="flex items-center gap-2 mb-4">
+              {["1h", "4h", "12h", "1d"].map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setTf(k)}
+                  className={`px-3 py-1 rounded-md border text-sm ${
+                    tf === k ? "bg-[#007aff] text-white border-[#007aff]" : "border-border hover:bg-muted"
+                  }`}
+                  aria-pressed={tf === k}
+                >
+                  {k.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          )}
+
+>>>>>>> e14276bd206ed63e99a3a1e0b8eeaa747edb647c
           <div className="h-96">
             {candles.length >= 2 ? (
               <CandleLite data={candles} height={384} />

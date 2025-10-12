@@ -1,3 +1,4 @@
+// app/server.js  — VERSION PROPRE
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser"; // ✅ ajouté
@@ -5,6 +6,10 @@ import { loadConfig } from "./core/config.js";
 import v1Router from "./api/index.js";
 import sequelize from "./core/db.js";
 import models from "./models/index.js"; // charge *.model.js (important)
+
+// (OPTION) cron pour ingestion auto CoinDesk
+// import cron from "node-cron";
+// import { refreshNewsFromCoinDesk } from "./services/news.service.js";
 
 // ──────────────────────────────────────────────
 // App & config
@@ -50,6 +55,23 @@ async function start() {
 
     await sequelize.sync(); // synchronisation douce
     console.log("✅ Sequelize sync done");
+
+    // (OPTION) lancer une ingestion au démarrage + cron périodique
+    // try {
+    //   const saved = await refreshNewsFromCoinDesk();
+    //   console.log(`🔄 Boot refresh: saved ${saved} news`);
+    // } catch (e) {
+    //   console.error("Boot refresh error:", e?.message || e);
+    // }
+    // const cronExpr = process.env.NEWS_CRON || "*/10 * * * *"; // toutes les 10 min
+    // cron.schedule(cronExpr, async () => {
+    //   try {
+    //     const saved = await refreshNewsFromCoinDesk();
+    //     console.log(`[cron ${cronExpr}] saved ${saved}`);
+    //   } catch (e) {
+    //     console.error("[cron] error:", e?.message || e);
+    //   }
+    // });
 
     app.listen(cfg.port, "0.0.0.0", () => {
       console.log(`✅ Learn2Trade backend (Node) on http://0.0.0.0:${cfg.port}`);
