@@ -1,27 +1,29 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { login } from "../api.js";   // on suppose que tu as api.js
-import { useAuthStore } from "../store"; // store Zustand
+import { login } from "../api.js";
+import { useAuthStore } from "../store";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const setAuth = useAuthStore((s) => s.login);
   const navigate = useNavigate();
   const [error, setError] = useState(null);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError(null);
+
     try {
       const data = await login(email, password);
-      if (data.access_token) {
-        setAuth(data.user, data.access_token);
-        navigate("/learn"); // ou autre page protégée
+
+      // ✅ nouvelle logique : cookie géré par le backend
+      if (data.status === "ok") {
+        navigate("/learn"); // redirection
       } else {
         setError(data.message || "Identifiants invalides");
       }
     } catch (err) {
+      console.error("Erreur login:", err);
       setError("Erreur serveur");
     }
   }

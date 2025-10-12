@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser"; // ✅ ajouté
 import { loadConfig } from "./core/config.js";
 import v1Router from "./api/index.js";
 import sequelize from "./core/db.js";
@@ -11,7 +12,15 @@ const cfg = loadConfig();
 const app = express();
 
 app.use(express.json());
-app.use(cors({ origin: cfg.corsOrigin, credentials: true }));
+app.use(cookieParser()); // ✅ ajouté
+app.use(
+  cors({
+    origin: "http://localhost:5173", // le front
+    credentials: true,               // 🔥 permet d’envoyer les cookies
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 // ──────────────────────────────────────────────
 // HealthCheck
@@ -37,13 +46,14 @@ async function start() {
     console.log("✅ DB connected");
 
     console.log("Models chargés :", Object.keys(models));
+    console.log("🌍 CORS autorisé depuis :", cfg.corsOrigin);
 
     await sequelize.sync(); // synchronisation douce
     console.log("✅ Sequelize sync done");
 
     app.listen(cfg.port, "0.0.0.0", () => {
       console.log(`✅ Learn2Trade backend (Node) on http://0.0.0.0:${cfg.port}`);
-    });       
+    });
   } catch (err) {
     console.error("❌ Failed to start server:", err);
     process.exit(1);
