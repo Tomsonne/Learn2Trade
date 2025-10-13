@@ -13,20 +13,28 @@ import { IndicatorsPage } from "./pages/IndicatorsPage.jsx";
 import History from "./pages/History.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Trades from "./pages/Trades.jsx";
+import ProtectedRoute from "./ProtectedRoute.jsx"; // ✅ import ajouté
+
 
 const router = createBrowserRouter([
   // Groupe SANS sidebar
+  // ----------- PUBLIC -----------
   {
     element: <App variant="public" />,
     children: [
-      { index: true, element: <Homepage /> },   // "/"
+      { index: true, element: <Homepage /> },
       { path: "login", element: <Login /> },
       { path: "signup", element: <Signup /> },
     ],
   },
-  // Groupe AVEC sidebar
+
+  // ----------- PROTÉGÉ -----------
   {
-    element: <App variant="app" />,
+    element: (
+      <ProtectedRoute>
+        <App variant="app" />
+      </ProtectedRoute>
+    ),
     children: [
       { path: "news", element: <NewsPage /> },
       { path: "learn", element: <IndicatorsPage /> },

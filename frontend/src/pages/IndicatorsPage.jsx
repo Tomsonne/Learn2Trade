@@ -5,7 +5,6 @@ import CandleLite from "../components/CandleLite.jsx";
 import RsiCard from "../components/cards/RsiCard.jsx";
 import MaCard from "../components/cards/MaCard.jsx";
 import CourseSection from "../components/CourseSection.jsx";
-
 import StrategiesSection from "../components/StrategiesSection.jsx";
 import { glossaryTerms } from "../data/glossary.js";
 import { strategies } from "../data/strategies.js";
@@ -19,7 +18,6 @@ export function IndicatorsPage() {
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
   const [tf, setTf] = useState("1h");
   const [symbol, setSymbol] = useState("BTC");
-
 
   const { price: spot } = useSpotPrice({ symbol, vs: "usd", refreshMs: 60_000 });
 
@@ -52,7 +50,6 @@ export function IndicatorsPage() {
     { id: "glossary",   label: "Glossaire",             icon: Info },
   ];
 
-
   // … renderCourse / renderGlossary
 
   const renderLiveSection = () => (
@@ -84,13 +81,14 @@ export function IndicatorsPage() {
       </div>
     </div>
   );
+
   return (
     <div className="space-y-6">
       {/* nav */}
       <div className="bg-card rounded-2xl p-6 border border-border">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-medium text-card-foreground">Apprendre nos Stratégies</h1>
-          <p className="text-sm text-muted-foreground">Cours interactif • Trading éducatif • Sans risque</p>
+          <div className="text-sm text-muted-foreground">Cours interactif • Trading éducatif • Sans risque</div>
         </div>
         <div className="flex gap-2">
           {menuItems.map(({ id, label, icon: Icon }) => (
@@ -102,6 +100,7 @@ export function IndicatorsPage() {
           ))}
         </div>
       </div>
+
       {activeSection === "course" && <CourseSection />}
       {activeSection === "strategies" && (
         <StrategiesSection strategies={strategies} selectedStrategy={selectedStrategy} setSelectedStrategy={setSelectedStrategy} />

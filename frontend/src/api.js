@@ -51,20 +51,27 @@ export async function signup(email, password) {
 }
 
 // ✅ ajout pour déconnexion
-export async function logout() {
-  const res = await fetch(`${API_BASE}/auth/logout`, {
-    method: "POST",
-    credentials: "include",
-  });
-  return res.json();
-}
-
-// ✅ ajout pour vérifier la session
+// api.js
 export async function checkAuth() {
-  const res = await fetch(`${API_BASE}/auth/check`, {
-    credentials: "include",
-  });
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}/auth/check`, {
+      credentials: "include",
+    });
+    return await res.json();
+  } catch (err) {
+    console.error("checkAuth error", err);
+    return { status: "error" };
+  }
 }
 
-export { API_BASE };
+export async function logout() {
+  try {
+    const res = await fetch(`${API_BASE}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+    return await res.json();
+  } catch (err) {
+    console.error("logout error", err);
+  }
+}

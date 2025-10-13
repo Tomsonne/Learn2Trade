@@ -17,7 +17,6 @@ const cfg = loadConfig();
 const app = express();
 
 app.use(express.json());
-app.use(cookieParser()); // ✅ ajouté
 app.use(
   cors({
     origin: "http://localhost:5173", // le front
@@ -26,6 +25,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+app.use(cookieParser());
 
 // ──────────────────────────────────────────────
 // HealthCheck
