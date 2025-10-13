@@ -135,8 +135,6 @@ export function IndicatorsPage() {
 
         <div className="bg-card rounded-2xl p-6 border border-border">
           <h3 className="text-lg font-medium text-card-foreground mb-6">Graphique BTC/USD — Chandeliers</h3>
-<<<<<<< HEAD
-=======
 
             <div className="flex items-center gap-2 mb-4">
               <label
@@ -177,7 +175,6 @@ export function IndicatorsPage() {
             </div>
           )}
 
->>>>>>> e14276bd206ed63e99a3a1e0b8eeaa747edb647c
           <div className="h-96">
             {candles.length >= 2 ? (
               <CandleLite data={candles} height={384} />
