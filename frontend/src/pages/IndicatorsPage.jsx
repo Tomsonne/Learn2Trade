@@ -42,10 +42,10 @@ export function IndicatorsPage() {
     symbol,
     vs: "usd",
     tf,
-    days: RANGE_BY_TF[tf], // (peut être ignoré par le hook selon implémentation)
+    days: RANGE_BY_TF[tf],
     preferOHLCFor1d: true,
     refreshMs: 60_000,
-    spotPrice: spot, // ✅ unifie le prix entre TF
+    spotPrice: spot, //unifie le prix entre TF
   });
 
   // Debug
@@ -191,7 +191,7 @@ export function IndicatorsPage() {
 
           <div className="h-96">
             {candles.length >= 2 ? (
-              /* ✅ Remount du chart quand symbol/tf change */
+              /*Remount du chart quand symbol/tf change */
               <CandleLite key={`${symbol}-${tf}`} data={candles} height={384} />
             ) : (
               <ResponsiveContainer width="100%" height="100%">

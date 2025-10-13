@@ -112,7 +112,7 @@ export default function MaCard({
               type="monotone"
               name="MA20"
               dataKey="ma20"
-              stroke="#f59e0b"     // amber
+              stroke="#f59e0b"
               strokeWidth={2}
               dot={false}
               connectNulls
@@ -122,7 +122,7 @@ export default function MaCard({
               type="monotone"
               name="MA50"
               dataKey="ma50"
-              stroke="#38bdf8"     // sky
+              stroke="#38bdf8"
               strokeWidth={2}
               dot={false}
               connectNulls

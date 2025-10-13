@@ -13,7 +13,7 @@ export function useMarketSeries({
   vs = "usd",
   tf = "1h",
   refreshMs = 60_000,
-  spotPrice, // optionnel : force la dernière close pour un prix identique sur toutes les TF
+  spotPrice, // force la dernière close pour un prix identique sur toutes les TF
 } = {}) {
   const [data, setData]   = useState([]);
   const [meta, setMeta]   = useState({ hasMA20: false, hasMA50: false });

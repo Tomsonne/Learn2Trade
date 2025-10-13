@@ -23,7 +23,7 @@ export default function NewsPage() {
     const ctrl = new AbortController();
     currentCtrl.current = ctrl;
 
-    // 🔎 DIAG: ne PAS envoyer le filtre à l’API pour vérifier qu’on reçoit bien des données
+    // DIAG: ne PAS envoyer le filtre à l’API pour vérifier qu’on reçoit bien des données
     const params = new URLSearchParams({ limit: "10", t: String(Date.now()) });
     const url = `${base}/news?${params.toString()}`;
     console.log("[NEWS] URL =", url);
@@ -43,7 +43,7 @@ export default function NewsPage() {
         Array.isArray(json?.rows) ? json.rows :
         [];
 
-      // 🔒 Post-filtre côté client si onglet ≠ ALL
+      // Post-filtre côté client si onglet ≠ ALL
       const filtered = tab === "ALL"
         ? list
         : list.filter((n) => {

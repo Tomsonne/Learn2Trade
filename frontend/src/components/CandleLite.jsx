@@ -25,7 +25,7 @@ export default function CandleLite({ data = [], height = 384 }) {
       },
       rightPriceScale: {
         borderVisible: false,
-        scaleMargins: { top: 0.1, bottom: 0.2 }, // respire un peu
+        scaleMargins: { top: 0.1, bottom: 0.2 },
       },
       timeScale: { borderVisible: false, timeVisible: true, secondsVisible: false },
       crosshair: { mode: CrosshairMode.Normal },
@@ -40,7 +40,7 @@ export default function CandleLite({ data = [], height = 384 }) {
       wickUpColor: "#94a3b8",
       wickDownColor: "#94a3b8",
       lastValueVisible: true,
-      priceLineVisible: false, // pas de ligne criarde
+      priceLineVisible: false,
     });
 
     // Auto-resize
