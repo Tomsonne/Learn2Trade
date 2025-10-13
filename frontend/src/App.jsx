@@ -1,29 +1,28 @@
-// App.jsx
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import SidebarLayout from "./components/Sidebar.jsx";
 
-const NO_SIDEBAR = new Set(["/", "/login", "/signup"]);
-
-export default function App() {
-  const { pathname } = useLocation();
-  const hideSidebar = NO_SIDEBAR.has(pathname);
+/**
+ * App layout unique, piloté par le prop `variant`:
+ * - "public" → sans sidebar (/, /login, /signup)
+ * - "app"    → avec sidebar (news, learn, trades, history, dashboard)
+ */
+export default function App({ variant = "public" }) {
+  const withSidebar = variant === "app";
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <Header />
       <main className="flex-1">
-        {hideSidebar ? (
-          // pas de sidebar sur /, /login, /signup
-          <div className="p-5">
-            <Outlet />
-          </div>
-        ) : (
-          // layout avec sidebar pour le reste
+        {withSidebar ? (
           <SidebarLayout>
             <Outlet />
           </SidebarLayout>
+        ) : (
+          <div className="p-5">
+            <Outlet />
+          </div>
         )}
       </main>
       <Footer />

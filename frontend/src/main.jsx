@@ -4,6 +4,7 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import "./index.css";
 
 import App from "./App.jsx";
+
 import Homepage from "./pages/Homepage.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
@@ -14,18 +15,24 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Trades from "./pages/Trades.jsx";
 
 const router = createBrowserRouter([
-  {path: "/", element: <Homepage />},
-  { path: "signup", element: <Signup /> },
-  { path: "login", element: <Login /> },
-    {element: <App />,
+  // Groupe SANS sidebar
+  {
+    element: <App variant="public" />,
     children: [
-      { index: true, element: <Homepage /> },
+      { index: true, element: <Homepage /> },   // "/"
       { path: "login", element: <Login /> },
+      { path: "signup", element: <Signup /> },
+    ],
+  },
+  // Groupe AVEC sidebar
+  {
+    element: <App variant="app" />,
+    children: [
       { path: "news", element: <NewsPage /> },
       { path: "learn", element: <IndicatorsPage /> },
-      { path: "trades", element: <Trades />},
-      {path: "history", element: <History /> },
-      {path: "dashboard", element: <Dashboard />}
+      { path: "trades", element: <Trades /> },
+      { path: "history", element: <History /> },
+      { path: "dashboard", element: <Dashboard /> },
     ],
   },
 ]);

@@ -3,16 +3,16 @@ import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import { LayoutDashboard, BookOpen, TrendingUp, History, Newspaper } from "lucide-react";
 
-/** Sidebar — desktop only, slim (160px), no branding */
+/** Sidebar, slim (160px)*/
 const DEFAULT_ITEMS = [
-  { label: "Dashboard", to: "/",        icon: LayoutDashboard },
+  { label: "Dashboard", to: "/dashboard",        icon: LayoutDashboard },
   { label: "Learn",     to: "/learn",   icon: BookOpen },
   { label: "Trades",    to: "/trades",  icon: TrendingUp },
   { label: "History",   to: "/history", icon: History },
   { label: "News",      to: "/news",    icon: Newspaper },
 ];
 
-function SidebarItem({ to, label, Icon, active }) {
+function SidebarItem({ to, label, icon: Icon, active }) {
   return (
     <Link
       to={to}
