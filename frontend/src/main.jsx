@@ -13,7 +13,7 @@ import { IndicatorsPage } from "./pages/IndicatorsPage.jsx";
 import History from "./pages/History.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Trades from "./pages/Trades.jsx";
-import ProtectedRoute from "./ProtectedRoute.jsx"; // ✅ import ajouté
+import ProtectedRoute from "./ProtectedRoute.jsx";
 
 
 const router = createBrowserRouter([

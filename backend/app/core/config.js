@@ -22,18 +22,14 @@ export function loadConfig() {
       logging: false,
     },
 
-    coingecko: {
-      baseUrl: process.env.COINGECKO_BASE || 'https://api.coingecko.com/api/v3',
-      apiKey: process.env.COINGECKO_API_KEY || '',
-      timeoutMs: Number(process.env.CG_TIMEOUT_MS || 10000),
-      cacheTtlMs: Number(process.env.CG_CACHE_TTL_MS || 30000),
-      headers() {
-        const h = { accept: 'application/json' };
-        if (this.apiKey) {
-          // 🔒 Demo uniquement
-          h['x-cg-demo-api-key'] = this.apiKey;
-        }
-        return h;
+    binance: {
+      baseUrl: process.env.BINANCE_BASE || 'https://api.binance.com',
+      wsBase:  process.env.BINANCE_WS_BASE || 'wss://stream.binance.com:9443/ws',
+      timeoutMs: Number(process.env.BINANCE_TIMEOUT_MS || 10000),
+      cacheTtlMs: Number(process.env.BINANCE_CACHE_TTL_MS || 30000),
+      pairs: {
+        BTC: process.env.BTC_PAIR || 'BTCUSDT',
+        ETH: process.env.ETH_PAIR || 'ETHUSDT',
       },
     },
 

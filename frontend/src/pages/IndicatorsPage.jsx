@@ -11,7 +11,7 @@ import { strategies } from "../data/strategies.js";
 import { useSpotPrice } from "../hooks/useSpotPrice.js";
 import TimeframeToolbar from "../components/ui/TimeframeToolbar.jsx";
 import SymbolSelector from "../components/ui/SymbolSelector.jsx";
-import { RANGE_BY_TF, getRSISignal, getMASignal } from "../utils/ta-ui.js";
+import { getRSISignal, getMASignal } from "../utils/ta-ui.js";
 
 export function IndicatorsPage() {
   const [activeSection, setActiveSection] = useState("live");
@@ -19,10 +19,10 @@ export function IndicatorsPage() {
   const [tf, setTf] = useState("1h");
   const [symbol, setSymbol] = useState("BTC");
 
-  const { price: spot } = useSpotPrice({ symbol, vs: "usd", refreshMs: 60_000 });
+  const { price: spot } = useSpotPrice({ symbol, refreshMs: 60_000 });
 
   const { data: series = [], loading, error } = useMarketSeries({
-    symbol, vs: "usd", tf, days: RANGE_BY_TF[tf], preferOHLCFor1d: true, refreshMs: 60_000, spotPrice: spot
+     symbol, tf, refreshMs: 60_000, spotPrice: spot
   });
 
   useEffect(() => { if (series.length) console.log("SAMPLE row:", series[0]); }, [series]);

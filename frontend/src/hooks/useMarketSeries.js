@@ -1,98 +1,83 @@
-import { useEffect, useState } from "react";
+// src/hooks/useMarketSeries.js
+import { useEffect, useState, useCallback } from "react";
 import { SMA, RSI } from "technicalindicators";
-import {
-  resampleOHLC,
-  bucketMsFromTf,
-  H, DAY,
-  daysFor,
-  srcBucketMsFromDays,
-} from "../utils/ohlc.js";
+
+const API = import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api/v1";
+
+// combien de bougies à charger par timeframe
+const LIMIT_BY_TF = {
+  '1m': 500, '3m': 500, '5m': 500, '15m': 500, '30m': 500,
+  '1h': 500, '2h': 500, '4h': 500, '6h': 500, '8h': 500, '12h': 500,
+  '1d': 200, '3d': 200, '1w': 200, '1M': 200,
+};
+
+// pad pour réaligner la longueur des indicateurs sur rows.length
+const padToLen = (fullLen, arr) => {
+  const pad = fullLen - arr.length;
+  return (pad > 0 ? Array(pad).fill(null) : []).concat(arr);
+};
 
 export function useMarketSeries({
-  symbol,
-  vs = "usd",
+  symbol = "BTC",
   tf = "1h",
   refreshMs = 60_000,
-  spotPrice, // force la dernière close pour un prix identique sur toutes les TF
+  spotPrice = null,
 } = {}) {
-  const [data, setData]   = useState([]);
-  const [meta, setMeta]   = useState({ hasMA20: false, hasMA50: false });
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(null);
+  const [error, setError] = useState(null);
 
-  const base = (import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api/v1").replace(/\/$/, "");
-  const days = daysFor(tf);
-  const url  = `${base}/market/ohlc?symbol=${encodeURIComponent(symbol)}&vs=${encodeURIComponent(vs)}&days=${days}`;
+  const limit = LIMIT_BY_TF[tf] ?? 300;
 
-  useEffect(() => {
-    const bucketMs   = bucketMsFromTf(tf);
-    const srcBucketMs = srcBucketMsFromDays(days);
+  const load = useCallback(async () => {
+    try {
+      setLoading(true);
+      const url = `${API}/market/ohlc?symbol=${symbol}&interval=${tf}&limit=${limit}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      if (json.status !== "ok") throw new Error(json.error?.message || "API_ERROR");
 
-    let timer;
-    const ctrl = new AbortController();
-    let aborted = false;
-    const normTs = (t) => (t < 2e10 ? t * 1000 : t);
+      const rows = json.data ?? [];                 // [{ t,o,h,l,c }]
+      const closes = rows.map(r => r.c);
 
-    const load = async () => {
-      try {
-        setLoading(true); setError(null);
+      // technicalindicators
+      const ma20Arr = SMA.calculate({ period: 20, values: closes });
+      const ma50Arr = SMA.calculate({ period: 50, values: closes });
+      const rsiArr  = RSI.calculate({ period: 14, values: closes });
 
-        const res = await fetch(url, { headers: { accept: "application/json" }, signal: ctrl.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
+      // réaligne aux longueurs de rows
+      const ma20 = padToLen(rows.length, ma20Arr);
+      const ma50 = padToLen(rows.length, ma50Arr);
+      const rsi  = padToLen(rows.length, rsiArr);
 
-        // normalisation OHLC
-        let rows = [];
-        if (json?.status === "ok" && Array.isArray(json.data) && json.data.length) {
-          rows = (Array.isArray(json.data[0])
-            ? json.data.map(([t,o,h,l,c]) => ({ ts: normTs(t), o:+o, h:+h, l:+l, c:+c }))
-            : json.data.map(({ t,o,h,l,c }) => ({ ts: normTs(t), o:+o, h:+h, l:+l, c:+c })));
-        } else if (Array.isArray(json?.ohlc)) {
-          rows = json.ohlc.map(([t,o,h,l,c]) => ({ ts: normTs(t), o:+o, h:+h, l:+l, c:+c }));
-        } else {
-          throw new Error("Payload OHLC inconnu");
-        }
+      const enriched = rows.map((r, i) => ({
+        ts: r.t, o: r.o, h: r.h, l: r.l, c: r.c,
+        ma20: ma20[i], ma50: ma50[i], rsi: rsi[i],
+      }));
 
-        // resample si cible > source
-        let ohlc = bucketMs > srcBucketMs ? resampleOHLC(rows, bucketMs) : rows;
-
-        // patch dernière bougie avec spotPrice (uniformise la dernière close entre TF)
-        if (Number.isFinite(spotPrice) && ohlc.length) {
-          const last = ohlc[ohlc.length - 1];
-          const c = Number(spotPrice);
-          ohlc = [...ohlc.slice(0, -1), { ...last, c, h: Math.max(last.h, c), l: Math.min(last.l, c) }];
-        }
-
-        // indicateurs (seulement si assez de points)
-        const closes  = ohlc.map(r => r.c).filter(Number.isFinite);
-        const hasMA20 = closes.length >= 20;
-        const hasMA50 = closes.length >= 50;
-
-        const ma20Arr  = hasMA20 ? SMA.calculate({ period: 20, values: closes }) : [];
-        const ma50Arr  = hasMA50 ? SMA.calculate({ period: 50, values: closes }) : [];
-        const rsi14Arr = closes.length >= 14 ? RSI.calculate({ period: 14, values: closes }) : [];
-
-        const out = ohlc.map((r, i) => ({
-          ts: r.ts,
-          time: Math.floor(r.ts / 1000),
-          o: r.o, h: r.h, l: r.l, c: r.c,
-          ma20: hasMA20 && i >= 19 ? ma20Arr[i - 19] : null,
-          ma50: hasMA50 && i >= 49 ? ma50Arr[i - 49] : null,
-          rsi:  i >= 14 ? (rsi14Arr[i - 14] ?? null) : null,
-        }));
-
-        if (!aborted) { setData(out); setMeta({ hasMA20, hasMA50 }); }
-      } catch (e) {
-        if (!aborted) setError(e.message || String(e));
-      } finally {
-        if (!aborted) setLoading(false);
+      // option : écraser le close de la dernière bougie avec le spot
+      if (typeof spotPrice === "number" && enriched.length) {
+        enriched[enriched.length - 1] = { ...enriched.at(-1), c: spotPrice };
       }
-    };
 
-    load();
-    if (refreshMs > 0) timer = setInterval(load, refreshMs);
-    return () => { aborted = true; ctrl.abort(); if (timer) clearInterval(timer); };
-  }, [url, tf, symbol, vs, refreshMs, spotPrice, days]);
+      setData(enriched);
+      setError(null);
+    } catch (e) {
+      setError(String(e.message || e));
+    } finally {
+      setLoading(false);
+    }
+  }, [symbol, tf, limit, spotPrice]);
 
-  return { data, loading, error, meta };
+  // initial + changements de deps
+  useEffect(() => { load(); }, [load]);
+
+  // polling
+  useEffect(() => {
+    if (!refreshMs) return;
+    const id = setInterval(load, refreshMs);
+    return () => clearInterval(id);
+  }, [load, refreshMs]);
+
+  return { data, loading, error };
 }

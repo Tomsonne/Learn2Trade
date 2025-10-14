@@ -22,8 +22,8 @@ export default function RsiCard({
   // Données propres: { x: time(sec), rsi }
   const rsiData = useMemo(() => {
     const cleaned = (Array.isArray(series) ? series : [])
-      .filter(d => Number.isFinite(d?.time) && Number.isFinite(d?.rsi))
-      .map(d => ({ x: Number(d.time), rsi: Number(d.rsi) }));
+      .filter(d => Number.isFinite(d?.ts) && Number.isFinite(d?.rsi))
+      .map(d => ({ x: Math.floor(Number(d.ts) / 1000), rsi: Number(d.rsi) }));
     return cleaned.slice(-300);
   }, [series]);
 
