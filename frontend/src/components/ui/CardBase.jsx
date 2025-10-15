@@ -6,20 +6,28 @@ export default function CardBase({
   onClick,
   children,
   className = "",
-  ...rest // pour passer d'autres props (id, aria-*, data-*)
+  ...rest
 }) {
-  const tag = href ? "a" : "div";
+  const Tag = href ? "a" : "div";
 
-  const props = {
-    onClick,
-    className:
-      "group relative w-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 " +
-      className,
-    ...rest,
-  };
+  const classes = [
+    "group relative w-full rounded-2xl",
+    "border border-app bg-surface text-app",
+    "p-4 shadow-sm hover:shadow-md",
+    "focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))]",
+    className,
+  ].join(" ");
 
-  // si lien -> ajouter href
-  if (href) props.href = href;
+  const props = { onClick, className: classes, ...rest };
 
-  return React.createElement(tag, props, children);
+  if (href) {
+    props.href = href;
+    // ouverture sécurisée si lien externe
+    if (/^https?:\/\//.test(href)) {
+      props.target = "_blank";
+      props.rel = "noopener noreferrer";
+    }
+  }
+
+  return <Tag {...props}>{children}</Tag>;
 }
