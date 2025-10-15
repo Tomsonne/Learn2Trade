@@ -17,8 +17,10 @@
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "binance-api-node": "^0.12.9",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "decimal.js": "^10.6.0",
     "dotenv": "^16.4.5",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
