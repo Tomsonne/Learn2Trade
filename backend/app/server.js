@@ -6,6 +6,8 @@ import { loadConfig } from "./core/config.js";
 import v1Router from "./api/index.js";
 import sequelize from "./core/db.js";
 import models from "./models/index.js"; // charge *.model.js (important)
+import tradeRoutes from "./api/trade.routes.js";
+
 
 // (OPTION) cron pour ingestion auto CoinDesk
 // import cron from "node-cron";
@@ -34,6 +36,8 @@ app.get("/healthz", (_req, res) => res.json({ status: "ok" }));
 // API v1
 app.use("/api/v1", v1Router);
 
+app.use("/api/trades", tradeRoutes);
+
 // ──────────────────────────────────────────────
 // 404 catch-all
 app.use((_req, res) => {
@@ -53,7 +57,8 @@ async function start() {
     console.log("Models chargés :", Object.keys(models));
     console.log("🌍 CORS autorisé depuis :", cfg.corsOrigin);
 
-    await sequelize.sync(); // synchronisation douce
+    await sequelize.sync({ alter: true });
+ // synchronisation douce
     console.log("✅ Sequelize sync done");
 
     // (OPTION) lancer une ingestion au démarrage + cron périodique

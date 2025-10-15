@@ -23,3 +23,5 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE1M2M2OTJlLTcxNDM
 tNDg0YS1iOTgzLTFlY2I2NTQyYjc0ZCIsImVtYWlsIjoidG90b0B0b3RvLmNvbSI
 sImlzX2FkbWluIjpmYWxzZSwiaWF0IjoxNzYwMjg5ODgyLCJleHAiOjE3NjAyOTM
 0ODJ9.GvLy6NfR0YoJnTFEpfwcok0Qq0kvod1qhEYqXFFBvgQ
+
+docker exec -it learn2trade_backend npm install decimal.js

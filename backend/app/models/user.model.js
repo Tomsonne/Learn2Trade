@@ -55,6 +55,11 @@ User.init(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    cash: {
+      type: DataTypes.DECIMAL(24, 10),
+      allowNull: false,
+      defaultValue: 10000, // solde initial
+    },
   },
   {
     sequelize,
