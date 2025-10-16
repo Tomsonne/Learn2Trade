@@ -20,8 +20,8 @@ function Logo() {
         <path d="M7 14l3-3 3 3 4-5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
       <span className="text-xl font-semibold tracking-tight">
-        <span className="text-emerald-600">Learn</span>
-        <span className="ml-1">2Trade</span>
+        <span className="text-emerald-600">Skill</span>
+        <span className="ml-1">Vest</span>
       </span>
     </Link>
   );
