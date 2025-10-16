@@ -62,7 +62,7 @@ export async function closeTrade(tradeId) {
 
   const priceOpen = new Decimal(trade.price_open);
   const priceClose = new Decimal(marketPrice);
-  const quantity = new Decimal(trade.quantity);
+  const quantity = new Decimal(trade.quantity);s
 
   const pnl =
     trade.side === "BUY"

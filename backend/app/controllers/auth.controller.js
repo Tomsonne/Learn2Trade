@@ -111,3 +111,14 @@ export async function logout(req, res) {
     return res.status(500).json({ status: "error", message: "Erreur serveur" });
   }
 }
+
+
+export const me = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: "Non authentifié" });
+    res.json({ id: req.user.id, email: req.user.email });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+};

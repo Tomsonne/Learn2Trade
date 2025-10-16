@@ -36,7 +36,6 @@ app.get("/healthz", (_req, res) => res.json({ status: "ok" }));
 // API v1
 app.use("/api/v1", v1Router);
 
-app.use("/api/trades", tradeRoutes);
 
 // ──────────────────────────────────────────────
 // 404 catch-all

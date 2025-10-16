@@ -1,17 +1,17 @@
-//buy/sell virtuels, historique des trades.
 // app/api/trade.routes.js
-import express from "express";
-import { openTrade, closeTrade, getTrades } from "../controllers/trade.controller.js";
+import { Router } from "express";
+import * as tradeController from "../controllers/trade.controller.js";
+import { verifyAuth } from "./middlewares/auth.middleware.js";
 
-const router = express.Router();
+const router = Router();
 
-// Créer un trade
-router.post("/", openTrade);
+// 🟢 Récupère toutes les positions de l'utilisateur connecté
+router.get("/user/:userId", verifyAuth, tradeController.getTradesByUser);
 
-// Fermer un trade
-router.put("/:id/close", closeTrade);
+// 🟣 Crée un nouveau trade
+router.post("/", verifyAuth, tradeController.createTrade);
 
-// Liste des trades utilisateur
-router.get("/", getTrades);
+// 🔴 Ferme un trade existant
+router.put("/:tradeId/close", verifyAuth, tradeController.closeTrade);
 
 export default router;

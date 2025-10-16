@@ -1,38 +1,61 @@
-//exécution et suivi des ordres.
-// app/controllers/trade.controller.js
-import * as TradeService from "../services/trade.service.js";
+import Trade from "../models/trade.model.js";
+import Asset from "../models/asset.model.js";
+import * as tradeService from "../services/trade.service.js";
 
-export async function openTrade(req, res) {
+
+export async function getTradesByUser(req, res) {
   try {
-    // Utilise le user_id du body (tant qu’il n’y a pas d’auth)
-    const userId = req.body.user_id;
-    const trade = await TradeService.openTrade(userId, req.body);
-    res.status(201).json(trade);
+    const { userId } = req.params;
+
+    const trades = await Trade.findAll({
+      where: { user_id: userId, is_closed: false },
+      include: [{ model: Asset, as: "asset" }],
+      order: [["opened_at", "DESC"]],
+    });
+
+    if (!trades.length) {
+      return res.status(200).json([]); // pas d’erreur si vide
+    }
+
+    res.json(trades);
   } catch (err) {
-    console.error(err);
-    res.status(400).json({ error: err.message });
+    console.error("Erreur getTradesByUser:", err);
+    res.status(500).json({ error: "Erreur serveur" });
   }
 }
+
+
+export async function createTrade(req, res) {
+  try {
+    const { user_id, asset_id, side, quantity } = req.body;
+
+    const trade = await tradeService.openTrade(user_id, { asset_id, side, quantity });
+
+    res.status(201).json(trade);
+  } catch (err) {
+    console.error("Erreur createTrade:", err);
+    res.status(500).json({ error: err.message || "Erreur serveur" });
+  }
+}
+
 
 export async function closeTrade(req, res) {
   try {
-    const tradeId = req.params.id;
-    const trade = await TradeService.closeTrade(tradeId); // 👈 on ne passe plus de close_price ici
-    res.status(200).json(trade);
+    const { tradeId } = req.params;
+    const trade = await Trade.findByPk(tradeId, { include: [{ model: Asset, as: "asset" }] });
+
+    if (!trade) return res.status(404).json({ error: "Trade non trouvé" });
+    if (trade.is_closed) return res.status(400).json({ error: "Trade déjà fermé" });
+
+    // On simule la fermeture au prix actuel de l’actif
+    trade.is_closed = true;
+    trade.close_price = trade.asset.price;
+    trade.closed_at = new Date();
+    await trade.save();
+
+    res.json(trade);
   } catch (err) {
-    console.error(err);
-    res.status(400).json({ error: err.message });
+    console.error("Erreur closeTrade:", err);
+    res.status(500).json({ error: "Erreur serveur" });
   }
 }
-
-
-export async function getTrades(req, res) {
-  try {
-    const userId = req.user?.id || 1;
-    const trades = await TradeService.getTradesByUser(userId);
-    res.status(200).json(trades);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-}
-
