@@ -13,35 +13,44 @@ export default function NewsCard({
   href,
   featured = false,
 }) {
+  const size = featured ? "h-28 w-28" : "h-16 w-16";
+  const isExternal = href?.startsWith("http");
+
   return (
-    <CardBase href={href} className="flex items-start gap-4">
+    <CardBase
+      href={href}
+      className="flex items-start gap-4"
+      {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    >
       {imageUrl ? (
-        <img
-          src={imageUrl}
-          alt=""
-          className={`${featured ? "h-28 w-28" : "h-16 w-16"} rounded-xl object-cover`}
-          loading="lazy"
-        />
+        <img src={imageUrl} alt={title ?? ""} loading="lazy" className={`${size} rounded-xl object-cover flex-none`} />
       ) : (
-        <div className={`${featured ? "h-28 w-28" : "h-16 w-16"} rounded-xl bg-slate-100`} />
+        <div className={`${size} rounded-xl border border-app bg-surface flex-none`} aria-hidden="true" />
       )}
 
       <div className="min-w-0 flex-1">
-        <span className="mb-1 inline-block rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
+        {/* Badge catégorie sur tokens */}
+        <span
+          className="mb-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium"
+          style={{ background: "rgb(var(--primary) / 0.10)", color: "rgb(var(--primary))" }}
+        >
           {category}
         </span>
 
-        <h3 className={`font-semibold text-slate-900 ${featured ? "text-lg" : "text-base"} truncate`}>
+        {/* Titre sur palette projet */}
+        <h3 className={`font-semibold ${featured ? "text-lg" : "text-base"} text-app truncate`} title={title}>
           {title}
         </h3>
 
+        {/* Extrait SANS prose (prose override la couleur → gris clair) */}
         {excerpt && (
-            <div className="prose prose-slate dark:prose-invert prose-sm max-w-none prose-p:my-1 prose-a:no-underline hover:prose-a:underline">
-            <p className="line-clamp-2">{excerpt}</p>
-            </div>
+          <p className="mt-1 text-sm leading-relaxed text-muted line-clamp-2">
+            {excerpt}
+          </p>
         )}
 
-        <div className="mt-2 text-xs text-slate-500">
+        {/* Meta */}
+        <div className="mt-2 text-xs text-muted">
           {source} {publishedAt && `• ${formatPublished(publishedAt)}`}
         </div>
       </div>

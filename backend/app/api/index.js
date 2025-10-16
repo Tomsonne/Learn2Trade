@@ -2,15 +2,14 @@ import { Router } from "express";
 import marketRoutes from "./market.routes.js";
 import newsRoutes from "./news.routes.js";
 import authRoutes from "./auth.routes.js";
-import assetRoutes from "./asset.route.js";
-import tradeRoutes from "./trade.routes.js";
-
+import positionRoutes from "./position.routes.js"
+import tradeRoutes from"./trade.routes.js"
 const router = Router();
 
-router.use("/market", marketRoutes);
+// Routes principales
+router.use("/market", marketRoutes); // prix, forex, etc.
 router.use("/news", newsRoutes);
 router.use("/auth", authRoutes);
-router.use("/assets", assetRoutes);
-router.use("/trades", tradeRoutes);
-
+router.use("/position", positionRoutes);
+router.use("/trade", tradeRoutes);
 export default router;

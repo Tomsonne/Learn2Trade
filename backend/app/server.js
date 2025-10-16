@@ -6,7 +6,6 @@ import { loadConfig } from "./core/config.js";
 import v1Router from "./api/index.js";
 import sequelize from "./core/db.js";
 import models from "./models/index.js"; // charge *.model.js (important)
-import tradeRoutes from "./api/trade.routes.js";
 
 
 // (OPTION) cron pour ingestion auto CoinDesk
@@ -36,7 +35,6 @@ app.get("/healthz", (_req, res) => res.json({ status: "ok" }));
 // API v1
 app.use("/api/v1", v1Router);
 
-
 // ──────────────────────────────────────────────
 // 404 catch-all
 app.use((_req, res) => {
@@ -47,6 +45,18 @@ app.use((_req, res) => {
 });
 
 // ──────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error("ERR:", err);
+  res.status(500).json({
+    status: "error",
+    error: {
+      code: "SERVER_ERROR",
+      message: err.message,
+      detail: err?.parent?.detail || err?.original?.detail || null,
+    },
+  });
+});
+
 // Start server + DB
 async function start() {
   try {

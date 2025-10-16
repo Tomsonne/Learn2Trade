@@ -1,17 +1,16 @@
-// app/api/trade.routes.js
+
 import { Router } from "express";
-import * as tradeController from "../controllers/trade.controller.js";
-import { verifyAuth } from "./middlewares/auth.middleware.js";
+import { openTrade, closeTrade, getTrades } from "../controllers/trade.controller.js";
 
 const router = Router();
 
-// 🟢 Récupère toutes les positions de l'utilisateur connecté
-router.get("/user/:userId", verifyAuth, tradeController.getTradesByUser);
+// GET /api/v1/trade?userId=... [&is_closed=true|false&assetId=2]
+router.get("/", getTrades);
 
-// 🟣 Crée un nouveau trade
-router.post("/", verifyAuth, tradeController.createTrade);
+// POST /api/v1/trade/open
+router.post("/open", openTrade);
 
-// 🔴 Ferme un trade existant
-router.put("/:tradeId/close", verifyAuth, tradeController.closeTrade);
+// POST /api/v1/trade/:id/close
+router.post("/:id/close", closeTrade);
 
 export default router;

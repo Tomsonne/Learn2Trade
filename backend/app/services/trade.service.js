@@ -3,80 +3,126 @@ import models from "../models/index.js";
 import Decimal from "decimal.js";
 import { ValidationError } from "../utils/errors.js";
 import binance from "binance-api-node";
-const client = binance.default(); // ✅ pour ESM
+import sequelize from "../core/db.js";
 
+const client = binance.default(); // endpoints publics
 
-
-const { Trade, User } = models;
-
-export async function openTrade(userId, { asset_id, side, quantity }) {
-  const user = await User.findByPk(userId);
-  if (!user) throw new ValidationError("Utilisateur introuvable");
-
-  const asset = await models.Asset.findByPk(asset_id);
-  if (!asset) throw new ValidationError("Actif introuvable");
-
-  // 💹 Récupère le prix réel du marché via Binance
-  const symbol = asset.symbol || "BTCUSDT";
-  const ticker = await client.prices({ symbol });
-  const marketPrice = parseFloat(ticker[symbol]);
-  if (!marketPrice) throw new ValidationError("Impossible de récupérer le prix du marché");
-
-  const cost = new Decimal(marketPrice).mul(quantity);
-
-  if (side === "BUY" && new Decimal(user.cash).lt(cost)) {
-    throw new ValidationError("Solde insuffisant");
+async function getMarketPriceDecimal(symbol) {
+  try {
+    const prices = await client.prices({ symbol });
+    const p = prices?.[symbol];
+    if (!p) throw new Error(`no price for ${symbol}`);
+    return new Decimal(p);
+  } catch {
+    throw new ValidationError(`Impossible de récupérer le prix du marché (${symbol})`);
   }
-
-  if (side === "BUY") {
-    user.cash = new Decimal(user.cash).minus(cost);
-    await user.save();
-  }
-
-  const trade = await Trade.create({
-    user_id: userId,
-    asset_id,
-    side,
-    price_open: marketPrice, // ✅ prix réel du marché
-    quantity,
-    opened_at: new Date(),
-    is_closed: false
-  });
-
-  return trade;
 }
 
+const { Trade, User, Asset } = models;
 
+/** Ouvre un trade (BUY ou SELL) — gère le cash si BUY */
+export async function openTrade(userId, { asset_id, side, quantity }) {
+  if (!userId || !asset_id || !side || !quantity) throw new ValidationError("Champs manquants");
+  const qty = new Decimal(quantity);
+  if (qty.lte(0)) throw new ValidationError("quantity doit être > 0");
+  if (!["BUY", "SELL"].includes(side)) throw new ValidationError("side invalide");
 
-export async function closeTrade(tradeId) {
-  const trade = await Trade.findByPk(tradeId, {
-    include: [{ model: models.Asset, as: "asset" }], // ✅ alias ajouté
+  return sequelize.transaction(async (tx) => {
+    const user = await User.findByPk(userId, { transaction: tx, lock: tx.LOCK.UPDATE });
+    if (!user) throw new ValidationError("Utilisateur introuvable");
+
+    const asset = await Asset.findByPk(asset_id, { transaction: tx });
+    if (!asset) throw new ValidationError("Actif introuvable");
+
+    const symbol = asset.symbol || "BTCUSDT";
+    const priceOpen = await getMarketPriceDecimal(symbol); // Decimal
+    // Le notional représente la valeur totale de la position sur le marché.
+    const notional = priceOpen.mul(qty);                   // Decimal
+    const userCash = new Decimal(user.cash || "0");
+
+    // Gestion du cash: on débite seulement pour BUY; (pour SELL à nu, on ne débite pas)
+    if (side === "BUY") {
+      if (userCash.lt(notional)) throw new ValidationError("Solde insuffisant");
+      user.cash = userCash.minus(notional).toString();
+      await user.save({ transaction: tx });
+    }
+
+    const trade = await Trade.create(
+      {
+        user_id: userId,
+        asset_id,
+        side,
+        price_open: priceOpen.toString(), // stocker en string pour DECIMAL SQL
+        quantity: qty.toString(),
+        opened_at: new Date(),
+        is_closed: false,
+      },
+      { transaction: tx }
+    );
+
+    return trade;
   });
-  if (!trade) throw new ValidationError("Trade introuvable");
-  if (trade.is_closed) throw new ValidationError("Trade déjà clôturé");
+}
 
-  const symbol = trade.asset?.symbol || "BTCUSDT";
-  const ticker = await client.prices({ symbol });
-  const marketPrice = parseFloat(ticker[symbol]);
-  if (!marketPrice) throw new ValidationError("Impossible de récupérer le prix du marché");
+/** Clôture un trade — crédite le cash pour BUY; calcule le PnL; marque fermé */
+export async function closeTrade(tradeId) {
+  if (!tradeId) throw new ValidationError("tradeId manquant");
 
-  const priceOpen = new Decimal(trade.price_open);
-  const priceClose = new Decimal(marketPrice);
-  const quantity = new Decimal(trade.quantity);s
+  return sequelize.transaction(async (tx) => {
+    const trade = await Trade.findByPk(tradeId, {
+      include: [{ model: Asset, as: "asset" }],
+      transaction: tx,
+      lock: tx.LOCK.UPDATE,
+    });
+    if (!trade) throw new ValidationError("Trade introuvable");
+    if (trade.is_closed) throw new ValidationError("Trade déjà clôturé");
 
-  const pnl =
-    trade.side === "BUY"
-      ? priceClose.minus(priceOpen).mul(quantity)
-      : priceOpen.minus(priceClose).mul(quantity);
+    const user = await User.findByPk(trade.user_id, { transaction: tx, lock: tx.LOCK.UPDATE });
+    if (!user) throw new ValidationError("Utilisateur introuvable");
 
-  trade.price_close = marketPrice;
-  trade.pnl = pnl;
-  trade.is_closed = true;
-  trade.closed_at = new Date();
+    const symbol = trade.asset?.symbol || "BTCUSDT";
+    const priceClose = await getMarketPriceDecimal(symbol);
 
-  await trade.save();
+    const priceOpen = new Decimal(trade.price_open);
+    const qty = new Decimal(trade.quantity);
 
-  console.log(`🔹 Trade ${trade.id} fermé à ${marketPrice} (${symbol}) — PnL: ${pnl.toFixed(2)}`);
+    // PnL :
+    //  - BUY  : (close - open) * qty
+    //  - SELL : (open - close) * qty
+    const pnl =
+      trade.side === "BUY"
+        ? priceClose.minus(priceOpen).mul(qty)
+        : priceOpen.minus(priceClose).mul(qty);
 
-  return trade;
+    // Cash :
+    //  - BUY  : on crédite la valeur de vente = close * qty
+    //  - SELL : Ici on crédite toujours le produit de la vente.
+    const credit = priceClose.mul(qty);
+    const newCash = new Decimal(user.cash || "0").plus(credit);
+    user.cash = newCash.toString();
+    await user.save({ transaction: tx });
+
+    // MAJ trade
+    trade.price_close = priceClose.toString();
+    trade.pnl = pnl.toString();
+    trade.is_closed = true;
+    trade.closed_at = new Date();
+    await trade.save({ transaction: tx });
+
+    return trade;
+  });
+}
+
+export async function getTradesByUser({ userId, is_closed, assetId }) {
+  const { Trade, Asset } = (await import("../models/index.js")).default;
+  if (!userId) throw new Error("userId requis");
+  const where = { user_id: userId };
+  if (typeof is_closed !== "undefined") where.is_closed = is_closed === true || is_closed === "true";
+  if (assetId) where.asset_id = Number(assetId);
+
+  return Trade.findAll({
+    where,
+    order: [["opened_at", "DESC"]],
+    include: [{ model: Asset, as: "asset", attributes: ["id", "symbol"] }],
+  });
 }
