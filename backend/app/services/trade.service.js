@@ -65,44 +65,46 @@ export async function openTrade(userId, { asset_id, side, quantity }) {
 }
 
 /** Clôture un trade — crédite le cash pour BUY; calcule le PnL; marque fermé */
+// app/services/trade.service.js
 export async function closeTrade(tradeId) {
   if (!tradeId) throw new ValidationError("tradeId manquant");
 
   return sequelize.transaction(async (tx) => {
+    // 1) Lock UNIQUEMENT la ligne Trade (pas d'include ici)
     const trade = await Trade.findByPk(tradeId, {
-      include: [{ model: Asset, as: "asset" }],
       transaction: tx,
-      lock: tx.LOCK.UPDATE,
+      lock: tx.LOCK.UPDATE, // lock sur Trade uniquement
     });
     if (!trade) throw new ValidationError("Trade introuvable");
     if (trade.is_closed) throw new ValidationError("Trade déjà clôturé");
 
-    const user = await User.findByPk(trade.user_id, { transaction: tx, lock: tx.LOCK.UPDATE });
+    // 2) Récupère l'asset sans lock/join
+    const asset = await models.Asset.findByPk(trade.asset_id, { transaction: tx });
+
+    // 3) Lock l'utilisateur séparément
+    const user = await User.findByPk(trade.user_id, {
+      transaction: tx,
+      lock: tx.LOCK.UPDATE,
+    });
     if (!user) throw new ValidationError("Utilisateur introuvable");
 
-    const symbol = trade.asset?.symbol || "BTCUSDT";
+    // 4) Prix marché
+    const symbol = asset?.symbol || "BTCUSDT";
     const priceClose = await getMarketPriceDecimal(symbol);
 
     const priceOpen = new Decimal(trade.price_open);
     const qty = new Decimal(trade.quantity);
 
-    // PnL :
-    //  - BUY  : (close - open) * qty
-    //  - SELL : (open - close) * qty
     const pnl =
       trade.side === "BUY"
         ? priceClose.minus(priceOpen).mul(qty)
         : priceOpen.minus(priceClose).mul(qty);
 
-    // Cash :
-    //  - BUY  : on crédite la valeur de vente = close * qty
-    //  - SELL : Ici on crédite toujours le produit de la vente.
+    // Créditer le cash à la clôture (produit de la vente)
     const credit = priceClose.mul(qty);
-    const newCash = new Decimal(user.cash || "0").plus(credit);
-    user.cash = newCash.toString();
+    user.cash = new Decimal(user.cash || "0").plus(credit).toString();
     await user.save({ transaction: tx });
 
-    // MAJ trade
     trade.price_close = priceClose.toString();
     trade.pnl = pnl.toString();
     trade.is_closed = true;
@@ -112,6 +114,7 @@ export async function closeTrade(tradeId) {
     return trade;
   });
 }
+
 
 export async function getTradesByUser({ userId, is_closed, assetId }) {
   const { Trade, Asset } = (await import("../models/index.js")).default;
