@@ -20,6 +20,22 @@ export default function MaCard({
 }) {
   const Icon = maSignal.icon;
 
+  // couleurs depuis le thème (CSS variables)
+  const theme = useMemo(() => {
+    const css = getComputedStyle(document.documentElement);
+    const hsl = (name, fallback) => {
+      const v = css.getPropertyValue(name).trim();
+      return v ? `hsl(${v})` : fallback;
+    };
+    return {
+      tick:  hsl("--muted-foreground", "rgba(148,163,184,.9)"),
+      grid:  "rgba(148,163,184,.18)",
+      spot:  hsl("--primary", "rgb(37, 99, 235)"),
+      ma20:  hsl("--chart-1", hsl("--primary", "rgb(37, 99, 235)")),
+      ma50:  hsl("--chart-2", hsl("--secondary", "rgb(99, 102, 241)")),
+    };
+  }, []);
+
   // données propres -> { x: time(sec), ma20, ma50 }
   const data = useMemo(() => {
     const arr = (Array.isArray(series) ? series : [])
@@ -73,7 +89,7 @@ export default function MaCard({
       <div style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 8, right: 12, bottom: 6, left: 12 }}>
-            <CartesianGrid stroke="rgba(148,163,184,.18)" />
+            <CartesianGrid stroke={theme.grid} />
 
             <XAxis
               dataKey="x"
@@ -81,7 +97,7 @@ export default function MaCard({
               scale="time"
               domain={["dataMin", "dataMax"]}
               tickFormatter={fmtTickX}
-              tick={{ fontSize: 11, fill: "rgba(148,163,184,.9)" }}
+              tick={{ fontSize: 11, fill: theme.tick }}
               tickCount={tickCountX}
               minTickGap={24}
               axisLine={false}
@@ -92,7 +108,7 @@ export default function MaCard({
               domain={[yMin, yMax]}
               tickFormatter={(v) => fmt(Number(v))}
               width={56}
-              tick={{ fontSize: 11, fill: "rgba(148,163,184,.9)" }}
+              tick={{ fontSize: 11, fill: theme.tick }}
               axisLine={false}
               tickLine={false}
             />
@@ -101,18 +117,18 @@ export default function MaCard({
             {Number.isFinite(price) && (
               <ReferenceLine
                 y={price}
-                stroke="#60a5fa"
+                stroke={theme.spot}
                 strokeDasharray="6 6"
                 ifOverflow="extendDomain"
               />
             )}
 
-            {/* MA20 & MA50 (couleurs différentes, connectNulls) */}
+            {/* MA20 & MA50 (connectNulls pour éviter les trous) */}
             <Line
               type="monotone"
               name="MA20"
               dataKey="ma20"
-              stroke="#f59e0b"
+              stroke="hsl(var(--ma20))"
               strokeWidth={2}
               dot={false}
               connectNulls
@@ -122,7 +138,7 @@ export default function MaCard({
               type="monotone"
               name="MA50"
               dataKey="ma50"
-              stroke="#38bdf8"
+              stroke="hsl(var(--ma50))"
               strokeWidth={2}
               dot={false}
               connectNulls
