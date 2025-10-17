@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { formatDateOnly, formatTimeOnly } from "../../utils/formatDate";
 import {
   ResponsiveContainer,
   LineChart,
@@ -63,11 +64,9 @@ export default function MaCard({
   }, [data]);
 
   // format ticks X selon TF
-  const fmtTickX = useMemo(() => {
-    const tFmt = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" });
-    const dFmt = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit" });
-    return (x) => (tf === "1d" ? dFmt.format(new Date(x * 1000)) : tFmt.format(new Date(x * 1000)));
-  }, [tf]);
+ const fmtTick = useMemo(() => {
+     return (xSec) => (tf === "1d" ? formatDateOnly(xSec) : formatTimeOnly(xSec));
+     }, [tf]);
 
   const tickCountX = tf === "1h" ? 5 : tf === "4h" ? 6 : tf === "12h" ? 6 : 7;
 
@@ -96,7 +95,7 @@ export default function MaCard({
               type="number"
               scale="time"
               domain={["dataMin", "dataMax"]}
-              tickFormatter={fmtTickX}
+              tickFormatter={fmtTick}
               tick={{ fontSize: 11, fill: theme.tick }}
               tickCount={tickCountX}
               minTickGap={24}

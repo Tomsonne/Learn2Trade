@@ -57,8 +57,8 @@ export function IndicatorsPage() {
       {error   && <div className="text-sm text-red-600">Erreur données live : {error}</div>}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RsiCard series={series} rsiSignal={rsiSignal} currentRSI={currentRSI} />
-        <MaCard  series={series} maSignal={maSignal} fmt={fmt} ma20={last?.ma20 ?? null} ma50={last?.ma50 ?? null} price={typeof spot==="number"?spot:null} />
+        <RsiCard series={series} rsiSignal={rsiSignal} currentRSI={currentRSI} tf={tf} />
+        <MaCard  series={series} maSignal={maSignal} fmt={fmt} tf={tf} ma20={last?.ma20 ?? null} ma50={last?.ma50 ?? null} price={typeof spot==="number"?spot:null} />
       </div>
 
       <div className="bg-card rounded-2xl p-6 border border-border">
@@ -75,7 +75,7 @@ export function IndicatorsPage() {
         </div>
 
         <div className="h-96">
-          {candles.length >= 2 ? <CandleLite key={`${symbol}-${tf}`} data={candles} height={384} /> : <div className="text-sm text-muted-foreground">Pas d’OHLC</div>}
+          {candles.length >= 2 ? <CandleLite key={`${symbol}-${tf}`} data={candles} height={384} tf={tf} locale="fr-FR" timeZone="Europe/Paris"/> : <div className="text-sm text-muted-foreground">Pas d’OHLC</div>}
         </div>
       </div>
     </div>

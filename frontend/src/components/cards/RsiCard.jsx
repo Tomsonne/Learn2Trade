@@ -1,5 +1,6 @@
 // src/components/cards/RsiCard.jsx
 import React, { useMemo } from "react";
+import { formatDateOnly, formatTimeOnly } from "/src/utils/formatDate";
 import {
   ResponsiveContainer,
   LineChart,
@@ -29,15 +30,8 @@ export default function RsiCard({
 
   // Format de l'axe X selon la TF
   const fmtTick = useMemo(() => {
-    const fmtTime = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" });
-    const fmtDate = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit" });
-    return (xSec) => {
-      const d = new Date(xSec * 1000);
-      if (tf === "1d") return fmtDate.format(d);        // ex: 11/10
-      return fmtTime.format(d);                         // ex: 14:30
-    };
-  }, [tf]);
-
+    return (xSec) => (tf === "1d" ? formatDateOnly(xSec) : formatTimeOnly(xSec));
+    }, [tf]);
   // Densité de ticks suivant la TF (indice visuel)
   const tickCount = tf === "1h" ? 5 : tf === "4h" ? 6 : tf === "12h" ? 6 : 7;
 
