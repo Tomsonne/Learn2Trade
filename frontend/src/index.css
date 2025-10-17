@@ -6,84 +6,75 @@
 /* ── Tokens ─────────────────────────────────────────────────────── */
 @layer base {
   :root {
-    --font-sans: "Inter", ui-sans-serif, system-ui, ...;
-    /* surfaces & texte (clair) */
+    --font-sans: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", Arial, sans-serif;
+
     --bg:       255 255 255;
     --surface:  248 250 252;
     --text:     15 23 42;
     --muted:    100 116 139;
     --border:   226 232 240;
-
-    /* marque & accent */
     --brand:    34 197 94;
     --primary:  37 99 235;
+    --ma20: 142 72% 45%;   /* vert */
+    --ma50: 38 92% 50%;    /* orange */
   }
-
   .dark {
     --bg:       2 6 23;
     --surface:  15 23 42;
     --text:     241 245 249;
     --muted:    148 163 184;
     --border:   30 41 59;
-
     --brand:    16 185 129;
     --primary:  59 130 246;
+    --ma20: 142 72% 45%;   /* vert */
+    --ma50: 38 92% 50%;    /* orange */
   }
-
   html, body, #root { height: 100%; }
-  body {
-    background: rgb(var(--bg));
-    color: rgb(var(--text));
-    @apply font-sans;
-  }
+  body { background: rgb(var(--bg)); color: rgb(var(--text)); @apply font-sans; }
 }
 
-/* ── Utilitaires ────────────────────────────────────────────────── */
+/* ── Utilities perso ─────────────────────────────────────────────── */
 @layer utilities {
-  .bg-app      { background: rgb(var(--bg)); }
-  .bg-surface  { background: rgb(var(--surface)); }
+  .bg-app      { background-color: rgb(var(--bg)); }
+  .bg-surface  { background-color: rgb(var(--surface)); }
   .text-app    { color: rgb(var(--text)); }
   .text-muted  { color: rgb(var(--muted)); }
   .border-app  { border-color: rgb(var(--border) / 1); }
+
+  /* Mappings “shadcn-like” */
+  .bg-card               { background-color: rgb(var(--surface)); }
+  .text-card-foreground  { color: rgb(var(--text)); }
+  .bg-muted              { background-color: rgb(var(--surface)); }
+  .text-muted-foreground { color: rgb(var(--muted)); }
+  .border-border         { border-color: rgb(var(--border) / 1); }
+
+  .text-primary              { color: rgb(var(--primary)); }
+  .bg-primary                { background-color: rgb(var(--primary)); }
+  .text-primary-foreground   { color: #fff; }
+  .bg-primary\/10            { background-color: rgb(var(--primary) / .10); }
+  .border-primary\/30        { border-color: rgb(var(--primary) / .30); }
+
+  .bg-accent              { background-color: rgb(var(--surface)); }
+  .text-accent-foreground { color: rgb(var(--text)); }
 }
 
-/* ── Composants (boutons) ───────────────────────────────────────── */
+/* ── Components perso ────────────────────────────────────────────── */
 @layer components {
   .btn {
     @apply inline-flex items-center justify-center font-semibold rounded-full;
     padding: .65rem 1.1rem;
     transition: opacity .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
   }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(var(--primary) / .3); }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
 
-  .btn:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgb(var(--primary) / .3);
-  }
-
-  .btn:disabled {
-    opacity: .6;
-    cursor: not-allowed;
-  }
-
-  .btn-primary {
-    color: #fff;
-    background: rgb(var(--primary) / 1);
-  }
+  .btn-primary { color: #fff; background: rgb(var(--primary)); }
   .btn-primary:hover { opacity: .95; }
 
-  .btn-outline {
-    color: rgb(var(--text) / 1);
-    border: 1px solid rgb(var(--border) / 1);
-    background: transparent;
-  }
-  .btn-outline:hover {
-    background: rgb(var(--surface) / 1);
-  }
+  .btn-outline { color: rgb(var(--text)); border: 1px solid rgb(var(--border)); background: transparent; }
+  .btn-outline:hover { background: rgb(var(--surface)); }
 
-  .btn-brand {
-    color: #fff;
-    background: rgb(var(--brand) / 1);
-  }
+  .btn-brand { color: #fff; background: rgb(var(--brand)); }
   .btn-brand:hover { opacity: .95; }
 }
 
