@@ -1,3 +1,4 @@
+
 import { Router } from "express";
 import { openTrade, closeTrade, getTrades } from "../controllers/trade.controller.js";
 
