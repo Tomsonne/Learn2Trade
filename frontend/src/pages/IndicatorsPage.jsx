@@ -1,3 +1,4 @@
+// src/pages/IndicatorsPage.jsx
 import React, { useMemo, useState, useEffect } from "react";
 import { BookOpen, Target, Info, BarChart3 } from "lucide-react";
 import { useMarketSeries } from "../hooks/useMarketSeries.js";
@@ -22,7 +23,7 @@ export function IndicatorsPage() {
   const { price: spot } = useSpotPrice({ symbol, refreshMs: 60_000 });
 
   const { data: series = [], loading, error } = useMarketSeries({
-     symbol, tf, refreshMs: 60_000, spotPrice: spot
+    symbol, tf, refreshMs: 60_000, spotPrice: spot
   });
 
   useEffect(() => { if (series.length) console.log("SAMPLE row:", series[0]); }, [series]);
@@ -50,8 +51,6 @@ export function IndicatorsPage() {
     { id: "glossary",   label: "Glossaire",             icon: Info },
   ];
 
-  // … renderCourse / renderGlossary
-
   const renderLiveSection = () => (
     <div className="space-y-6">
       {loading && <div className="text-sm text-muted-foreground">Mise à jour des données temps réel…</div>}
@@ -65,7 +64,7 @@ export function IndicatorsPage() {
       <div className="bg-card rounded-2xl p-6 border border-border">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-medium text-card-foreground">Graphique {symbol}/USD — Chandeliers</h3>
-          <span className="px-3 py-1 rounded-full text-sm bg-[#007aff]/10 text-[#007aff] border border-[#007aff]/30">
+          <span className="px-3 py-1 rounded-full text-sm bg-primary/10 text-primary border border-primary/30">
             Prix spot : {typeof spot==="number" ? fmt(spot) : "—"}
           </span>
         </div>
@@ -92,9 +91,17 @@ export function IndicatorsPage() {
         </div>
         <div className="flex gap-2">
           {menuItems.map(({ id, label, icon: Icon }) => (
-            <button key={id} type="button" onClick={() => setActiveSection(id)}
+            <button
+              key={id}
+              type="button"
+              onClick={() => setActiveSection(id)}
               aria-pressed={activeSection===id}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${activeSection===id ? "bg-[#007aff] text-white" : "bg-accent text-accent-foreground hover:bg-muted"}`}>
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                activeSection===id
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-accent text-accent-foreground hover:bg-muted"
+              }`}
+            >
               <Icon className="w-4 h-4" /><span className="text-sm font-medium">{label}</span>
             </button>
           ))}
@@ -107,20 +114,20 @@ export function IndicatorsPage() {
       )}
       {activeSection === "live" && renderLiveSection()}
       {activeSection === "glossary" && (
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    {glossaryTerms.map((term, i) => (
-      <div key={i} className="bg-accent rounded-xl p-6">
-        <h4 className="font-medium text-accent-foreground mb-3">{term.term}</h4>
-        <p className="text-sm text-muted-foreground mb-4">{term.definition}</p>
-        {term.usage && (
-          <div className="bg-[#007aff]/10 p-3 rounded-lg text-sm text-muted-foreground">
-            💡 {term.usage}
-          </div>
-        )}
-      </div>
-    ))}
-  </div>
-)}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {glossaryTerms.map((term, i) => (
+            <div key={i} className="bg-accent rounded-xl p-6">
+              <h4 className="font-medium text-accent-foreground mb-3">{term.term}</h4>
+              <p className="text-sm text-muted-foreground mb-4">{term.definition}</p>
+              {term.usage && (
+                <div className="bg-primary/10 p-3 rounded-lg text-sm text-muted-foreground">
+                  💡 {term.usage}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -14,8 +14,8 @@ export default function CourseSection() {
     <div className="space-y-8">
       <div className="bg-card rounded-2xl p-8 border border-border">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 bg-[#007aff] rounded-xl flex items-center justify-center">
-            <BookOpen className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-primary text-primary-foreground">
+            <BookOpen className="w-6 h-6" />
           </div>
           <div>
             <h2 className="text-2xl font-medium text-card-foreground">
@@ -54,30 +54,31 @@ export default function CourseSection() {
               </div>
             </div>
 
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-6">
-              <h3 className="text-lg font-medium text-green-800 dark:text-green-200 mb-4">
+            {/* Leçon 2 */}
+            <div className="bg-accent rounded-xl p-6">
+              <h3 className="text-lg font-medium text-accent-foreground mb-4">
                 ✅ Leçon 2: Les types de tendances
               </h3>
-              <div className="space-y-3 text-sm text-green-700 dark:text-green-300">
+              <div className="space-y-3 text-sm text-muted-foreground">
                 <div className="flex items-start gap-2">
-                  <TrendingUp className="w-4 h-4 mt-0.5" />
+                  <TrendingUp className="w-4 h-4 mt-0.5 text-brand" />
                   <div>
-                    <strong>Tendance haussière :</strong> Succession de sommets
-                    et creux de plus en plus hauts
+                    <strong className="text-card-foreground">Tendance haussière :</strong>{" "}
+                    Succession de sommets et creux de plus en plus hauts
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <TrendingDown className="w-4 h-4 mt-0.5" />
+                  <TrendingDown className="w-4 h-4 mt-0.5 text-primary" />
                   <div>
-                    <strong>Tendance baissière :</strong> Succession de sommets
-                    et creux de plus en plus bas
+                    <strong className="text-card-foreground">Tendance baissière :</strong>{" "}
+                    Succession de sommets et creux de plus en plus bas
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <BarChart3 className="w-4 h-4 mt-0.5" />
+                  <BarChart3 className="w-4 h-4 mt-0.5 text-muted-foreground" />
                   <div>
-                    <strong>Tendance latérale :</strong> Prix évoluent dans une
-                    fourchette horizontale
+                    <strong className="text-card-foreground">Tendance latérale :</strong>{" "}
+                    Prix évoluent dans une fourchette horizontale
                   </div>
                 </div>
               </div>
@@ -86,62 +87,63 @@ export default function CourseSection() {
 
           {/* Leçon 3 & 4 */}
           <div className="space-y-6">
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6">
-              <h3 className="text-lg font-medium text-blue-800 dark:text-blue-200 mb-4">
+            {/* Leçon 3 */}
+            <div className="bg-accent rounded-xl p-6">
+              <h3 className="text-lg font-medium text-accent-foreground mb-4">
                 🎯 Leçon 3: Support et Résistance
               </h3>
-              <div className="space-y-4 text-sm text-blue-700 dark:text-blue-300">
+              <div className="space-y-4 text-sm text-muted-foreground">
                 <p>
                   Les niveaux de support et résistance sont les fondations de
                   l'analyse technique.
                 </p>
                 <div className="space-y-3">
-                  <div className="bg-white dark:bg-blue-950/50 p-3 rounded-lg">
-                    <strong>Support :</strong> Zone où le prix a tendance à
-                    rebondir vers le haut. Les acheteurs sont plus nombreux que
+                  <div className="bg-card p-3 rounded-lg border border-border">
+                    <strong className="text-card-foreground">Support :</strong>{" "}
+                    Zone où le prix a tendance à rebondir vers le haut. Les acheteurs sont plus nombreux que
                     les vendeurs.
                   </div>
-                  <div className="bg-white dark:bg-blue-950/50 p-3 rounded-lg">
-                    <strong>Résistance :</strong> Zone où le prix a du mal à
-                    monter. Les vendeurs sont plus nombreux que les acheteurs.
+                  <div className="bg-card p-3 rounded-lg border border-border">
+                    <strong className="text-card-foreground">Résistance :</strong>{" "}
+                    Zone où le prix a du mal à monter. Les vendeurs sont plus nombreux que les acheteurs.
                   </div>
                 </div>
-                <div className="mt-4 p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/30">
                   <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5" />
-                    <div className="text-yellow-800 dark:text-yellow-200 text-xs">
-                      <strong>Règle d'or :</strong> Un support cassé devient
-                      résistance, et vice versa !
+                    <AlertTriangle className="w-4 h-4 text-primary mt-0.5" />
+                    <div className="text-xs text-primary">
+                      <strong>Règle d'or :</strong> Un support cassé devient résistance, et vice versa !
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6">
-              <h3 className="text-lg font-medium text-purple-800 dark:text-purple-200 mb-4">
+            {/* Leçon 4 */}
+            <div className="bg-accent rounded-xl p-6">
+              <h3 className="text-lg font-medium text-accent-foreground mb-4">
                 ⚡ Leçon 4: Gestion du risque
               </h3>
-              <div className="space-y-3 text-sm text-purple-700 dark:text-purple-300">
+              <div className="space-y-3 text-sm text-muted-foreground">
                 <p>
                   La gestion du risque est plus importante que l'analyse
                   elle-même !
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <CheckCircle className="w-4 h-4 text-brand" />
                     <span>Ne risquez jamais plus de 2% de votre capital</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <CheckCircle className="w-4 h-4 text-brand" />
                     <span>Toujours placer un stop-loss avant d'entrer</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <CheckCircle className="w-4 h-4 text-brand" />
                     <span>Ratio risque/rendement minimum 1:2</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <CheckCircle className="w-4 h-4 text-brand" />
                     <span>Tenir un journal de trading</span>
                   </div>
                 </div>

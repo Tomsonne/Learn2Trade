@@ -98,13 +98,13 @@ export default function NewsPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-3 p-4">
       <div className="mb-2 flex flex-wrap items-center gap-2">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Actualités du Marché</h2>
+        <h2 className="text-lg font-semibold text-card-foreground">Actualités du Marché</h2>
         <div className="ml-2">
           <SymbolFilter options={TABS} value={tab} onChange={setTab} />
         </div>
         <button
           onClick={refreshAndReload}
-          className="ml-auto rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100 dark:border-gray-700 dark:hover:bg-gray-700"
+          className="ml-auto rounded-md border border-border px-3 py-1.5 text-sm bg-accent text-accent-foreground hover:bg-muted"
           disabled={loading}
         >
           {loading ? "Rafraîchissement..." : "Rafraîchir"}
@@ -116,8 +116,8 @@ export default function NewsPage() {
       {loading && !items.length && (
         <div className="mx-auto max-w-3xl space-y-2">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-20 animate-pulse rounded-2xl border border-slate-200 bg-slate-50 dark:border-gray-700 dark:bg-gray-800" />
-          ))}
+            <div key={i} className="h-20 animate-pulse rounded-2xl border border-border bg-card" />
+           ))}
         </div>
       )}
 
