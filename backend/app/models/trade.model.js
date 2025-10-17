@@ -19,7 +19,6 @@ class Trade extends Model {
       foreignKey: { name: "strategy_id", allowNull: true },
       as: "strategy",
     });
-    
 
     /**
      * TRADE ↔ ASSET
@@ -38,49 +37,66 @@ Trade.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
+
     user_id: {
       type: DataTypes.UUID,
       allowNull: false,
     },
+
     strategy_id: {
       type: DataTypes.UUID,
       allowNull: true,
     },
+
     asset_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+
     side: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM("BUY", "SELL"),
       allowNull: false,
-      validate: {
-        isIn: [["BUY", "SELL"]], // ✅ valeur doit être BUY ou SELL
-      },
     },
+
     quantity: {
       type: DataTypes.DECIMAL(24, 10),
       allowNull: false,
-      validate: {
-        min: 0,
-      },
+      validate: { min: 0 },
     },
+
     price_open: {
       type: DataTypes.DECIMAL(18, 8),
       allowNull: false,
-      validate: {
-        min: 0,
-      },
+      validate: { min: 0 },
     },
+
     price_close: {
       type: DataTypes.DECIMAL(18, 8),
       allowNull: true,
-      validate: {
-        min: 0,
-      },
+      validate: { min: 0 },
     },
+
     pnl: {
       type: DataTypes.DECIMAL(24, 10),
       allowNull: true,
+    },
+
+    /**
+     * 💡 Ajouts pour le suivi
+     */
+    opened_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+
+    closed_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    is_closed: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
   },
   {

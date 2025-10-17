@@ -23,9 +23,9 @@ export default function MaCard({
   // données propres -> { x: time(sec), ma20, ma50 }
   const data = useMemo(() => {
     const arr = (Array.isArray(series) ? series : [])
-      .filter(d => Number.isFinite(d?.time) && (Number.isFinite(d?.ma20) || Number.isFinite(d?.ma50)))
+      .filter(d => Number.isFinite(d?.ts) && (Number.isFinite(d?.ma20) || Number.isFinite(d?.ma50)))
       .map(d => ({
-        x: Number(d.time),
+        x: Math.floor(Number(d.ts) / 1000), // ts(ms) -> s pour l’axe temps
         ma20: Number.isFinite(d.ma20) ? Number(d.ma20) : null,
         ma50: Number.isFinite(d.ma50) ? Number(d.ma50) : null,
       }));

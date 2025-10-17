@@ -1,10 +1,12 @@
 // app/server.js  — VERSION PROPRE
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser"; // ✅ ajouté
 import { loadConfig } from "./core/config.js";
 import v1Router from "./api/index.js";
 import sequelize from "./core/db.js";
 import models from "./models/index.js"; // charge *.model.js (important)
+
 
 // (OPTION) cron pour ingestion auto CoinDesk
 // import cron from "node-cron";
@@ -16,7 +18,15 @@ const cfg = loadConfig();
 const app = express();
 
 app.use(express.json());
-app.use(cors({ origin: cfg.corsOrigin, credentials: true }));
+app.use(
+  cors({
+    origin: "http://localhost:5173", // le front
+    credentials: true,               // 🔥 permet d’envoyer les cookies
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+app.use(cookieParser());
 
 // ──────────────────────────────────────────────
 // HealthCheck
@@ -35,6 +45,18 @@ app.use((_req, res) => {
 });
 
 // ──────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error("ERR:", err);
+  res.status(500).json({
+    status: "error",
+    error: {
+      code: "SERVER_ERROR",
+      message: err.message,
+      detail: err?.parent?.detail || err?.original?.detail || null,
+    },
+  });
+});
+
 // Start server + DB
 async function start() {
   try {
@@ -42,8 +64,10 @@ async function start() {
     console.log("✅ DB connected");
 
     console.log("Models chargés :", Object.keys(models));
+    console.log("🌍 CORS autorisé depuis :", cfg.corsOrigin);
 
-    await sequelize.sync(); // synchronisation douce
+    await sequelize.sync({ alter: true });
+ // synchronisation douce
     console.log("✅ Sequelize sync done");
 
     // (OPTION) lancer une ingestion au démarrage + cron périodique
