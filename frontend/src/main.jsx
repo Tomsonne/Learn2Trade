@@ -24,6 +24,8 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Homepage /> },
       { path: "login", element: <Login /> },
+      { path: "learn", element: <IndicatorsPage /> },
+
       { path: "signup", element: <Signup /> },
     ],
   },
@@ -37,7 +39,6 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: "news", element: <NewsPage /> },
-      { path: "learn", element: <IndicatorsPage /> },
       { path: "trades", element: <Trades /> },
       { path: "history", element: <History /> },
       { path: "dashboard", element: <Dashboard /> },

@@ -1,35 +1,41 @@
-// app/server.js  — VERSION PROPRE
+// app/server.js — VERSION FINALE
 import express from "express";
 import cors from "cors";
-import cookieParser from "cookie-parser"; // ✅ ajouté
+import cookieParser from "cookie-parser";
 import { loadConfig } from "./core/config.js";
 import v1Router from "./api/index.js";
 import sequelize from "./core/db.js";
-import models from "./models/index.js"; // charge *.model.js (important)
-
-
-// (OPTION) cron pour ingestion auto CoinDesk
-// import cron from "node-cron";
-// import { refreshNewsFromCoinDesk } from "./services/news.service.js";
+import models from "./models/index.js";
 
 // ──────────────────────────────────────────────
 // App & config
 const cfg = loadConfig();
 const app = express();
 
-app.use(express.json());
+// Liste blanche des origines autorisées
+const allowedOrigins = [
+  "http://localhost:5173",             // Développement local
+  "https://learn2-trade.vercel.app",   // Production sur Vercel
+];
+
+// Middleware CORS dynamique
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://learn2-trade.vercel.app"
-    ],
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn("❌ CORS refusé pour :", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+app.use(express.json());
 app.use(cookieParser());
 
 // ──────────────────────────────────────────────
@@ -49,8 +55,9 @@ app.use((_req, res) => {
 });
 
 // ──────────────────────────────────────────────
+// Gestion des erreurs serveur
 app.use((err, req, res, next) => {
-  console.error("ERR:", err);
+  console.error("ERR:", err.message || err);
   res.status(500).json({
     status: "error",
     error: {
@@ -61,42 +68,23 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server + DB
+// ──────────────────────────────────────────────
+// Démarrage du serveur
 async function start() {
   try {
     await sequelize.authenticate();
     console.log("✅ DB connected");
 
     console.log("Models chargés :", Object.keys(models));
-    console.log("🌍 CORS autorisé depuis :", cfg.corsOrigin);
+    console.log("🌍 CORS autorisé depuis :", allowedOrigins);
 
     await sequelize.sync({ alter: true });
- // synchronisation douce
     console.log("✅ Sequelize sync done");
-
-    // (OPTION) lancer une ingestion au démarrage + cron périodique
-    // try {
-    //   const saved = await refreshNewsFromCoinDesk();
-    //   console.log(`🔄 Boot refresh: saved ${saved} news`);
-    // } catch (e) {
-    //   console.error("Boot refresh error:", e?.message || e);
-    // }
-    // const cronExpr = process.env.NEWS_CRON || "*/10 * * * *"; // toutes les 10 min
-    // cron.schedule(cronExpr, async () => {
-    //   try {
-    //     const saved = await refreshNewsFromCoinDesk();
-    //     console.log(`[cron ${cronExpr}] saved ${saved}`);
-    //   } catch (e) {
-    //     console.error("[cron] error:", e?.message || e);
-    //   }
-    // });
 
     const PORT = process.env.PORT || 8000;
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`✅ Learn2Trade backend (Node) running on port ${PORT}`);
     });
-
-
   } catch (err) {
     console.error("❌ Failed to start server:", err);
     process.exit(1);
