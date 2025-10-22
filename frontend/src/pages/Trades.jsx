@@ -51,7 +51,7 @@ export default function TradesPage() {
           quantity: Number(qty),
         }),
       });
-      if (!r.ok) throw new Error("Erreur ouverture trade");
+      if (!r.ok) throw new Error("Erreur solde insuffisant");
       setQty("");
       await fetchOpenTrades();
     } catch (e) {
