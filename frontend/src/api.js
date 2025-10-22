@@ -4,8 +4,8 @@
 
 let API_BASE;
 
-// 1️⃣ Si une variable d'environnement Vite existe (définie dans .env)
-if (import.meta.env && import.meta.env.VITE_API_BASE) {
+// 1️⃣ Si une variable d'environnement Vite existe (.env ou Vercel)
+if (import.meta.env?.VITE_API_BASE) {
   API_BASE = import.meta.env.VITE_API_BASE;
 }
 
@@ -14,27 +14,27 @@ if (!API_BASE) {
   const host = window.location.hostname;
 
   if (/^(localhost|127\.|::1)$/.test(host)) {
-    // 🔹 En local → backend local (Railway tourne en dev sur port 8000)
+    // 🔹 En local → backend Railway local
     API_BASE = "http://localhost:8000/api/v1";
   } else {
-    // 🔹 En production → backend Railway (plus Render)
+    // 🔹 En production → backend hébergé sur Railway
     API_BASE = "https://skillvest-production.up.railway.app/api/v1";
   }
 }
 
-// 🔍 Log pour debug
+// 🔍 Log utile pour debug (supprimable en prod)
 console.log("🔌 API_BASE utilisé :", API_BASE);
 
 // =========================
 // 🧠 Fonctions API
 // =========================
 
-// Authentification utilisateur
+// --- Connexion utilisateur ---
 export async function login(email, password) {
   const res = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include", // 🔥 indispensable pour cookies JWT
+    credentials: "include", // 🔥 cookies JWT
     body: JSON.stringify({ email, password }),
   });
 
@@ -46,7 +46,7 @@ export async function login(email, password) {
   return res.json();
 }
 
-// Inscription utilisateur
+// --- Inscription utilisateur ---
 export async function signup(email, password) {
   const res = await fetch(`${API_BASE}/auth/signup`, {
     method: "POST",
@@ -63,7 +63,7 @@ export async function signup(email, password) {
   return res.json();
 }
 
-// Vérification du token / session
+// --- Vérifie la session / token actif ---
 export async function checkAuth() {
   try {
     const res = await fetch(`${API_BASE}/auth/check`, {
@@ -76,7 +76,7 @@ export async function checkAuth() {
   }
 }
 
-// Déconnexion
+// --- Déconnexion utilisateur ---
 export async function logout() {
   try {
     const res = await fetch(`${API_BASE}/auth/logout`, {
