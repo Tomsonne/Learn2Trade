@@ -20,12 +20,16 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5173", // le front
-    credentials: true,               // 🔥 permet d’envoyer les cookies
+    origin: [
+      "http://localhost:5173",
+      "https://learn2-trade.vercel.app"
+    ],
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 app.use(cookieParser());
 
 // ──────────────────────────────────────────────
