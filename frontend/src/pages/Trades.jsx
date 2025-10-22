@@ -2,7 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import CardBase from "../components/ui/CardBase";
 import PositionCard from "../components/PositionCard.jsx";
 
-const API_URL = "http://localhost:8000/api/v1";
+const API_URL = window.location.hostname.includes("localhost")
+  ? "http://localhost:8000/api/v1"
+  : "https://skillvest-production.up.railway.app/api/v1";
 
 export default function TradesPage() {
   const [user, setUser] = useState(null);

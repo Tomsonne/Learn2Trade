@@ -15,7 +15,13 @@ export default function NewsPage() {
   const [error, setError]     = useState(null);
   const [tab, setTab] = useState("ALL");
 
-  const base = (import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api/v1").replace(/\/$/, "");
+  const base = (
+  import.meta.env.VITE_API_BASE ||
+  (window.location.hostname.includes("localhost")
+    ? "http://localhost:8000/api/v1"
+    : "https://skillvest-production.up.railway.app/api/v1")
+  ).replace(/\/$/, "");
+
   const currentCtrl = useRef(null);
 
   const fetchNews = useCallback(async () => {

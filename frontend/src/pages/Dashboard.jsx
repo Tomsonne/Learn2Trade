@@ -4,7 +4,9 @@ import PortfolioDistribution from "../components/dashboard/PortfolioDistribution
 import PositionsTable from "../components/dashboard/PositionsTable";
 import { cashFromTradesSingleRow } from "../utils/cashFromTrades";
 
-const API_URL = "http://localhost:8000/api/v1";
+const API_URL = window.location.hostname.includes("localhost")
+  ? "http://localhost:8000/api/v1"
+  : "https://skillvest-production.up.railway.app/api/v1";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);

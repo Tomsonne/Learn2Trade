@@ -1,7 +1,11 @@
 // frontend/src/hooks/useSpotPrice.js
 import { useEffect, useState } from "react";
 
-const API = import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api/v1";
+const API =
+  import.meta.env.VITE_API_BASE ||
+  (window.location.hostname.includes("localhost")
+    ? "http://localhost:8000/api/v1"
+    : "https://skillvest-production.up.railway.app/api/v1");
 
 export function useSpotPrice({ symbol = "BTC", refreshMs = 60_000 } = {}) {
   const [price, setPrice] = useState(null);
