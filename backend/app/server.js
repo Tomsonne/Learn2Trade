@@ -19,7 +19,6 @@ const allowedOrigins = [
   "https://learn2-trade-iovrk9oci-tomsonnes-projects.vercel.app", // preview Vercel (branche Thomas)
 ];
 
-
 // Middleware CORS dynamique
 app.use(
   cors({
@@ -36,6 +35,9 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// ✅ Autorise toutes les requêtes préflight (OPTIONS)
+app.options("/*", cors()); // doit être placé AVANT les routes
 
 app.use(express.json());
 app.use(cookieParser());
@@ -104,5 +106,3 @@ process.on("SIGTERM", async () => {
   } catch {}
   process.exit(0);
 });
-
-app.options("/*", cors()); // ✅ compatible Express 5+
