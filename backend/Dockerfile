@@ -20,4 +20,4 @@ ENV NODE_ENV=development
 EXPOSE 8000
 
 # Étape 7 : Commande de démarrage
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]
