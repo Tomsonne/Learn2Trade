@@ -87,9 +87,12 @@ async function start() {
     //   }
     // });
 
-    app.listen(cfg.port, "0.0.0.0", () => {
-      console.log(`✅ Learn2Trade backend (Node) on http://0.0.0.0:${cfg.port}`);
+    const PORT = process.env.PORT || 8000;
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`✅ Learn2Trade backend (Node) running on port ${PORT}`);
     });
+
+
   } catch (err) {
     console.error("❌ Failed to start server:", err);
     process.exit(1);
