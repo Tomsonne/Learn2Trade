@@ -106,4 +106,3 @@ process.on("SIGTERM", async () => {
 });
 
 
-app.options("*", cors()); // ⚙️ pour que les navigateurs mobiles prévalident les requêtes POST
