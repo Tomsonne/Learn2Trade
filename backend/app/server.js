@@ -14,9 +14,11 @@ const app = express();
 
 // Liste blanche des origines autorisées
 const allowedOrigins = [
-  "http://localhost:5173",             // Développement local
-  "https://learn2-trade.vercel.app",   // Production sur Vercel
+  "http://localhost:5173",                                   // dev local
+  "https://learn2-trade.vercel.app",                         // domaine principal
+  "https://learn2-trade-iovrk9oci-tomsonnes-projects.vercel.app", // preview Vercel (branche Thomas)
 ];
+
 
 // Middleware CORS dynamique
 app.use(
