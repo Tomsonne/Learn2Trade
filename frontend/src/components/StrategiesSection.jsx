@@ -66,7 +66,7 @@ export default function StrategiesSection({ strategies, selectedStrategy, setSel
           <p className="text-muted-foreground mb-4">{selectedStrategy.description}</p>
 
           <div>
-            <h4 className="font-medium text-accent-foreground mb-3">📋 Étapes :</h4>
+            <h4 className="font-medium text-accent-foreground mb-3">Étapes :</h4>
             <div className="space-y-3">
               {selectedStrategy.steps.map((step, i) => (
                 <div key={i} className="flex items-start gap-3">
