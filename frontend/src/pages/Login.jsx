@@ -82,10 +82,6 @@ export default function Login() {
           <div className="flex-grow h-px bg-gray-200 dark:bg-gray-600"></div>
         </div>
 
-        <button className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 font-medium hover:bg-gray-50 dark:hover:bg-gray-700">
-          Utiliser le compte démo
-        </button>
-
         <p className="mt-6 text-center text-sm text-gray-500">
           Pas encore de compte ?{" "}
           <Link to="/signup" className="text-blue-600 hover:underline">

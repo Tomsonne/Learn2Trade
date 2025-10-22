@@ -1,9 +1,8 @@
-// app/controllers/trade.controller.js
-import * as TradeService from "../services/trade.service.js"; //chemin + .js
+import * as TradeService from "../services/trade.service.js";
 
 export async function openTrade(req, res) {
   try {
-    const userId = req.body.user_id; // ou req.user?.id plus tard
+    const userId = req.body.user_id;
     const trade = await TradeService.openTrade(userId, req.body);
     res.status(201).json(trade);
   } catch (err) {
@@ -15,18 +14,18 @@ export async function openTrade(req, res) {
 export async function closeTrade(req, res) {
   try {
     const tradeId = req.params.id;
-    const trade = await TradeService.closeTrade(tradeId);
-    res.status(200).json(trade);
+    const { quantity } = req.body; // ✅ permet la fermeture partielle
+    const result = await TradeService.closeTrade(tradeId, quantity);
+    res.status(200).json(result);
   } catch (err) {
     console.error(err);
     res.status(400).json({ error: err.message });
   }
 }
 
-//  getTradesByUser attend un objet : { userId, is_closed?, assetId? }
 export async function getTrades(req, res) {
   try {
-    const userId = req.query.userId || req.user?.id; // lisible via query
+    const userId = req.query.userId || req.user?.id;
     const { is_closed, assetId } = req.query;
     if (!userId) return res.status(400).json({ error: "userId requis" });
 

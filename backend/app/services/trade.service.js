@@ -1,12 +1,15 @@
-// app/services/trade.service.js
 import models from "../models/index.js";
 import Decimal from "decimal.js";
 import { ValidationError } from "../utils/errors.js";
 import binance from "binance-api-node";
 import sequelize from "../core/db.js";
 
-const client = binance.default(); // endpoints publics
+const client = binance.default();
+const { Trade, User, Asset } = models;
 
+// ===========================
+// 📈 Récupère le prix marché
+// ===========================
 async function getMarketPriceDecimal(symbol) {
   try {
     const prices = await client.prices({ symbol });
@@ -18,9 +21,9 @@ async function getMarketPriceDecimal(symbol) {
   }
 }
 
-const { Trade, User, Asset } = models;
-
-/** Ouvre un trade (BUY ou SELL) — gère le cash si BUY */
+// ===========================
+// 🟢 Ouvre un trade
+// ===========================
 export async function openTrade(userId, { asset_id, side, quantity }) {
   if (!userId || !asset_id || !side || !quantity) throw new ValidationError("Champs manquants");
   const qty = new Decimal(quantity);
@@ -35,12 +38,10 @@ export async function openTrade(userId, { asset_id, side, quantity }) {
     if (!asset) throw new ValidationError("Actif introuvable");
 
     const symbol = asset.symbol || "BTCUSDT";
-    const priceOpen = await getMarketPriceDecimal(symbol); // Decimal
-    // Le notional représente la valeur totale de la position sur le marché.
-    const notional = priceOpen.mul(qty);                   // Decimal
+    const priceOpen = await getMarketPriceDecimal(symbol);
+    const notional = priceOpen.mul(qty);
     const userCash = new Decimal(user.cash || "0");
 
-    // Gestion du cash: on débite seulement pour BUY; (pour SELL à nu, on ne débite pas)
     if (side === "BUY") {
       if (userCash.lt(notional)) throw new ValidationError("Solde insuffisant");
       user.cash = userCash.minus(notional).toString();
@@ -52,7 +53,7 @@ export async function openTrade(userId, { asset_id, side, quantity }) {
         user_id: userId,
         asset_id,
         side,
-        price_open: priceOpen.toString(), // stocker en string pour DECIMAL SQL
+        price_open: priceOpen.toString(),
         quantity: qty.toString(),
         opened_at: new Date(),
         is_closed: false,
@@ -64,63 +65,98 @@ export async function openTrade(userId, { asset_id, side, quantity }) {
   });
 }
 
-/** Clôture un trade — crédite le cash pour BUY; calcule le PnL; marque fermé */
-// app/services/trade.service.js
-export async function closeTrade(tradeId) {
+// ===========================
+// 🔴 Ferme (partiellement ou totalement) un trade
+// ===========================
+export async function closeTrade(tradeId, quantityToClose) {
   if (!tradeId) throw new ValidationError("tradeId manquant");
 
   return sequelize.transaction(async (tx) => {
-    // 1) Lock UNIQUEMENT la ligne Trade (pas d'include ici)
+    // 1️⃣ Récupère le trade d’origine
     const trade = await Trade.findByPk(tradeId, {
       transaction: tx,
-      lock: tx.LOCK.UPDATE, // lock sur Trade uniquement
+      lock: tx.LOCK.UPDATE,
     });
     if (!trade) throw new ValidationError("Trade introuvable");
     if (trade.is_closed) throw new ValidationError("Trade déjà clôturé");
 
-    // 2) Récupère l'asset sans lock/join
-    const asset = await models.Asset.findByPk(trade.asset_id, { transaction: tx });
-
-    // 3) Lock l'utilisateur séparément
-    const user = await User.findByPk(trade.user_id, {
-      transaction: tx,
-      lock: tx.LOCK.UPDATE,
-    });
+    // 2️⃣ Récupère les entités liées
+    const asset = await Asset.findByPk(trade.asset_id, { transaction: tx });
+    const user = await User.findByPk(trade.user_id, { transaction: tx, lock: tx.LOCK.UPDATE });
+    if (!asset) throw new ValidationError("Actif introuvable");
     if (!user) throw new ValidationError("Utilisateur introuvable");
 
-    // 4) Prix marché
-    const symbol = asset?.symbol || "BTCUSDT";
+    // 3️⃣ Vérifie la quantité demandée
+    const closeQty = new Decimal(quantityToClose || trade.quantity);
+    const fullQty = new Decimal(trade.quantity);
+    if (closeQty.lte(0) || closeQty.gt(fullQty))
+      throw new ValidationError("Quantité invalide pour la fermeture");
+
+    // 4️⃣ Prix marché actuel
+    const symbol = asset.symbol || "BTCUSDT";
     const priceClose = await getMarketPriceDecimal(symbol);
-
     const priceOpen = new Decimal(trade.price_open);
-    const qty = new Decimal(trade.quantity);
 
-    const pnl =
+    // 5️⃣ Calcule le PnL de la portion fermée
+    const pnlPerUnit =
       trade.side === "BUY"
-        ? priceClose.minus(priceOpen).mul(qty)
-        : priceOpen.minus(priceClose).mul(qty);
+        ? priceClose.minus(priceOpen)
+        : priceOpen.minus(priceClose);
+    const pnl = pnlPerUnit.mul(closeQty);
 
-    // Créditer le cash à la clôture (produit de la vente)
-    const credit = priceClose.mul(qty);
+    // 6️⃣ Crédit cash
+    const credit = priceClose.mul(closeQty);
     user.cash = new Decimal(user.cash || "0").plus(credit).toString();
     await user.save({ transaction: tx });
 
-    trade.price_close = priceClose.toString();
-    trade.pnl = pnl.toString();
-    trade.is_closed = true;
-    trade.closed_at = new Date();
+    // 7️⃣ Crée un doublon fermé
+    const closedTrade = await Trade.create(
+      {
+        user_id: trade.user_id,
+        asset_id: trade.asset_id,
+        side: trade.side,
+        quantity: closeQty.toString(),
+        price_open: priceOpen.toString(),
+        price_close: priceClose.toString(),
+        pnl: pnl.toString(),
+        is_closed: true,
+        opened_at: trade.opened_at,
+        closed_at: new Date(),
+      },
+      { transaction: tx }
+    );
+
+    // 8️⃣ Met à jour le trade d’origine
+    const remainingQty = fullQty.minus(closeQty);
+    if (remainingQty.lte(0)) {
+      trade.is_closed = true;
+      trade.price_close = priceClose.toString();
+      trade.pnl = pnl.toString();
+      trade.closed_at = new Date();
+    } else {
+      trade.quantity = remainingQty.toString();
+    }
+
     await trade.save({ transaction: tx });
 
-    return trade;
+    return {
+      message: remainingQty.lte(0)
+        ? "Trade entièrement fermé"
+        : "Fermeture partielle effectuée",
+      closed_trade: closedTrade,
+      remaining_trade: trade,
+    };
   });
 }
 
-
+// ===========================
+// 📋 Récupère les trades d’un user
+// ===========================
 export async function getTradesByUser({ userId, is_closed, assetId }) {
-  const { Trade, Asset } = (await import("../models/index.js")).default;
   if (!userId) throw new Error("userId requis");
   const where = { user_id: userId };
-  if (typeof is_closed !== "undefined") where.is_closed = is_closed === true || is_closed === "true";
+  if (typeof is_closed !== "undefined")
+    where.is_closed = is_closed === true || is_closed === "true";
   if (assetId) where.asset_id = Number(assetId);
 
   return Trade.findAll({

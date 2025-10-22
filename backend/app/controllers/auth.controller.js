@@ -1,5 +1,6 @@
 import * as authService from "../services/auth.service.js";
 import { ValidationError } from "../utils/errors.js";
+import  User from "../models/user.model.js";
 
 /* -------------------------------------------------------------------------- */
 /* 🧩 INSCRIPTION                                                             */
@@ -73,15 +74,12 @@ export async function check(req, res) {
 
   try {
     const cookies = req.cookies || {};
-    console.log("🧩 Cookies reçus :", cookies);
-
     const token = cookies.token;
     if (!token) {
       console.log("❌ Aucun token trouvé");
       return res.status(401).json({ status: "error", message: "Non connecté" });
     }
 
-    // ⚠️ On protège la vérification du token dans un try/catch
     let decoded;
     try {
       decoded = authService.verifyToken(token);
@@ -90,7 +88,18 @@ export async function check(req, res) {
       return res.status(401).json({ status: "error", message: "Token invalide ou expiré" });
     }
 
-    return res.json({ status: "ok", user: decoded });
+    // 🔍 Récupération complète du user depuis la base
+    const dbUser = await User.findByPk(decoded.id, {
+      attributes: ["id", "email", "is_admin", "cash", "created_at", "updated_at"],
+    });
+
+    if (!dbUser) {
+      console.log("❌ Utilisateur introuvable en base");
+      return res.status(404).json({ status: "error", message: "Utilisateur introuvable" });
+    }
+
+    console.log("✅ Utilisateur trouvé :", dbUser.email, "Cash =", dbUser.cash);
+    return res.json({ status: "ok", user: dbUser });
 
   } catch (err) {
     console.error("❌ Erreur check globale :", err);

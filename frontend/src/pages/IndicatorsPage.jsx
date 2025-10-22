@@ -15,7 +15,7 @@ import SymbolSelector from "../components/ui/SymbolSelector.jsx";
 import { getRSISignal, getMASignal } from "../utils/ta-ui.js";
 
 export function IndicatorsPage() {
-  const [activeSection, setActiveSection] = useState("live");
+  const [activeSection, setActiveSection] = useState("course");
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
   const [tf, setTf] = useState("1h");
   const [symbol, setSymbol] = useState("BTC");
