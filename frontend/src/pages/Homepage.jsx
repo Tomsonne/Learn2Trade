@@ -5,7 +5,6 @@ export default function HomePage() {
 
   return (
     <main className="bg-white dark:bg-gray-900">
-      {/* HERO texte seul */}
       <section className="text-center px-6 pt-20 pb-8 text-slate-900 dark:text-slate-100">
         <h1 className="text-4xl sm:text-6xl font-extrabold">
           Apprenez à trader, simplement.
@@ -31,7 +30,6 @@ export default function HomePage() {
       {/* Vidéo en dessous du texte */}
       <section className="px-6 pb-16">
         <div className="mx-auto max-w-5xl">
-          {/* Utilise /video_faststart.mp4 si tu l’as générée */}
           <video
             className="w-full rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 object-cover"
             src="/video.mp4"
@@ -40,7 +38,6 @@ export default function HomePage() {
             loop
             playsInline
             preload="metadata"
-            // controls
           />
         </div>
       </section>
