@@ -17,6 +17,8 @@
     --primary:  37 99 235;
     --ma20: 142 72% 45%;   /* vert */
     --ma50: 38 92% 50%;    /* orange */
+    --danger: 239 68 68;
+    --violet: 28 31 65;
   }
   .dark {
     --bg:       2 6 23;
@@ -28,6 +30,8 @@
     --primary:  59 130 246;
     --ma20: 142 72% 45%;   /* vert */
     --ma50: 38 92% 50%;    /* orange */
+    --danger: 239 68 68;
+    --violet: 28 31 65;
   }
   html, body, #root { height: 100%; }
   body { background: rgb(var(--bg)); color: rgb(var(--text)); @apply font-sans; }
@@ -81,4 +85,23 @@
 /* Accessibilité animation */
 @media (prefers-reduced-motion: reduce) {
   .btn { transition: none; }
+}
+
+/* ── Form controls & variants ─────────────────*/
+@layer components {
+  .form-label {
+    @apply block text-sm mb-2 text-muted-foreground;
+  }
+
+  .input, .select {
+    @apply w-full rounded-xl border border-border bg-surface text-app
+           placeholder:text-muted px-3 py-2
+           focus:outline-none focus:ring-2 focus:ring-primary/30;
+  }
+
+  .btn-danger { color:#fff; background: rgb(var(--danger)); }
+  .btn-danger:hover { opacity:.95; }
+
+  .btn-violet { color:#fff; background: rgb(var(--violet)); }
+  .btn-violet:hover { opacity:.95; }
 }

@@ -121,7 +121,7 @@ export function IndicatorsPage() {
               <p className="text-sm text-muted-foreground mb-4">{term.definition}</p>
               {term.usage && (
                 <div className="bg-primary/10 p-3 rounded-lg text-sm text-muted-foreground">
-                  💡 {term.usage}
+                  {term.usage}
                 </div>
               )}
             </div>

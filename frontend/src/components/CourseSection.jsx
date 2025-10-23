@@ -32,7 +32,7 @@ export default function CourseSection() {
           <div className="space-y-6">
             <div className="bg-accent rounded-xl p-6">
               <h3 className="text-lg font-medium text-accent-foreground mb-4">
-                📚 Leçon 1: Qu'est-ce que l'analyse technique ?
+                Leçon 1: Qu'est-ce que l'analyse technique ?
               </h3>
               <div className="space-y-4 text-sm text-muted-foreground">
                 <p>
@@ -57,7 +57,7 @@ export default function CourseSection() {
             {/* Leçon 2 */}
             <div className="bg-accent rounded-xl p-6">
               <h3 className="text-lg font-medium text-accent-foreground mb-4">
-                ✅ Leçon 2: Les types de tendances
+                Leçon 2: Les types de tendances
               </h3>
               <div className="space-y-3 text-sm text-muted-foreground">
                 <div className="flex items-start gap-2">
@@ -90,7 +90,7 @@ export default function CourseSection() {
             {/* Leçon 3 */}
             <div className="bg-accent rounded-xl p-6">
               <h3 className="text-lg font-medium text-accent-foreground mb-4">
-                🎯 Leçon 3: Support et Résistance
+                Leçon 3: Support et Résistance
               </h3>
               <div className="space-y-4 text-sm text-muted-foreground">
                 <p>
@@ -122,7 +122,7 @@ export default function CourseSection() {
             {/* Leçon 4 */}
             <div className="bg-accent rounded-xl p-6">
               <h3 className="text-lg font-medium text-accent-foreground mb-4">
-                ⚡ Leçon 4: Gestion du risque
+                Leçon 4: Gestion du risque
               </h3>
               <div className="space-y-3 text-sm text-muted-foreground">
                 <p>
