@@ -1,3 +1,4 @@
+import { Wallet, TrendingUp, PiggyBank, BarChart3 } from "lucide-react";
 import KpiCard from "./KpiCard";
 import positionsToKpis from "../../utils/positionsToKpis";
 
@@ -10,10 +11,10 @@ export default function KpiGrid({ positions = [], cash = 0 }) {
   const { balance, pnlAbs, pnlPct, invested, cash: cashUsd } = positionsToKpis(positions, cash);
 
   const kpis = [
-    { icon: "💰", title: "Solde Total", value: fmtMoney(balance, "USD") },
-    { icon: "📈", title: "PnL Total", value: `${pnlAbs >= 0 ? "+" : ""}${fmtMoney(pnlAbs, "USD")}`, sub: fmtPct(pnlPct) },
-    { icon: "🏦", title: "Cash Disponible", value: fmtMoney(cashUsd, "USD") },
-    { icon: "📊", title: "Montant Investi", value: fmtMoney(invested, "USD") },
+    { icon: <Wallet className="w-5 h-5" />,      title: "Solde Total",     value: fmtMoney(balance, "USD") },
+    { icon: <TrendingUp className="w-5 h-5" />,  title: "PnL Latent",       value: `${pnlAbs >= 0 ? "+" : ""}${fmtMoney(pnlAbs, "USD")}`, sub: fmtPct(pnlPct) },
+    { icon: <PiggyBank className="w-5 h-5" />,   title: "Cash Disponible", value: fmtMoney(cashUsd, "USD") },
+    { icon: <BarChart3 className="w-5 h-5" />,   title: "Montant Investi", value: fmtMoney(invested, "USD") },
   ];
 
   return (
@@ -22,3 +23,4 @@ export default function KpiGrid({ positions = [], cash = 0 }) {
     </div>
   );
 }
+
