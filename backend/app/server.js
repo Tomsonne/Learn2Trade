@@ -1,4 +1,5 @@
-// app/server.js — VERSION FINALE
+// app/server.js — ✅ VERSION FINALE (Railway + Vercel)
+
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -8,59 +9,45 @@ import sequelize from "./core/db.js";
 import models from "./models/index.js";
 
 // ──────────────────────────────────────────────
-// App & config
+// Chargement config & initialisation app
 const cfg = loadConfig();
 const app = express();
 
-// Liste blanche des origines autorisées
+// ──────────────────────────────────────────────
+// 🌍 Configuration CORS (frontend Vercel + local)
 const allowedOrigins = [
-  "http://localhost:5173",                                   // dev local
-  "https://learn2-trade.vercel.app",                         // domaine principal
-  "https://learn2-trade-iovrk9oci-tomsonnes-projects.vercel.app", // preview Vercel (branche Thomas)
+  "http://localhost:5173", // dev local
+  "https://learn2-trade.vercel.app", // domaine principal
+  "https://learn2-trade-iovrk9oci-tomsonnes-projects.vercel.app", // preview (branche Thomas)
 ];
 
-// Middleware CORS dynamique
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.warn("❌ CORS refusé pour :", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
+    origin: allowedOrigins,
+    credentials: true, // autorise l’envoi des cookies
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 // ✅ Autorise toutes les requêtes préflight (OPTIONS)
-// ✅ Gérer toutes les requêtes OPTIONS manuellement
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    res.header("Access-Control-Allow-Credentials", "true");
-    return res.sendStatus(204); // 204 = No Content
-  }
-  next();
-});
+app.options("*", cors({ origin: allowedOrigins, credentials: true }));
 
+// ──────────────────────────────────────────────
+// Middlewares généraux
 app.use(express.json());
 app.use(cookieParser());
 
 // ──────────────────────────────────────────────
-// HealthCheck
+// 🩺 HealthCheck
 app.get("/healthz", (_req, res) => res.json({ status: "ok" }));
 
-// API v1
+// ──────────────────────────────────────────────
+// 🧩 Routes principales (API v1)
 app.use("/api/v1", v1Router);
 
 // ──────────────────────────────────────────────
-// 404 catch-all
+// ❌ 404 — Route non trouvée
 app.use((_req, res) => {
   res.status(404).json({
     status: "error",
@@ -69,9 +56,9 @@ app.use((_req, res) => {
 });
 
 // ──────────────────────────────────────────────
-// Gestion des erreurs serveur
-app.use((err, req, res, next) => {
-  console.error("ERR:", err.message || err);
+// ⚠️ Gestion des erreurs serveur
+app.use((err, req, res, _next) => {
+  console.error("❌ ERR:", err.message || err);
   res.status(500).json({
     status: "error",
     error: {
@@ -83,21 +70,21 @@ app.use((err, req, res, next) => {
 });
 
 // ──────────────────────────────────────────────
-// Démarrage du serveur
+// 🚀 Démarrage du serveur
 async function start() {
   try {
     await sequelize.authenticate();
-    console.log("✅ DB connected");
+    console.log("✅ Base de données connectée");
 
-    console.log("Models chargés :", Object.keys(models));
-    console.log("🌍 CORS autorisé depuis :", allowedOrigins);
+    console.log("📦 Models chargés :", Object.keys(models));
+    console.log("🌍 Origines CORS autorisées :", allowedOrigins);
 
     await sequelize.sync({ alter: true });
-    console.log("✅ Sequelize sync done");
+    console.log("✅ Synchronisation Sequelize terminée");
 
     const PORT = process.env.PORT || 8000;
     app.listen(PORT, "0.0.0.0", () => {
-      console.log(`✅ Learn2Trade backend (Node) running on port ${PORT}`);
+      console.log(`✅ Learn2Trade backend running on port ${PORT}`);
     });
   } catch (err) {
     console.error("❌ Failed to start server:", err);
@@ -108,11 +95,14 @@ async function start() {
 start();
 
 // ──────────────────────────────────────────────
-// Arrêt propre (Docker)
+// 🔌 Arrêt propre (Docker / Railway)
 process.on("SIGTERM", async () => {
-  console.log("SIGTERM received, shutting down...");
+  console.log("🛑 SIGTERM reçu, arrêt du serveur...");
   try {
     await sequelize.close();
-  } catch {}
+    console.log("✅ Connexion DB fermée proprement");
+  } catch {
+    console.warn("⚠️ Erreur lors de la fermeture de la DB");
+  }
   process.exit(0);
 });
