@@ -112,14 +112,23 @@ export async function check(req, res) {
 /* -------------------------------------------------------------------------- */
 export async function logout(req, res) {
   try {
-    res.clearCookie("token", { path: "/" });
-    console.log("👋 Utilisateur déconnecté");
+    const isDev = process.env.NODE_ENV !== "production";
+
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: !isDev,
+      sameSite: isDev ? "Lax" : "None",
+      path: "/", // obligatoire
+    });
+
+    console.log("👋 Utilisateur déconnecté, cookie supprimé");
     return res.json({ status: "ok", message: "Déconnecté" });
   } catch (err) {
     console.error("❌ Logout error:", err);
     return res.status(500).json({ status: "error", message: "Erreur serveur" });
   }
 }
+
 
 
 export const me = async (req, res) => {
