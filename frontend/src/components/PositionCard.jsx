@@ -1,6 +1,16 @@
 import { useState, useMemo } from "react";
 import CardBase from "./ui/CardBase";
 import { useSpotPrice } from "../hooks/useSpotPrice";
+import MiniChart from "./MiniChart";
+
+// ✅ Helper manquant
+const baseSymbol = (symbol = "") => {
+  const s = String(symbol).toUpperCase();
+  if (s.includes("ETH")) return "ETH";
+  if (s.includes("BTC")) return "BTC";
+  // fallback générique (BTC par défaut si inconnu)
+  return "BTC";
+};
 
 const fmtUSD = (v) => {
   const n = Number(v);
@@ -14,20 +24,13 @@ const fmt2 = (v) => {
 };
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v ?? 0));
 
-const baseSymbol = (symbol = "") => {
-  const s = String(symbol).toUpperCase().replace(/[^A-Z]/g, "");
-  if (s.includes("ETH")) return "ETH";
-  if (s.includes("BTC")) return "BTC";
-  return "BTC";
-};
-
 export default function PositionCard({ trade, onClose }) {
   const [closeQty, setCloseQty] = useState(0);
 
   const priceOpen = Number(trade.price_open);
   const qty = Number(trade.quantity);
   const side = trade.side;
-  const symbol = trade.asset?.symbol || `#${trade.asset_id}`;
+  const symbol = trade.symbol || trade.asset?.symbol || `#${trade.asset_id}`;
 
   const spotKey = baseSymbol(symbol);
   const { price: live } = useSpotPrice({ symbol: spotKey, refreshMs: 60_000 });
@@ -53,14 +56,21 @@ export default function PositionCard({ trade, onClose }) {
 
   return (
     <CardBase className="flex flex-col gap-3 bg-white">
-      <div className="flex items-start justify-between">
-        <div className="font-semibold">{symbol}</div>
-        <div className={`text-sm ${pnlClass}`}>
-          {pnl == null ? "—" : `${pnl >= 0 ? "+" : ""}${fmtUSD(pnl)}`}
-          {pnlPct == null ? "" : ` (${pnlPct >= 0 ? "+" : ""}${fmt2(pnlPct)}%)`}
+      {/* En-tête + mini-chart */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="font-semibold">{symbol}</div>
+          <div className={`text-sm ${pnlClass}`}>
+            {pnl == null ? "—" : `${pnl >= 0 ? "+" : ""}${fmtUSD(pnl)}`}
+            {pnlPct == null ? "" : ` (${pnlPct >= 0 ? "+" : ""}${fmt2(pnlPct)}%)`}
+          </div>
+        </div>
+        <div className="w-40 sm:w-48 md:w-56 shrink-0">
+          <MiniChart symbol={symbol} tf="15m" height={110} />
         </div>
       </div>
 
+      {/* Détails */}
       <div className="grid grid-cols-2 gap-x-3 text-sm">
         <div className="text-gray-600">Côté</div>
         <div className="text-right font-medium">{side}</div>
@@ -75,6 +85,7 @@ export default function PositionCard({ trade, onClose }) {
         <div className="text-right">{hasPx ? fmtUSD(px) : "—"}</div>
       </div>
 
+      {/* Slider fermeture */}
       <div className="mt-2">
         <div className="flex items-center justify-between text-sm mb-1">
           <span>Quantité à fermer</span>
