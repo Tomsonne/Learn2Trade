@@ -3,12 +3,10 @@ import CardBase from "./ui/CardBase";
 import { useSpotPrice } from "../hooks/useSpotPrice";
 import MiniChart from "./MiniChart";
 
-// ✅ Helper manquant
 const baseSymbol = (symbol = "") => {
   const s = String(symbol).toUpperCase();
   if (s.includes("ETH")) return "ETH";
   if (s.includes("BTC")) return "BTC";
-  // fallback générique (BTC par défaut si inconnu)
   return "BTC";
 };
 
@@ -52,14 +50,14 @@ export default function PositionCard({ trade, onClose }) {
     return pct * 100;
   }, [hasPx, px, priceOpen, side]);
 
-  const pnlClass = pnl == null ? "text-gray-500" : pnl >= 0 ? "text-green-600" : "text-red-600";
+  const pnlClass = pnl == null ? "text-muted-foreground" : pnl >= 0 ? "text-green-600" : "text-red-600";
 
   return (
-    <CardBase className="flex flex-col gap-3 bg-white">
+    <CardBase className="flex flex-col gap-3 bg-card border border-border rounded-2xl">
       {/* En-tête + mini-chart */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="font-semibold">{symbol}</div>
+          <div className="font-semibold text-card-foreground">{symbol}</div>
           <div className={`text-sm ${pnlClass}`}>
             {pnl == null ? "—" : `${pnl >= 0 ? "+" : ""}${fmtUSD(pnl)}`}
             {pnlPct == null ? "" : ` (${pnlPct >= 0 ? "+" : ""}${fmt2(pnlPct)}%)`}
@@ -72,24 +70,24 @@ export default function PositionCard({ trade, onClose }) {
 
       {/* Détails */}
       <div className="grid grid-cols-2 gap-x-3 text-sm">
-        <div className="text-gray-600">Côté</div>
-        <div className="text-right font-medium">{side}</div>
+        <div className="text-muted-foreground">Côté</div>
+        <div className="text-right font-medium text-card-foreground">{side}</div>
 
-        <div className="text-gray-600">Quantité</div>
-        <div className="text-right">{fmt2(qty)}</div>
+        <div className="text-muted-foreground">Quantité</div>
+        <div className="text-right text-card-foreground">{fmt2(qty)}</div>
 
-        <div className="text-gray-600">Prix d’achat</div>
-        <div className="text-right">{Number.isFinite(priceOpen) ? fmtUSD(priceOpen) : "—"}</div>
+        <div className="text-muted-foreground">Prix d’achat</div>
+        <div className="text-right text-card-foreground">{Number.isFinite(priceOpen) ? fmtUSD(priceOpen) : "—"}</div>
 
-        <div className="text-gray-600">Prix actuel</div>
-        <div className="text-right">{hasPx ? fmtUSD(px) : "—"}</div>
+        <div className="text-muted-foreground">Prix actuel</div>
+        <div className="text-right text-card-foreground">{hasPx ? fmtUSD(px) : "—"}</div>
       </div>
 
       {/* Slider fermeture */}
       <div className="mt-2">
         <div className="flex items-center justify-between text-sm mb-1">
-          <span>Quantité à fermer</span>
-          <span className="font-medium">{fmt2(closeQty)} / {fmt2(maxQty)}</span>
+          <span className="text-card-foreground">Quantité à fermer</span>
+          <span className="font-medium text-card-foreground">{fmt2(closeQty)} / {fmt2(maxQty)}</span>
         </div>
         <input
           type="range"
@@ -98,23 +96,23 @@ export default function PositionCard({ trade, onClose }) {
           step={maxQty >= 1 ? 0.001 : maxQty / 100 || 0.000001}
           value={closeQty}
           onChange={(e) => setCloseQty(clamp(Number(e.target.value), 0, maxQty))}
-          className="w-full accent-orange-500"
+          className="w-full accent-violet"
         />
+
         <div className="flex gap-2 mt-1">
-          {[0, 0.25, 0.5, 0.75, 1].map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => setCloseQty(Number((maxQty * p).toFixed(6)))}
-              className={`flex-1 text-xs py-1 rounded border hover:bg-gray-50 ${
-                Math.abs(closeQty - maxQty * p) < maxQty * 0.01
-                  ? "border-orange-500 text-orange-600"
-                  : "border-gray-200 text-gray-700"
-              }`}
-            >
-              {p * 100}%
-            </button>
-          ))}
+          {[0, 0.25, 0.5, 0.75, 1].map((p) => {
+            const active = Math.abs(closeQty - maxQty * p) < Math.max(maxQty * 0.01, 0.000001);
+            return (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setCloseQty(Number((maxQty * p).toFixed(6)))}
+                className={`flex-1 text-xs ${active ? "chip chip--active" : "chip"}`}
+              >
+                {p * 100}%
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -122,14 +120,11 @@ export default function PositionCard({ trade, onClose }) {
         type="button"
         disabled={!closeQty || closeQty <= 0}
         onClick={() => onClose(trade.id, closeQty)}
-        className={`w-full py-2 rounded-xl text-white mt-1 ${
-          !closeQty || closeQty <= 0
-            ? "bg-orange-300 cursor-not-allowed"
-            : "bg-orange-500 hover:bg-orange-600"
-        }`}
+        className="btn btn-violet w-full rounded-2xl mt-1"
       >
         Fermer {fmt2(closeQty)} {symbol}
       </button>
     </CardBase>
   );
 }
+

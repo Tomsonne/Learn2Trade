@@ -21,7 +21,10 @@ export default function TradesPage() {
   const fetchOpenTrades = useCallback(async () => {
     if (!user?.id) return;
     try {
-      const r = await fetch(`${API_URL}/trade?userId=${user.id}&is_closed=false`, { credentials: "include" });
+      const r = await fetch(
+        `${API_URL}/trade?userId=${user.id}&is_closed=false`,
+        { credentials: "include" }
+      );
       const js = await r.json();
       setPositions(js?.data?.filter((t) => !t.is_closed) || []);
     } catch (e) {
@@ -31,14 +34,15 @@ export default function TradesPage() {
     }
   }, [user]);
 
-  useEffect(() => { if (user) fetchOpenTrades(); }, [user, fetchOpenTrades]);
+  useEffect(() => {
+    if (user) fetchOpenTrades();
+  }, [user, fetchOpenTrades]);
 
   const placeOrder = async (side) => {
     if (!user?.id || !selectedAssetId || !qty) {
       alert("Remplis l’actif et la quantité.");
       return;
     }
-    console.log("📤 Ouverture trade:", { user_id: user.id, asset_id: selectedAssetId, side, qty });
     try {
       const r = await fetch(`${API_URL}/trade/open`, {
         method: "POST",
@@ -75,16 +79,24 @@ export default function TradesPage() {
   };
 
   if (loading) return <div className="p-6 text-center">Chargement…</div>;
-  if (!user) return <div className="p-6 text-center text-red-500">Vous devez être connecté pour accéder aux trades.</div>;
+  if (!user)
+    return (
+      <div className="p-6 text-center text-red-500">
+        Vous devez être connecté pour accéder aux trades.
+      </div>
+    );
 
   return (
     <div className="p-6 flex gap-6 flex-col lg:flex-row">
-      <CardBase className="w-full lg:w-[36%] bg-white">
-        <h2 className="text-xl font-semibold mb-4">Passer un ordre</h2>
+      {/* Carte ordre – alignée au thème */}
+      <CardBase className="w-full lg:w-[36%] bg-card border border-border rounded-2xl">
+        <h2 className="text-xl font-semibold mb-6 text-card-foreground">
+          Passer un ordre
+        </h2>
 
-        <label className="block text-sm mb-2">Actif</label>
+        <label className="form-label">Actif</label>
         <select
-          className="w-full border rounded p-2 mb-4"
+          className="select mb-4"
           value={selectedAssetId}
           onChange={(e) => setSelectedAssetId(e.target.value)}
         >
@@ -93,31 +105,41 @@ export default function TradesPage() {
           <option value="2">BTC/USD</option>
         </select>
 
-        <label className="block text-sm mb-2">Quantité</label>
+        <label className="form-label">Quantité</label>
         <input
           type="number"
           min="0"
           step="0.000001"
-          className="w-full border rounded p-2 mb-4"
+          className="input mb-5"
           placeholder="Ex: 0.005"
           value={qty}
           onChange={(e) => setQty(e.target.value)}
         />
 
         <div className="flex gap-3">
-          <button onClick={() => placeOrder("BUY")} className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl">
+          <button
+            onClick={() => placeOrder("BUY")}
+            className="btn btn-brand flex-1 rounded-2xl"
+          >
             Acheter
           </button>
-          <button onClick={() => placeOrder("SELL")} className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl">
+          <button
+            onClick={() => placeOrder("SELL")}
+            className="btn btn-danger flex-1 rounded-2xl"
+          >
             Vendre
           </button>
         </div>
       </CardBase>
 
+      {/* Positions ouvertes */}
       <div className="flex-1">
-        <h2 className="text-xl font-semibold mb-4">Mes positions (ouvertes)</h2>
+        <h2 className="text-xl font-semibold mb-4 text-card-foreground">
+          Mes positions (ouvertes)
+        </h2>
+
         {positions.length === 0 ? (
-          <div className="text-gray-600">Aucune position ouverte</div>
+          <div className="text-muted">Aucune position ouverte</div>
         ) : (
           <div className="grid md:grid-cols-2 xl:grid-cols-2 gap-4">
             {positions.map((pos) => (
