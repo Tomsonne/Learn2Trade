@@ -5,11 +5,12 @@ export default function HomePage() {
 
   return (
     <main className="bg-white dark:bg-gray-900">
-      <section className="text-center py-20 text-slate-900 dark:text-slate-100">
+      {/* HERO texte seul */}
+      <section className="text-center px-6 pt-20 pb-8 text-slate-900 dark:text-slate-100">
         <h1 className="text-4xl sm:text-6xl font-extrabold">
           Apprenez à trader, simplement.
         </h1>
-        <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">
+        <p className="mt-4 text-lg text-slate-700 dark:text-slate-300">
           Forex + Crypto. Simulation. Temps réel. Zéro risque.
         </p>
 
@@ -24,6 +25,23 @@ export default function HomePage() {
           <Link className="btn btn-outline" to="/learn">
             En savoir plus
           </Link>
+        </div>
+      </section>
+
+      {/* Vidéo en dessous du texte */}
+      <section className="px-6 pb-16">
+        <div className="mx-auto max-w-5xl">
+          {/* Utilise /video_faststart.mp4 si tu l’as générée */}
+          <video
+            className="w-full rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 object-cover"
+            src="/video.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            // controls
+          />
         </div>
       </section>
     </main>
