@@ -1,5 +1,5 @@
 // src/pages/History.jsx
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import CardBase from "../components/ui/CardBase";
 
 const API_URL = window.location.hostname.includes("localhost")
@@ -22,6 +22,7 @@ export default function HistoryPage() {
   const [user, setUser] = useState(null);
   const [trades, setTrades] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("ALL"); // "ALL" | "BTC" | "ETH"
 
   // Vérifie la session utilisateur
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function HistoryPage() {
       .catch(() => setUser(null));
   }, []);
 
-  // Récupère l’historique de trades fermés
+  // Récupère l’historique des trades fermés
   const fetchHistory = useCallback(async () => {
     if (!user?.id) return;
     try {
@@ -51,6 +52,24 @@ export default function HistoryPage() {
     if (user) fetchHistory();
   }, [user, fetchHistory]);
 
+  // Tri du plus récent au plus ancien
+  const sortedTrades = useMemo(() => {
+    return [...trades].sort((a, b) => {
+      const da = new Date(a.closed_at || a.updated_at || a.created_at);
+      const db = new Date(b.closed_at || b.updated_at || b.created_at);
+      return db - da; // plus récent d'abord
+    });
+  }, [trades]);
+
+  // Filtrage par actif
+  const filteredTrades = useMemo(() => {
+    if (filter === "ALL") return sortedTrades;
+    return sortedTrades.filter((t) => {
+      const sym = (t.asset?.symbol || t.symbol || "").toUpperCase();
+      return sym.includes(filter);
+    });
+  }, [sortedTrades, filter]);
+
   if (loading) return <div className="p-6 text-center">Chargement…</div>;
   if (!user)
     return (
@@ -59,7 +78,7 @@ export default function HistoryPage() {
       </div>
     );
 
-  if (!trades.length)
+  if (!filteredTrades.length)
     return (
       <div className="p-6 text-center text-muted-foreground">
         Aucun trade clôturé pour le moment.
@@ -73,11 +92,42 @@ export default function HistoryPage() {
     return diffH < 1 ? `${Math.round(diffH * 60)} min` : `${diffH.toFixed(1)} h`;
   };
 
+  const calcPnl = (t) => {
+    const entry = Number(t.price_open);
+    const exit = Number(t.price_close);
+    const qty = Number(t.quantity);
+    if (!Number.isFinite(entry) || !Number.isFinite(exit) || !Number.isFinite(qty)) return { abs: 0, pct: 0 };
+
+    const diff = t.side === "BUY" ? exit - entry : entry - exit;
+    const abs = diff * qty;
+    const pct = (diff / entry) * 100;
+    return { abs, pct };
+  };
+
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-6 text-card-foreground">
-        Historique des Trades
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold text-card-foreground">
+          Historique des Trades
+        </h1>
+
+        {/* Filtre actif */}
+        <div className="inline-flex rounded-md border border-border overflow-hidden">
+          {["ALL", "BTC", "ETH"].map((opt) => (
+            <button
+              key={opt}
+              onClick={() => setFilter(opt)}
+              className={`px-3 py-1.5 text-sm transition ${
+                filter === opt
+                  ? "bg-indigo-600 text-white"
+                  : "bg-transparent text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-gray-700"
+              } ${opt !== "ALL" ? "border-l border-border" : ""}`}
+            >
+              {opt === "ALL" ? "Tous" : opt}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <CardBase className="overflow-x-auto bg-card border border-border rounded-2xl">
         <table className="min-w-full border-separate border-spacing-y-2 text-sm">
@@ -95,12 +145,11 @@ export default function HistoryPage() {
             </tr>
           </thead>
           <tbody>
-            {trades.map((t) => {
-              const pnlAbs = Number(t.pnl_abs ?? t.realized_pnl ?? 0);
-              const pnlPct = Number(t.pnl_pct ?? 0);
+            {filteredTrades.map((t) => {
+              const { abs: pnlAbs, pct: pnlPct } = calcPnl(t);
               const positive = pnlAbs >= 0;
-              const status = t.is_closed ? "Clôturé" : "Ouvert";
               const symbol = t.asset?.symbol || t.symbol || "#";
+              const status = t.is_closed ? "Clôturé" : "Ouvert";
 
               return (
                 <tr key={t.id} className="bg-surface rounded-xl shadow-sm">
@@ -112,9 +161,7 @@ export default function HistoryPage() {
                       minute: "2-digit",
                     })}
                   </td>
-                  <td className="px-3 py-2 font-medium text-card-foreground">
-                    {symbol}
-                  </td>
+                  <td className="px-3 py-2 font-medium text-card-foreground">{symbol}</td>
                   <td className="px-3 py-2">{t.side}</td>
                   <td className="px-3 py-2">{nfQty.format(t.quantity)}</td>
                   <td className="px-3 py-2">{nfUsd.format(t.price_open)}</td>
@@ -124,9 +171,7 @@ export default function HistoryPage() {
                       {`${pnlAbs >= 0 ? "+" : ""}${nfUsd.format(pnlAbs)}`}
                     </span>
                     <span
-                      className={`ml-1 text-xs ${
-                        positive ? "text-emerald-500" : "text-rose-500"
-                      }`}
+                      className={`ml-1 text-xs ${positive ? "text-emerald-500" : "text-rose-500"}`}
                     >
                       ({nfPct.format(pnlPct)}%)
                     </span>
