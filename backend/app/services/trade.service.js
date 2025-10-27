@@ -8,7 +8,7 @@ const client = binance.default();
 const { Trade, User, Asset } = models;
 
 // ===========================
-// 📈 Récupère le prix marché
+//  Récupère le prix marché
 // ===========================
 async function getMarketPriceDecimal(symbol) {
   try {
@@ -22,7 +22,7 @@ async function getMarketPriceDecimal(symbol) {
 }
 
 // ===========================
-// 🟢 Ouvre un trade
+//  Ouvre un trade
 // ===========================
 export async function openTrade(userId, { asset_id, side, quantity }) {
   if (!userId || !asset_id || !side || !quantity) throw new ValidationError("Champs manquants");
@@ -66,13 +66,13 @@ export async function openTrade(userId, { asset_id, side, quantity }) {
 }
 
 // ===========================
-// 🔴 Ferme (partiellement ou totalement) un trade
+//  Ferme (partiellement ou totalement) un trade
 // ===========================
 export async function closeTrade(tradeId, quantityToClose) {
   if (!tradeId) throw new ValidationError("tradeId manquant");
 
   return sequelize.transaction(async (tx) => {
-    // 1️⃣ Récupère le trade d’origine
+    // Récupère le trade d’origine
     const trade = await Trade.findByPk(tradeId, {
       transaction: tx,
       lock: tx.LOCK.UPDATE,
@@ -80,36 +80,36 @@ export async function closeTrade(tradeId, quantityToClose) {
     if (!trade) throw new ValidationError("Trade introuvable");
     if (trade.is_closed) throw new ValidationError("Trade déjà clôturé");
 
-    // 2️⃣ Récupère les entités liées
+    //  Récupère les entités liées
     const asset = await Asset.findByPk(trade.asset_id, { transaction: tx });
     const user = await User.findByPk(trade.user_id, { transaction: tx, lock: tx.LOCK.UPDATE });
     if (!asset) throw new ValidationError("Actif introuvable");
     if (!user) throw new ValidationError("Utilisateur introuvable");
 
-    // 3️⃣ Vérifie la quantité demandée
+    // Vérifie la quantité demandée
     const closeQty = new Decimal(quantityToClose || trade.quantity);
     const fullQty = new Decimal(trade.quantity);
     if (closeQty.lte(0) || closeQty.gt(fullQty))
       throw new ValidationError("Quantité invalide pour la fermeture");
 
-    // 4️⃣ Prix marché actuel
+    // Prix marché actuel
     const symbol = asset.symbol || "BTCUSDT";
     const priceClose = await getMarketPriceDecimal(symbol);
     const priceOpen = new Decimal(trade.price_open);
 
-    // 5️⃣ Calcule le PnL de la portion fermée
+    // Calcule le PnL de la portion fermée
     const pnlPerUnit =
       trade.side === "BUY"
         ? priceClose.minus(priceOpen)
         : priceOpen.minus(priceClose);
     const pnl = pnlPerUnit.mul(closeQty);
 
-    // 6️⃣ Crédit cash
+    // Crédit cash
     const credit = priceClose.mul(closeQty);
     user.cash = new Decimal(user.cash || "0").plus(credit).toString();
     await user.save({ transaction: tx });
 
-    // 7️⃣ Crée un doublon fermé
+    // Crée un doublon fermé
     const closedTrade = await Trade.create(
       {
         user_id: trade.user_id,
@@ -126,7 +126,7 @@ export async function closeTrade(tradeId, quantityToClose) {
       { transaction: tx }
     );
 
-    // 8️⃣ Met à jour le trade d’origine
+    // Met à jour le trade d’origine
     const remainingQty = fullQty.minus(closeQty);
     if (remainingQty.lte(0)) {
       trade.is_closed = true;
@@ -150,7 +150,7 @@ export async function closeTrade(tradeId, quantityToClose) {
 }
 
 // ===========================
-// 📋 Récupère les trades d’un user
+//  Récupère les trades d’un user
 // ===========================
 export async function getTradesByUser({ userId, is_closed, assetId }) {
   if (!userId) throw new Error("userId requis");
@@ -159,9 +159,27 @@ export async function getTradesByUser({ userId, is_closed, assetId }) {
     where.is_closed = is_closed === true || is_closed === "true";
   if (assetId) where.asset_id = Number(assetId);
 
-  return Trade.findAll({
+  const trades = await Trade.findAll({
     where,
     order: [["opened_at", "DESC"]],
     include: [{ model: Asset, as: "asset", attributes: ["id", "symbol"] }],
   });
+
+  // Ajoute ici le calcul du PnL %
+  for (const t of trades) {
+    const entry = parseFloat(t.price_open);
+    const qty = parseFloat(t.quantity);
+    const pnl = parseFloat(t.pnl);
+
+    if (!Number.isFinite(entry) || !Number.isFinite(qty) || !Number.isFinite(pnl)) {
+      t.setDataValue("pnl_pct", 0);
+      continue;
+    }
+
+    const invested = entry * qty;
+    const pct = invested !== 0 ? (pnl / invested) * 100 : 0;
+    t.setDataValue("pnl_pct", Number(pct.toFixed(2))); // stocké virtuellement dans la réponse
+  }
+
+  return trades;
 }

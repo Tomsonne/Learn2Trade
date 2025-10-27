@@ -11,12 +11,8 @@ const nfUsd = new Intl.NumberFormat("fr-FR", {
   currency: "USD",
   maximumFractionDigits: 2,
 });
-const nfQty = new Intl.NumberFormat("fr-FR", {
-  maximumSignificantDigits: 6,
-});
-const nfPct = new Intl.NumberFormat("fr-FR", {
-  maximumFractionDigits: 2,
-});
+const nfQty = new Intl.NumberFormat("fr-FR", { maximumSignificantDigits: 6 });
+const nfPct = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
 
 export default function HistoryPage() {
   const [user, setUser] = useState(null);
@@ -32,7 +28,7 @@ export default function HistoryPage() {
       .catch(() => setUser(null));
   }, []);
 
-  // Récupère l’historique des trades fermés
+  // Récupère les trades fermés
   const fetchHistory = useCallback(async () => {
     if (!user?.id) return;
     try {
@@ -57,7 +53,7 @@ export default function HistoryPage() {
     return [...trades].sort((a, b) => {
       const da = new Date(a.closed_at || a.updated_at || a.created_at);
       const db = new Date(b.closed_at || b.updated_at || b.created_at);
-      return db - da; // plus récent d'abord
+      return db - da;
     });
   }, [trades]);
 
@@ -92,16 +88,14 @@ export default function HistoryPage() {
     return diffH < 1 ? `${Math.round(diffH * 60)} min` : `${diffH.toFixed(1)} h`;
   };
 
-  const calcPnl = (t) => {
-    const entry = Number(t.price_open);
-    const exit = Number(t.price_close);
-    const qty = Number(t.quantity);
-    if (!Number.isFinite(entry) || !Number.isFinite(exit) || !Number.isFinite(qty)) return { abs: 0, pct: 0 };
-
-    const diff = t.side === "BUY" ? exit - entry : entry - exit;
-    const abs = diff * qty;
-    const pct = (diff / entry) * 100;
-    return { abs, pct };
+  // Fallback local si le backend n’envoie pas encore pnl_pct
+  const calcLocalPct = (t) => {
+    const entry = parseFloat(t.price_open);
+    const qty = parseFloat(t.quantity);
+    const pnl = parseFloat(t.pnl);
+    if (!Number.isFinite(entry) || !Number.isFinite(qty) || !Number.isFinite(pnl)) return 0;
+    const invested = entry * qty;
+    return invested ? (pnl / invested) * 100 : 0;
   };
 
   return (
@@ -111,7 +105,6 @@ export default function HistoryPage() {
           Historique des Trades
         </h1>
 
-        {/* Filtre actif */}
         <div className="inline-flex rounded-md border border-border overflow-hidden">
           {["ALL", "BTC", "ETH"].map((opt) => (
             <button
@@ -146,7 +139,8 @@ export default function HistoryPage() {
           </thead>
           <tbody>
             {filteredTrades.map((t) => {
-              const { abs: pnlAbs, pct: pnlPct } = calcPnl(t);
+              const pnlAbs = Number(t.pnl ?? 0);
+              const pnlPct = Number(t.pnl_pct ?? calcLocalPct(t));
               const positive = pnlAbs >= 0;
               const symbol = t.asset?.symbol || t.symbol || "#";
               const status = t.is_closed ? "Clôturé" : "Ouvert";
