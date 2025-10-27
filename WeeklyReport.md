@@ -1,188 +1,195 @@
-# 📄 Weekly Progress Report – Learn2Trade
 
-## ✅ Semaine du 15 au 19 Septembre 2025
+[Weekly_Progress_Report_Learn2Trade.md](https://github.com/user-attachments/files/23161584/Weekly_Progress_Report_Learn2Trade.md)
+# Weekly Progress Report – Learn2Trade
+
+## Semaine du 15 au 19 Septembre 2025
 
 ### 1. Structuration du projet backend
-- Mise en place d’une arborescence claire pour séparer les responsabilités :  
-  - `api` pour les routes (endpoints REST)  
-  - `controllers` pour la logique API  
-  - `services` pour la logique métier  
-  - `models` pour les classes SQL  
-  - `core` pour la configuration et la connexion à la base  
-  - `test` pour les tests unitaires  
-- Création d’un point d’entrée unique `server.js`.  
-- Préparation de l’environnement de développement avec Docker (Node + Postgres).  
+- Création du dossier `backend/app` avec séparation claire :  
+  - `api` : routes REST (auth, trade, asset, market, news, user, position)  
+  - `controllers` : logique d’API centralisée  
+  - `services` : logique métier (auth, trade, market, etc.)  
+  - `models` : classes et schéma de données SQL  
+  - `core` : configuration (`config.js`, `db.js`)  
+  - `validators` et `utils` : gestion des erreurs et validation  
+- Mise en place du serveur unique `server.js` et du `Dockerfile`.  
+- Configuration complète de l’environnement via `docker-compose.yml` (Node + PostgreSQL).  
 
----
-
-### 2. Base de données PostgreSQL
-- Choix de **PostgreSQL** pour la fiabilité et la compatibilité SQL.  
-- Création du schéma complet (`schema.sql`) contenant les tables principales :  
+### 2. Base de données
+- Choix de PostgreSQL pour sa robustesse et ses types numériques précis.  
+- Schéma SQL dans `backend/db/init/schema.sql` incluant :  
   `users`, `assets`, `strategies`, `trades`, `positions`, `strategy_signals`, `news_cache`.  
-- Initialisation automatique du conteneur Postgres via `docker-compose`.  
-- Tests de connexion et premières requêtes de validation via DBeaver.  
+- Test de connexion et initialisation via `docker-compose up`.  
+
+### 3. Tests unitaires
+- Configuration de Jest (`jest.config.js`, `jest.setup.js`).  
+- Premier test sur `auth.service.test.js` et `user.service.test.js`.  
+
+### Problèmes rencontrés
+- Synchronisation lente entre conteneurs Node et Postgres.  
+- Ajustement du mapping entre modèles et colonnes SQL.  
+
+### Résultats
+- Environnement de développement stable.  
+- Serveur Express connecté à PostgreSQL via `pg`.  
+- Schéma validé et premier test Jest fonctionnel.  
 
 ---
 
-### 3. Configuration serveur
-- Mise en place d’un serveur **Express.js** avec middlewares (CORS, helmet, morgan, JSON parsing).  
-- Validation de la communication backend ↔ base de données.  
+## Semaine du 22 au 26 Septembre 2025
+
+### 1. Modèles et services
+- Implémentation des modèles `User`, `Trade`, `Position`, `Asset`, `Strategy`.  
+- Requêtes SQL paramétrées dans chaque service (prévention injection).  
+- Validation des relations et contraintes clés étrangères.  
+
+### 2. Logique métier
+- `TradeService` : ouverture/fermeture de position, calcul du PnL.  
+- `UserService` : création d’utilisateur, hachage de mot de passe (bcrypt).  
+- `AssetService` : gestion de la liste d’actifs (`BTC/USD`, `ETH/USD`).  
+
+### 3. Migration API marché
+- Abandon de CoinGecko (limites API et granularité horaire insuffisante).  
+- Passage à Binance API : endpoints OHLC précis (`1m`, `1h`, `4h`, `1d`).  
+
+### Problèmes rencontrés
+- Rate limit CoinGecko.  
+- Format de données incohérent entre CoinGecko et nos besoins.  
+
+### Résultats
+- Backend structuré et testable.  
+- Services fonctionnels et découplés.  
+- Nouvelle source de données de marché opérationnelle.  
 
 ---
 
-### ⚠️ Problèmes rencontrés
-- Difficulté initiale à synchroniser les conteneurs Docker.  
-- Petites erreurs de mapping entre les noms de colonnes SQL et les propriétés JS.  
+## Semaine du 29 Septembre au 3 Octobre 2025
 
----
+### 1. Initialisation du frontend
+- Dossier `frontend` créé avec Vite + React + TailwindCSS.  
+- Structure conforme :  
+  - `pages` (Dashboard, Homepage, Login, Signup, News, Trades, Indicators, History)  
+  - `components` (Header, Footer, Sidebar, CandleLite, MiniChart, etc.)  
+  - `hooks` (`useMarketSeries`, `useSpotPrice`)  
+  - `utils` (`pnl.js`, `positionsToKpis.js`, `cashFromTrades.js`)  
 
-### 🎯 Résultats
-- Environnement de développement complet et fonctionnel.  
-- Serveur Node connecté à PostgreSQL.  
-- Schéma SQL stable et validé.  
-
----
-
-## ✅ Semaine du 22 au 26 Septembre 2025
-
-### 1. Création des modèles
-- Définition des modèles `User`, `Trade`, `Position`, `Asset`, `Strategy`.  
-- Implémentation d’un **repository SQL** avec requêtes préparées.  
-- Vérification des relations (`user_id`, `asset_id`, `trade_id`) et des contraintes.  
-
----
-
-### 2. Services métier
-- Création de `TradeService` pour ouvrir/fermer un trade avec calcul du PnL.  
-- Début du service `UserService` pour gérer l’inscription et l’authentification (bcrypt).  
-- Mise en place de `AssetService` pour récupérer les actifs listés.  
-
----
-
-### ⚠️ Problèmes rencontrés
-- Première tentative d’intégration de l’API **CoinGecko** :  
-  - Limites strictes de taux d’appels (`rate limit exceeded`).  
-  - Données parfois obsolètes ou incomplètes .
-  - problemes sur les Tf12h et 1d  
-- Décision de **migrer vers l’API Binance**, plus fiable et moins limitative.  
-
----
-
-### 🎯 Résultats
-- Backend plus structuré et cohérent.  
-- Première couche de logique métier validée.  
-- Planification du passage à Binance pour la récupération de prix en temps réel.  
-
----
-
-## ✅ Semaine du 29 Septembre au 3 Octobre 2025
-
-### 1. Démarrage du frontend React
-- Initialisation du projet frontend avec **Vite + React + TailwindCSS**.  
-- Structure du dossier `src` : `pages`, `components`, `hooks`, `api.js`.  
-- Configuration du proxy API pour le développement local.  
-
----
-
-### 2. Liaison backend ↔ frontend
-- Création d’un service API central (`api.js`) pour gérer les appels (`fetch`).  
-- Tests de récupération des actifs et prix reels depuis le backend.  
-- Affichage des cours page strategie dynamique(api coingecko).  
-
----
+### 2. Intégration backend ↔ frontend
+- Service `src/api.js` centralisant les appels API avec `fetch`.  
+- Connexion fonctionnelle au backend local (`/api/v1/...`).  
+- Tests d’affichage des actifs et positions utilisateurs.  
 
 ### 3. Interface de base
-- Création des composants :  
-  - `CardBase` (structure commune)  
-  - `KpiCard` (indicateurs clés)  
-  - `PortfolioDistribution` (répartition graphique)  
-  - `PositionsTable` (liste des positions ouvertes).  
+- Composants visuels :  
+  - `CardBase`, `KpiCard`, `PortfolioDistribution`, `PositionsTable`.  
+- Navigation avec `ProtectedRoute` et `React Router`.  
+
+### Problèmes rencontrés
+- Gestion des variables d’environnement (`import.meta.env`) sous Vite.  
+- Adaptation de l’URL API entre Docker et localhost.  
+
+### Résultats
+- Dashboard React fonctionnel et connecté.  
+- Interface responsive et cohérente avec TailwindCSS.  
 
 ---
 
-### ⚠️ Problèmes rencontrés
-- Difficultés à gérer les variables d’environnement avec Vite (`import.meta.env`).  
-- Ajustements nécessaires pour l’URL API selon l’environnement Docker / local.  
-
----
-
-### 🎯 Résultats
-- Premier **Dashboard React fonctionnel**.  
-- Données affichées depuis le backend.  
-- Design cohérent et responsive avec TailwindCSS.  
-
----
-
-## ✅ Semaine du 6 au 10 Octobre 2025
+## Semaine du 6 au 10 Octobre 2025
 
 ### 1. Indicateurs techniques
-- Création du module `lib/indicators.js` (RSI et Moyennes Mobiles).  
-- Développement du hook `useMarketSeries` pour agréger les données OHLC.  
-- Intégration du graphique **CandleLite.jsx** avec **lightweight-charts**.  
-
----
+- Module `lib/indicators.js` : calculs RSI et moyennes mobiles.  
+- Hook `useMarketSeries` pour agréger les bougies OHLC.  
+- Intégration du graphique `CandleLite.jsx` via Lightweight Charts.  
 
 ### 2. Backend trading
-- Ajout des routes `/api/v1/trade/open` et `/api/v1/trade/:id/close`.  
-- Gestion des transactions SQL avec `FOR UPDATE`.  
-- Calcul du profit/loss et mise à jour des positions ouvertes.  
+- Nouvelles routes :  
+  - `POST /api/v1/trade/open`  
+  - `POST /api/v1/trade/:id/close`  
+- Gestion des transactions SQL atomiques (`BEGIN / COMMIT / ROLLBACK`).  
+- Calcul dynamique du PnL et mise à jour des positions.  
+
+### Problèmes rencontrés
+- Conflits `FOR UPDATE` sur jointures SQL.  
+- Simplification du modèle `Position` pour améliorer la stabilité.  
+
+### Résultats
+- Indicateurs RSI et MA fonctionnels.  
+- Backend stable et transactions validées.  
+- Graphique interactif en temps réel sur le Dashboard.  
 
 ---
 
-### ⚠️ Problèmes rencontrés
-- Erreurs SQL liées à `FOR UPDATE` sur des jointures extérieures (`nullable side`).  
-- Nécessité de revoir la logique de récupération de positions ouvertes avant le verrouillage.  
-- Ajustement du modèle `Position` pour simplifier la requête.  
+## Semaine du 13 au 17 Octobre 2025
+
+### 1. Optimisation du Dashboard
+- Refactorisation complète des composants (`KpiCard`, `PositionsTable`, `PortfolioDistribution`).  
+- Calcul dynamique des KPI : solde total, cash disponible, PnL global, montant investi.  
+- Amélioration de la cohérence visuelle (formatage, alignement, valeurs monétaires).  
+
+### 2. Migration complète vers Binance
+- Suppression du code CoinGecko.  
+- Nouveau service `market.service.js` utilisant les chandeliers Binance (`klines`).  
+- Synchronisation des indicateurs RSI/MA avec les nouvelles données.  
+
+### 3. Nettoyage et cohérence
+- Correction du décalage horaire sur les bougies (UTC + 2).  
+- Suppression du code d’agrégation local redondant.  
+- Vérification des timestamps et cohérence du cache local.  
+
+### Problèmes rencontrés
+- Parsing JSON différent entre APIs.  
+- Décalage de deux heures corrigé sur CandleLite.  
+
+### Résultats
+- Intégration Binance totalement stable.  
+- Dashboard plus fluide et réactif.  
+- Indicateurs fiables et cohérents sur chaque timeframe.  
 
 ---
 
-### 🎯 Résultats
-- Indicateurs techniques opérationnels (RSI, MA).  
-- Backend de trading stable après correction des transactions SQL.  
-- Graphiques interactifs fonctionnels sur le Dashboard.  
+## Prochaines étapes
+- Finaliser l’historique des trades et les graphiques de performance.  
+- Ajouter la persistance du rendement utilisateur (ROI cumulé).  
+- Préparer la démonstration et les supports pour le Demo Day Holberton.  
+- Ajouter une suite de tests d’intégration complète avant le déploiement définitif.
+## Semaine du 20 au 24 Octobre 2025
 
----
+### 1. Finalisation du Dashboard
+- Intégration complète des composants de visualisation :  
+  - `KpiGrid` pour les indicateurs principaux (solde, PnL, cash disponible, montant investi).  
+  - `PositionsTable` pour le suivi des positions ouvertes et fermées.  
+  - `PortfolioDistribution` pour la répartition des actifs détenus.  
+  - `CandleLite.jsx` pour l’affichage des bougies de prix en temps réel.  
+- Ajout de filtres temporels sur le graphique (`1h`, `4h`, `1d`).  
+- Amélioration des performances de rendu grâce à `useMemo` et `useEffect` optimisés.  
 
-## ✅ Semaine du 13 au 17 Octobre 2025
+### 2. Connexion au backend en production
+- Configuration du proxy HTTPS pour relier le frontend à l’API hébergée sur Render.  
+- Ajustement des variables d’environnement pour le mode production (`VITE_API_URL`).  
+- Vérification du comportement en production (latence, authentification, échanges JSON).  
 
-### 1. Amélioration du Dashboard
-- Refactorisation et nettoyage des composants (`KpiCard`, `PositionsTable`, `PortfolioDistribution`).  
-- Affichage dynamique des KPI : **solde total**, **cash disponible**, **PnL total**, **montant investi**.  
-- Optimisation du formatage (valeurs monétaires, pourcentages, alignement visuel).  
+### 3. Déploiement sur Vercel
+- Déploiement réussi du frontend sur **Vercel** :  
+  [https://learn2-trade.vercel.app](https://learn2-trade.vercel.app)  
+- Configuration du domaine, du build Vite et des règles de redirection (`vercel.json`).  
+- Vérification de la compatibilité entre les appels API et le backend Render.  
 
----
+### 4. Tests utilisateur
+- Vérification de la navigation complète : connexion, dashboard, graphique, historique.  
+- Tests de responsive design sur ordinateur, tablette et mobile.  
+- Validation du fonctionnement sur plusieurs navigateurs (Chrome, Edge, Firefox).  
 
-### 2. Données de marché et changement d’API
-- **Abandon de l’API CoinGecko** : les données en 30m/1h étaient trop difficiles à ré-agréger selon les timeframes (TF).  
-- **Migration vers l’API Binance**, plus adaptée aux besoins du projet :  
-  - Données OHLC disponibles directement selon plusieurs intervalles (`1m`, `1h`, `4h`, `1d`, etc.)  
-  - Meilleure fréquence de mise à jour et cohérence temporelle.  
-- Simplification du service `market.services.js` pour récupérer directement les chandeliers depuis Binance.  
+### 5. Expérience utilisateur (Homepage vidéo et CTA)
+- Ajout d’une vidéo d’introduction sur la page d’accueil pour encourager la création de compte et l’essai du service.  
+- Fichiers ajoutés : `public/video.mp4` et `public/video_faststart.mp4` (optimisé faststart pour déplacer l’atome moov en début de fichier).  
+- Intégration `<video autoplay muted loop playsinline>` avec poster de fallback et contrôle de compatibilité mobile.  
+- CTA mis en avant sous la vidéo : bouton **Créer un compte** (route `/signup`) et **Essayer la démo**.  
+- Fallback mobile : image statique si l’autoplay est bloqué, afin de préserver le TTI et l’UX.  
+- Impact mesuré : LCP amélioré sur desktop grâce à la version faststart ; aucune régression Core Web Vitals constatée.
+### Problèmes rencontrés
+- Légère différence de fuseau horaire entre Render et Vercel (UTC vs UTC+2).  
+- Nécessité de régénérer les clés JWT après déploiement pour le domaine HTTPS.  
 
----
-
-### 3. Stabilité et cohérence globale
-- Amélioration du rendu du graphique `CandleLite.jsx` avec les nouvelles données Binance.  
-- Vérification des calculs de RSI et de moyennes mobiles sur les nouvelles séries de données.  
-- Nettoyage des conversions de timestamps et suppression des fonctions d’agrégation locales devenues inutiles.  
-
----
-
-### ⚠️ Problèmes rencontrés
-- Ajustement du parsing JSON entre CoinGecko et Binance (format des timestamps et clés).  
-- Petites erreurs de synchronisation entre les données Binance et les indicateurs (résolues en recalculant le buffer local).  
-- Besoin d’adapter les hooks React (`useMarketSeries`) à la nouvelle structure des données.  
-
----
-
-### 🎯 Résultats
-- **Intégration complète de l’API Binance** réussie.  
-- **Dashboard plus fluide** et plus réactif grâce aux données déjà agrégées par timeframe.  
-- **Calculs d’indicateurs techniques fiables** sur des données cohérentes.  
-
----
-
-## 🔜 Prochaines étapes  
-- finaliser history et dashboard 
-- Ajouter la **persistance des performances utilisateurs** et l’historique des trades.  
-- Préparer une **présentation fonctionnelle du projet** (demo live + slides).  
+### Résultats
+- Dashboard complet, fluide et connecté au backend.  
+- Application déployée avec succès sur Vercel pour démonstration publique.  
+- Interface réactive, responsive et stable en production.
