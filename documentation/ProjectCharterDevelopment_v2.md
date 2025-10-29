@@ -128,6 +128,7 @@ Le projet combine des outils pédagogiques, un tableau de bord interactif et des
 |-----------|-------------|
 | Code source complet | https://github.com/Tomsonne/Learn2Trade/tree/main |
 | Application en ligne | [https://learn2-trade.vercel.app](https://learn2-trade.vercel.app) |
+| Trello | https://trello.com/b/xV7jt6Jt/l2t |
 | Rapport hebdomadaire | WeeklyReport.md |
 | Documentation technique | TechnicalDocumentation.md |
 | Présentation et schémas | images/high_level_diagram.png, images/page_dashboards.png, images/page_acceuil.png |
