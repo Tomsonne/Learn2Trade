@@ -75,7 +75,7 @@ Le projet combine des outils pédagogiques, un tableau de bord interactif et des
 - Simulation de trading virtuel (Buy/Sell).  
 - Stratégies RSI et MA Crossover.  
 - Vidéo d’accueil sur la page principale (incitation à l’inscription).  
-- Déploiement sur Vercel (frontend) et Render (backend).
+- Déploiement sur Vercel (frontend) et Railway (backend).
 
 **Out-of-Scope (MVP)**
 - Trading réel avec argent.  
@@ -118,7 +118,7 @@ Le projet combine des outils pédagogiques, un tableau de bord interactif et des
 ### Phase 4 : UX et mise en production (Semaines 9–10)
 - Vidéo d’accueil et CTA sur la homepage.  
 - Amélioration UI/UX (dark mode, responsive).  
-- Déploiement sur Vercel + Render.  
+- Déploiement sur Vercel + Railway.  
 - Tests d’intégration finaux et préparation Demo Day.  
 
 ---
@@ -138,3 +138,4 @@ Le projet combine des outils pédagogiques, un tableau de bord interactif et des
 ## 6. Auteurs
 - Julien Pulon — Développeur Full Stack.  
 - Thomas Rousseau — Développeur Full Stack. 
+
