@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/Logo_L2T.png" alt="Logo" width="400"/>
+  <img src="../images/Logo_L2T.png" alt="Logo" width="400"/>
 </p>
 
 # Idea Development Documentation
