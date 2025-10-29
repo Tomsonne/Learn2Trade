@@ -62,7 +62,7 @@ Méthode utilisée : **MoSCoW Prioritization** et suivi agile via **Trello + Wee
 ### Tests réalisés
 - **Tests unitaires (Jest)** : services `auth.service.js`, `user.service.js`
 - **Tests d’intégration (Postman)** : endpoints `/auth`, `/trade`, `/position`
-- **Tests finaux (prod)** : Vercel + Render → connexions et dashboard validés
+- **Tests finaux (prod)** : Vercel + Railway → connexions et dashboard validés
 
 ### Preuves
 Captures stockées dans le dossier `/images` :  
@@ -88,7 +88,7 @@ Captures stockées dans le dossier `/images` :
 **Projet :** Learn2Trade (Demo Day / Spécialisation Full Stack)  
 **Email :** pulonjulien@gmail.com.com 
 
-*Auteur :**  Thomas Rousseau – Développeur Full Stack  
+**Auteur :**  Thomas – Développeur Full Stack  
 **Formation :** Holberton School France  
 **Projet :** Learn2Trade (Demo Day / Spécialisation Full Stack)  
 **Email :** thomasrousseau19@gmail.com 
@@ -97,4 +97,5 @@ Captures stockées dans le dossier `/images` :
 **Remarque :**
 Tous les documents initiaux sont conservés pour la traçabilité pédagogique.  
 Les fichiers “_v2” et “_Addendum” représentent la version finale validée lors du développement effectif.
+
 
