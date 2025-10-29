@@ -1,6 +1,6 @@
 [ProjectCharterDevelopment_v2.md](https://github.com/user-attachments/files/23161564/ProjectCharterDevelopment_v2.md)
 <p align="center">
-  <img src="images/Logo_L2T.png" alt="Logo" width="400"/>
+  <img src="../images/Logo_L2T.png" alt="Logo" width="400"/>
 </p>
 
 # Project Charter – Learn2Trade
@@ -138,5 +138,6 @@ Le projet combine des outils pédagogiques, un tableau de bord interactif et des
 ## 6. Auteurs
 - Julien Pulon — Développeur Full Stack.  
 - Thomas Rousseau — Développeur Full Stack. 
+
 
 
