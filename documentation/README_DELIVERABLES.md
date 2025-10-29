@@ -64,12 +64,6 @@ Méthode utilisée : **MoSCoW Prioritization** et suivi agile via **Trello + Wee
 - **Tests d’intégration (Postman)** : endpoints `/auth`, `/trade`, `/position`
 - **Tests finaux (prod)** : Vercel + Railway → connexions et dashboard validés
 
-### Preuves
-Captures stockées dans le dossier `/images` :  
-- `test_postman_auth.png` – test API Auth  
-- `test_jest_trade.png` – test Jest backend  
-- `page_dashboards.png`, `page_acceuil.png` – pages frontend en production  
-
 ---
 
 ## 7. Suivi et rétrospective
@@ -91,11 +85,13 @@ Captures stockées dans le dossier `/images` :
 **Auteur :**  Thomas – Développeur Full Stack  
 **Formation :** Holberton School France  
 **Projet :** Learn2Trade (Demo Day / Spécialisation Full Stack)  
-**Email :** thomasrousseau19@gmail.com 
+**Email :** thomas.rousseau19@gmail.com 
+
 ---
 
 **Remarque :**
 Tous les documents initiaux sont conservés pour la traçabilité pédagogique.  
 Les fichiers “_v2” et “_Addendum” représentent la version finale validée lors du développement effectif.
+
 
 
