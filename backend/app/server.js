@@ -30,8 +30,10 @@ app.use(
   })
 );
 
-// ✅ Autorise toutes les requêtes préflight (OPTIONS)
-app.options("*", cors({ origin: allowedOrigins, credentials: true }));
+//  Autorise toutes les requêtes préflight (OPTIONS)
+app.options(/.*/, cors({ origin: allowedOrigins, credentials: true }));
+
+//app.options("*", cors({ origin: allowedOrigins, credentials: true }));
 
 // ──────────────────────────────────────────────
 // Middlewares généraux
