@@ -89,7 +89,7 @@ function handleError(res, err) {
   if (err instanceof ValidationError) {
     res.status(400).json({ status: "error", message: err.message });
   } else {
-    console.error("❌ user.controller error:", err);
+    console.error("user.controller error:", err);
     res.status(500).json({ status: "error", message: "Erreur serveur" });
   }
 }

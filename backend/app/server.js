@@ -34,7 +34,7 @@ app.use(
 app.options(/.*/, cors({ origin: allowedOrigins, credentials: true }));
 
 //app.options("*", cors({ origin: allowedOrigins, credentials: true }));
-
+//mauvaise version express
 // ──────────────────────────────────────────────
 // Middlewares généraux
 app.use(express.json());
@@ -45,11 +45,11 @@ app.use(cookieParser());
 app.get("/healthz", (_req, res) => res.json({ status: "ok" }));
 
 // ──────────────────────────────────────────────
-// 🧩 Routes principales (API v1)
+// Routes principales (API v1)
 app.use("/api/v1", v1Router);
 
 // ──────────────────────────────────────────────
-// ❌ 404 — Route non trouvée
+//  404 — Route non trouvée
 app.use((_req, res) => {
   res.status(404).json({
     status: "error",
@@ -58,9 +58,9 @@ app.use((_req, res) => {
 });
 
 // ──────────────────────────────────────────────
-// ⚠️ Gestion des erreurs serveur
+//  Gestion des erreurs serveur
 app.use((err, req, res, _next) => {
-  console.error("❌ ERR:", err.message || err);
+  console.error(" ERR:", err.message || err);
   res.status(500).json({
     status: "error",
     error: {
@@ -72,24 +72,24 @@ app.use((err, req, res, _next) => {
 });
 
 // ──────────────────────────────────────────────
-// 🚀 Démarrage du serveur
+// Démarrage du serveur
 async function start() {
   try {
     await sequelize.authenticate();
-    console.log("✅ Base de données connectée");
+    console.log("Base de données connectée");
 
-    console.log("📦 Models chargés :", Object.keys(models));
-    console.log("🌍 Origines CORS autorisées :", allowedOrigins);
+    console.log("Models chargés :", Object.keys(models));
+    console.log("Origines CORS autorisées :", allowedOrigins);
 
     await sequelize.sync({ alter: true });
-    console.log("✅ Synchronisation Sequelize terminée");
+    console.log("Synchronisation Sequelize terminée");
 
     const PORT = process.env.PORT || 8000;
     app.listen(PORT, "0.0.0.0", () => {
-      console.log(`✅ Learn2Trade backend running on port ${PORT}`);
+      console.log(`Learn2Trade backend running on port ${PORT}`);
     });
   } catch (err) {
-    console.error("❌ Failed to start server:", err);
+    console.error("Failed to start server:", err);
     process.exit(1);
   }
 }
@@ -99,12 +99,12 @@ start();
 // ──────────────────────────────────────────────
 // 🔌 Arrêt propre (Docker / Railway)
 process.on("SIGTERM", async () => {
-  console.log("🛑 SIGTERM reçu, arrêt du serveur...");
+  console.log("SIGTERM reçu, arrêt du serveur...");
   try {
     await sequelize.close();
-    console.log("✅ Connexion DB fermée proprement");
+    console.log("Connexion DB fermée proprement");
   } catch {
-    console.warn("⚠️ Erreur lors de la fermeture de la DB");
+    console.warn("Erreur lors de la fermeture de la DB");
   }
   process.exit(0);
 });

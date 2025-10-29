@@ -15,7 +15,7 @@ function extractSymbols(text) {
 }
 
 export async function refreshNewsFromCoinDesk() {
-const { default: Parser } = await import('rss-parser'); // ✅ import dynamique
+const { default: Parser } = await import('rss-parser'); // import dynamique
   const parser = new Parser({ timeout: 15000 });
   const feed = await parser.parseURL(COINDESK_RSS); // peut throw → géré par le controller
   const items = (feed.items || []).map(it => ({

@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "changeme";
 const JWT_EXPIRES_IN = "1h";
 
 /* -------------------------------------------------------------------------- */
-/* 🧩 SIGNUP                                                                  */
+/* SIGNUP                                                                  */
 /* -------------------------------------------------------------------------- */
 export async function signup({ email, password, is_admin = false }) {
   const existing = await User.findOne({ where: { email } });
@@ -29,12 +29,12 @@ export async function signup({ email, password, is_admin = false }) {
     access_token: token,
     token_type: "Bearer",
     expires_in: JWT_EXPIRES_IN,
-    token, // ✅ ajouté pour compatibilité cookie dans controller
+    token, // ajouté pour compatibilité cookie dans controller
   };
 }
 
 /* -------------------------------------------------------------------------- */
-/* 🧩 LOGIN                                                                   */
+/* LOGIN                                                                   */
 /* -------------------------------------------------------------------------- */
 export async function login(email, password) {
   const user = await User.findOne({ where: { email } });
@@ -54,16 +54,16 @@ export async function login(email, password) {
     access_token: token,
     token_type: "Bearer",
     expires_in: JWT_EXPIRES_IN,
-    token, // ✅ ajouté pour cohérence avec signup()
+    token, // ajouté pour cohérence avec signup()
   };
 }
 
 /* -------------------------------------------------------------------------- */
-/* 🧩 VERIFY TOKEN (pour checkAuth)                                           */
+/*  VERIFY TOKEN (pour checkAuth)                                           */
 /* -------------------------------------------------------------------------- */
 export function verifyToken(token) {
   try {
-    return jwt.verify(token, JWT_SECRET); // ✅ retourne le payload décodé
+    return jwt.verify(token, JWT_SECRET); // retourne le payload décodé
   } catch (err) {
     throw new ValidationError("Token invalide ou expiré");
   }

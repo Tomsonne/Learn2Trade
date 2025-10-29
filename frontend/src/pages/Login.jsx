@@ -16,7 +16,7 @@ export default function Login() {
     try {
       const data = await login(email, password);
 
-      // ✅ nouvelle logique : cookie géré par le backend
+      //  nouvelle logique : cookie géré par le backend
       if (data.status === "ok") {
         navigate("/learn"); // redirection
       } else {

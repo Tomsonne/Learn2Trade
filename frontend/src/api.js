@@ -1,32 +1,32 @@
 // =========================
-// 🌍 Configuration API_BASE
+//  Configuration API_BASE
 // =========================
 
 let API_BASE;
 
-// 1️⃣ Si une variable d'environnement Vite existe (.env ou Vercel)
+// Si une variable d'environnement Vite existe (.env ou Vercel)
 if (import.meta.env?.VITE_API_BASE) {
   API_BASE = import.meta.env.VITE_API_BASE;
 }
 
-// 2️⃣ Sinon, détection automatique selon l'environnement
+// Sinon, détection automatique selon l'environnement
 if (!API_BASE) {
   const host = window.location.hostname;
 
   if (/^(localhost|127\.|::1)$/.test(host)) {
-    // 🔹 En local → backend Railway local
+    //  En local → backend Railway local
     API_BASE = "http://localhost:8000/api/v1";
   } else {
-    // 🔹 En production → backend hébergé sur Railway
+    //  En production → backend hébergé sur Railway
     API_BASE = "https://skillvest-production.up.railway.app/api/v1";
   }
 }
 
-// 🔍 Log utile pour debug (supprimable en prod)
-console.log("🔌 API_BASE utilisé :", API_BASE);
+//  Log utile pour debug (supprimable en prod)
+console.log("API_BASE utilisé :", API_BASE);
 
 // =========================
-// 🧠 Fonctions API
+//  Fonctions API
 // =========================
 
 // --- Connexion utilisateur ---
@@ -34,7 +34,7 @@ export async function login(email, password) {
   const res = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include", // 🔥 cookies JWT
+    credentials: "include", // cookies JWT
     body: JSON.stringify({ email, password }),
   });
 
@@ -71,7 +71,7 @@ export async function checkAuth() {
     });
     return await res.json();
   } catch (err) {
-    console.error("❌ checkAuth error:", err);
+    console.error("checkAuth error:", err);
     return { status: "error" };
   }
 }
@@ -85,7 +85,7 @@ export async function logout() {
     });
     return await res.json();
   } catch (err) {
-    console.error("❌ logout error:", err);
+    console.error("logout error:", err);
     return { status: "error" };
   }
 }

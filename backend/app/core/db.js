@@ -8,7 +8,7 @@ dotenv.config();
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
-  console.error("❌ Erreur : aucune DATABASE_URL trouvée dans le .env");
+  console.error("Erreur : aucune DATABASE_URL trouvée dans le .env");
   process.exit(1);
 }
 
@@ -28,9 +28,9 @@ const sequelize = new Sequelize(databaseUrl, {
 (async () => {
   try {
     await sequelize.authenticate();
-    console.log("✅ Connexion établie avec Supabase PostgreSQL !");
+    console.log("Connexion établie avec Supabase PostgreSQL !");
   } catch (error) {
-    console.error("❌ Erreur connexion Supabase :", error.message);
+    console.error("Erreur connexion Supabase :", error.message);
   }
 })();
 

@@ -14,7 +14,7 @@ export async function openTrade(req, res) {
 export async function closeTrade(req, res) {
   try {
     const tradeId = req.params.id;
-    const { quantity } = req.body; // ✅ permet la fermeture partielle
+    const { quantity } = req.body; // permet la fermeture partielle
     const result = await TradeService.closeTrade(tradeId, quantity);
     res.status(200).json(result);
   } catch (err) {

@@ -3,7 +3,7 @@ import { ValidationError } from "../utils/errors.js";
 import  User from "../models/user.model.js";
 
 /* -------------------------------------------------------------------------- */
-/* 🧩 INSCRIPTION                                                             */
+/*  INSCRIPTION                                                             */
 /* -------------------------------------------------------------------------- */
 export async function signup(req, res) {
   try {
@@ -14,16 +14,16 @@ export async function signup(req, res) {
     if (err instanceof ValidationError) {
       return res.status(400).json({ status: "error", message: err.message });
     }
-    console.error("❌ Signup error:", err);
+    console.error(" Signup error:", err);
     return res.status(500).json({ status: "error", message: "Erreur serveur" });
   }
 }
 
 /* -------------------------------------------------------------------------- */
-/* 🧩 CONNEXION                                                               */
+/*  CONNEXION                                                               */
 /* -------------------------------------------------------------------------- */
 export async function login(req, res) {
-  console.log("🧩 Route /api/v1/auth/login atteinte");
+  console.log("Route /api/v1/auth/login atteinte");
 
   try {
     const { email, password } = req.body;
@@ -36,7 +36,7 @@ export async function login(req, res) {
     const result = await authService.login(email, password);
 
     if (!result || !result.access_token) {
-      console.error("❌ Aucun token reçu de authService.login");
+      console.error("Aucun token reçu de authService.login");
       return res.status(500).json({
         status: "error",
         message: "Erreur interne (token manquant)"
@@ -45,7 +45,7 @@ export async function login(req, res) {
 
     const isDev = process.env.NODE_ENV !== "production";
 
-    // ✅ Création du cookie JWT
+    // Création du cookie JWT
     res.cookie("token", result.access_token, {
       httpOnly: true,
       secure: !isDev,                  // false en local, true en prod
@@ -54,29 +54,29 @@ export async function login(req, res) {
       maxAge: 60 * 60 * 1000,          // 1h
     });
 
-    console.log("✅ Cookie JWT défini pour :", email);
+    console.log("Cookie JWT défini pour :", email);
     return res.json({ status: "ok", message: "Connexion réussie" });
 
   } catch (err) {
     if (err instanceof ValidationError) {
       return res.status(400).json({ status: "error", message: err.message });
     }
-    console.error("❌ Login error:", err);
+    console.error("Login error:", err);
     return res.status(500).json({ status: "error", message: "Erreur serveur" });
   }
 }
 
 /* -------------------------------------------------------------------------- */
-/* 🧩 VÉRIFICATION DE SESSION                                                 */
+/*  VÉRIFICATION DE SESSION                                                 */
 /* -------------------------------------------------------------------------- */
 export async function check(req, res) {
-  console.log("🧩 Route /api/v1/auth/check atteinte");
+  console.log("Route /api/v1/auth/check atteinte");
 
   try {
     const cookies = req.cookies || {};
     const token = cookies.token;
     if (!token) {
-      console.log("❌ Aucun token trouvé");
+      console.log("Aucun token trouvé");
       return res.status(401).json({ status: "error", message: "Non connecté" });
     }
 
@@ -84,31 +84,31 @@ export async function check(req, res) {
     try {
       decoded = authService.verifyToken(token);
     } catch (verifyErr) {
-      console.error("❌ Erreur vérification token :", verifyErr.message);
+      console.error("Erreur vérification token :", verifyErr.message);
       return res.status(401).json({ status: "error", message: "Token invalide ou expiré" });
     }
 
-    // 🔍 Récupération complète du user depuis la base
+    //  Récupération complète du user depuis la base
     const dbUser = await User.findByPk(decoded.id, {
       attributes: ["id", "email", "is_admin", "cash", "created_at", "updated_at"],
     });
 
     if (!dbUser) {
-      console.log("❌ Utilisateur introuvable en base");
+      console.log("Utilisateur introuvable en base");
       return res.status(404).json({ status: "error", message: "Utilisateur introuvable" });
     }
 
-    console.log("✅ Utilisateur trouvé :", dbUser.email, "Cash =", dbUser.cash);
+    console.log("Utilisateur trouvé :", dbUser.email, "Cash =", dbUser.cash);
     return res.json({ status: "ok", user: dbUser });
 
   } catch (err) {
-    console.error("❌ Erreur check globale :", err);
+    console.error("Erreur check globale :", err);
     return res.status(500).json({ status: "error", message: "Erreur serveur interne" });
   }
 }
 
 /* -------------------------------------------------------------------------- */
-/* 🧩 DÉCONNEXION                                                            */
+/*  DÉCONNEXION                                                            */
 /* -------------------------------------------------------------------------- */
 export async function logout(req, res) {
   try {
@@ -124,7 +124,7 @@ export async function logout(req, res) {
     console.log("👋 Utilisateur déconnecté, cookie supprimé");
     return res.json({ status: "ok", message: "Déconnecté" });
   } catch (err) {
-    console.error("❌ Logout error:", err);
+    console.error(" Logout error:", err);
     return res.status(500).json({ status: "error", message: "Erreur serveur" });
   }
 }
