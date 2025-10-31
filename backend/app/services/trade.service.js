@@ -72,6 +72,7 @@ export async function closeTrade(tradeId, quantityToClose) {
   if (!tradeId) throw new ValidationError("tradeId manquant");
 
   return sequelize.transaction(async (tx) => {
+    // Récupère le trade d’origine
     const trade = await Trade.findByPk(tradeId, {
       transaction: tx,
       lock: tx.LOCK.UPDATE,
@@ -84,42 +85,63 @@ export async function closeTrade(tradeId, quantityToClose) {
     if (!asset) throw new ValidationError("Actif introuvable");
     if (!user) throw new ValidationError("Utilisateur introuvable");
 
-    const closeQty = new Decimal(quantityToClose || trade.quantity);
+    // Quantité à fermer
     const fullQty = new Decimal(trade.quantity);
+    const closeQty = new Decimal(quantityToClose || trade.quantity);
     if (closeQty.lte(0) || closeQty.gt(fullQty))
       throw new ValidationError("Quantité invalide pour la fermeture");
 
+    // Prix marché
     const symbol = asset.symbol || "BTCUSDT";
     const priceClose = await getMarketPriceDecimal(symbol);
     const priceOpen = new Decimal(trade.price_open);
 
+    // Calcul du PnL
     const pnlPerUnit =
-      trade.side === "BUY" ? priceClose.minus(priceOpen) : priceOpen.minus(priceClose);
+      trade.side === "BUY"
+        ? priceClose.minus(priceOpen)
+        : priceOpen.minus(priceClose);
     const pnl = pnlPerUnit.mul(closeQty);
 
-    // Crédit cash de la portion fermée
+    // Crédit utilisateur
     const credit = priceClose.mul(closeQty);
     user.cash = new Decimal(user.cash || "0").plus(credit).toString();
     await user.save({ transaction: tx });
 
-    // Gestion fermeture partielle ou totale
+    // ➕ Crée la ligne fermée (historique)
+    const closedTrade = await Trade.create(
+      {
+        user_id: trade.user_id,
+        asset_id: trade.asset_id,
+        side: trade.side,
+        quantity: closeQty.toString(),
+        price_open: priceOpen.toString(),
+        price_close: priceClose.toString(),
+        pnl: pnl.toString(),
+        is_closed: true,
+        opened_at: trade.opened_at,
+        closed_at: new Date(),
+      },
+      { transaction: tx }
+    );
+
+    // 🔄 Met à jour ou supprime le trade d’origine
     const remainingQty = fullQty.minus(closeQty);
     if (remainingQty.lte(0)) {
-      trade.is_closed = true;
-      trade.price_close = priceClose.toString();
-      trade.pnl = pnl.toString();
-      trade.closed_at = new Date();
+      // Fermeture totale → on supprime le trade d’origine
+      await trade.destroy({ transaction: tx });
     } else {
+      // Fermeture partielle → on met à jour la quantité restante
       trade.quantity = remainingQty.toString();
+      await trade.save({ transaction: tx });
     }
-
-    await trade.save({ transaction: tx });
 
     return {
       message: remainingQty.lte(0)
         ? "Trade entièrement fermé"
-        : "Fermeture partielle effectuée",
-      trade,
+        : `Fermeture partielle (${closeQty.toString()}) effectuée`,
+      closed_trade: closedTrade,
+      remaining_quantity: remainingQty.toString(),
     };
   });
 }
