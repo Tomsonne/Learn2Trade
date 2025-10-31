@@ -39,7 +39,7 @@ Déploiement public : [https://learn2-trade.vercel.app](https://learn2-trade.ver
 | Composant | Hébergeur | URL |
 |------------|------------|------|
 | Frontend | **Vercel** | [https://learn2-trade.vercel.app](https://learn2-trade.vercel.app) |
-| Backend API | **Render** | *(URL API selon déploiement)* |
+| Backend API | **Railway** | *(URL API selon déploiement)* |
 | Base de données | **PostgreSQL (Docker)** | Hébergée localement en développement |
 
 ---
@@ -62,20 +62,14 @@ Méthode utilisée : **MoSCoW Prioritization** et suivi agile via **Trello + Wee
 ### Tests réalisés
 - **Tests unitaires (Jest)** : services `auth.service.js`, `user.service.js`
 - **Tests d’intégration (Postman)** : endpoints `/auth`, `/trade`, `/position`
-- **Tests finaux (prod)** : Vercel + Render → connexions et dashboard validés
-
-### Preuves
-Captures stockées dans le dossier `/images` :  
-- `test_postman_auth.png` – test API Auth  
-- `test_jest_trade.png` – test Jest backend  
-- `page_dashboards.png`, `page_acceuil.png` – pages frontend en production  
+- **Tests finaux (prod)** : Vercel + Railway → connexions et dashboard validés
 
 ---
 
 ## 7. Suivi et rétrospective
 
 - Suivi de progression : `WeeklyReport.md`  
-- Outil de gestion : Trello / GitHub 
+- Outil de gestion : Trello / GitHub https://trello.com/b/xV7jt6Jt/l2t 
 - Changements majeurs : migration CoinGecko → Binance, suppression DCA, ajout vidéo homepage  
 - Revue finale : application stable et déployée, tests validés, documentation complète.
 
@@ -88,12 +82,16 @@ Captures stockées dans le dossier `/images` :
 **Projet :** Learn2Trade (Demo Day / Spécialisation Full Stack)  
 **Email :** pulonjulien@gmail.com.com 
 
-*Auteur :**  Thomas Rousseau – Développeur Full Stack  
+**Auteur :**  Thomas – Développeur Full Stack  
 **Formation :** Holberton School France  
 **Projet :** Learn2Trade (Demo Day / Spécialisation Full Stack)  
-**Email :** thomasrousseau19@gmail.com 
+**Email :** thomas.rousseau19@gmail.com 
+
 ---
 
 **Remarque :**
 Tous les documents initiaux sont conservés pour la traçabilité pédagogique.  
 Les fichiers “_v2” et “_Addendum” représentent la version finale validée lors du développement effectif.
+
+
+

@@ -1,6 +1,6 @@
 [ProjectCharterDevelopment_v2.md](https://github.com/user-attachments/files/23161564/ProjectCharterDevelopment_v2.md)
 <p align="center">
-  <img src="images/Logo_L2T.png" alt="Logo" width="400"/>
+  <img src="../images/Logo_L2T.png" alt="Logo" width="400"/>
 </p>
 
 # Project Charter – Learn2Trade
@@ -75,7 +75,7 @@ Le projet combine des outils pédagogiques, un tableau de bord interactif et des
 - Simulation de trading virtuel (Buy/Sell).  
 - Stratégies RSI et MA Crossover.  
 - Vidéo d’accueil sur la page principale (incitation à l’inscription).  
-- Déploiement sur Vercel (frontend) et Render (backend).
+- Déploiement sur Vercel (frontend) et Railway (backend).
 
 **Out-of-Scope (MVP)**
 - Trading réel avec argent.  
@@ -99,26 +99,26 @@ Le projet combine des outils pédagogiques, un tableau de bord interactif et des
 
 ## 4. High-Level Plan
 
-### Phase 1 : Préparation (Semaines 1–2)
+### Phase 1 : Préparation 
 - Structuration du projet backend (`api`, `controllers`, `models`, `services`).  
 - Configuration Docker (Node + PostgreSQL).  
 - Schéma SQL et premiers tests Jest.
 
-### Phase 2 : Fonctionnalités principales (Semaines 3–5)
+### Phase 2 : Fonctionnalités principales 
 - Authentification (JWT + bcrypt).  
 - API Express opérationnelle.  
 - Dashboard React connecté au backend.  
 - Graphique en temps réel via Lightweight Charts.  
 
-### Phase 3 : Stratégies et trading (Semaines 6–8)
+### Phase 3 : Stratégies et trading 
 - Implémentation des stratégies RSI et MA Crossover.  
 - Simulation des trades et calcul du PnL.  
 - Historique utilisateur et performance.  
 
-### Phase 4 : UX et mise en production (Semaines 9–10)
+### Phase 4 : UX et mise en production 
 - Vidéo d’accueil et CTA sur la homepage.  
 - Amélioration UI/UX (dark mode, responsive).  
-- Déploiement sur Vercel + Render.  
+- Déploiement sur Vercel + Railway.  
 - Tests d’intégration finaux et préparation Demo Day.  
 
 ---
@@ -138,3 +138,6 @@ Le projet combine des outils pédagogiques, un tableau de bord interactif et des
 ## 6. Auteurs
 - Julien Pulon — Développeur Full Stack.  
 - Thomas Rousseau — Développeur Full Stack. 
+
+
+

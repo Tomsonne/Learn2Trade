@@ -16,7 +16,7 @@ Ce document complète la documentation technique initiale sans la modifier. Il p
 | **Frontend** | React + Tailwind | React + Vite + Tailwind (inchangé côté design) | Ajout de Vite pour un build plus rapide et une meilleure DX. |
 | **Stratégies** | RSI, DCA, MA | RSI et MA uniquement (DCA retirée du MVP) | Périmètre réduit pour garantir un MVP stable et démontrable. |
 | **Vidéo d’accueil** | Non définie | Vidéo sur la homepage + CTA “Créer un compte” | Amélioration de l’expérience utilisateur et du taux d’inscription. |
-| **Déploiement** | Non précisé | Frontend : Vercel / Backend : Render | Simplicité, stabilité, et URLs publiques pour la démo. |
+| **Déploiement** | Non précisé | Frontend : Vercel / Backend : Railway | Simplicité, stabilité, et URLs publiques pour la démo. |
 | **Tests** | pytest (backend Python), Jest (frontend React) | Jest (backend JS) + Postman (API) | Unification des tests dans l’écosystème JavaScript, preuves via captures et scripts Postman. |
 
 **Note :** La stack Flask initialement mentionnée dans le plan de projet n’a jamais été implémentée — le projet a été conçu et livré intégralement en JavaScript (Node.js + Express + React).
@@ -29,7 +29,7 @@ Ce document complète la documentation technique initiale sans la modifier. Il p
 - Backend: Express (Node.js)  
 - Base de données: PostgreSQL  
 - Intégrations: API Binance (prix/klines), NewsAPI ou flux RSS  
-- Déploiement: Vercel (front), Render (API)  
+- Déploiement: Vercel (front), Railway (API)  
 - Communication: REST JSON, polling périodique pour prix et OHLC  
 
 Diagramme haut-niveau: voir `images/high_level_diagram.png`.
@@ -83,7 +83,7 @@ Réponses JSON : `{status, data}` ou `{status, error}`.
 - Branches : `main`, `dev`, `feature/*`  
 - Tests : Jest (backend JS), Postman (API)  
 - Docker : `docker-compose.yml` (Node + Postgres)  
-- Déploiement : Vercel / Render  
+- Déploiement : Vercel / Railway  
 
 ---
 
@@ -92,7 +92,7 @@ Réponses JSON : `{status, data}` ou `{status, error}`.
 - Unification JavaScript (Express + React).  
 - Binance → cohérence temporelle et granularité.  
 - Lightweight Charts → performance graphique.  
-- Vercel / Render → simplicité et disponibilité.  
+- Vercel / Railway → simplicité et disponibilité.  
 
 ---
 
@@ -101,3 +101,4 @@ Réponses JSON : `{status, data}` ou `{status, error}`.
 Le document initial est conservé inchangé pour l’évaluation.  
 Les divergences sont documentées ici pour expliquer les écarts et leurs raisons.  
 Suivi hebdomadaire : `WeeklyReport.md`.
+

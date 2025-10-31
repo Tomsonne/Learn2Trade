@@ -163,7 +163,7 @@
 - Amélioration des performances de rendu grâce à `useMemo` et `useEffect` optimisés.  
 
 ### 2. Connexion au backend en production
-- Configuration du proxy HTTPS pour relier le frontend à l’API hébergée sur Render.  
+- Configuration du proxy HTTPS pour relier le frontend à l’API hébergée sur Railway.  
 - Ajustement des variables d’environnement pour le mode production (`VITE_API_URL`).  
 - Vérification du comportement en production (latence, authentification, échanges JSON).  
 
@@ -171,7 +171,7 @@
 - Déploiement réussi du frontend sur **Vercel** :  
   [https://learn2-trade.vercel.app](https://learn2-trade.vercel.app)  
 - Configuration du domaine, du build Vite et des règles de redirection (`vercel.json`).  
-- Vérification de la compatibilité entre les appels API et le backend Render.  
+- Vérification de la compatibilité entre les appels API et le backend Railway.  
 
 ### 4. Tests utilisateur
 - Vérification de la navigation complète : connexion, dashboard, graphique, historique.  
@@ -186,7 +186,7 @@
 - Fallback mobile : image statique si l’autoplay est bloqué, afin de préserver le TTI et l’UX.  
 - Impact mesuré : LCP amélioré sur desktop grâce à la version faststart ; aucune régression Core Web Vitals constatée.
 ### Problèmes rencontrés
-- Légère différence de fuseau horaire entre Render et Vercel (UTC vs UTC+2).  
+- Légère différence de fuseau horaire entre Railway et Vercel (UTC vs UTC+2).  
 - Nécessité de régénérer les clés JWT après déploiement pour le domaine HTTPS.  
 
 ### Résultats
