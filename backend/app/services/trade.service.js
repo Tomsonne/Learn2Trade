@@ -108,7 +108,7 @@ export async function closeTrade(tradeId, quantityToClose) {
     user.cash = new Decimal(user.cash || "0").plus(credit).toString();
     await user.save({ transaction: tx });
 
-    // ➕ Crée la ligne fermée (historique)
+    // Crée la ligne fermée (historique)
     const closedTrade = await Trade.create(
       {
         user_id: trade.user_id,
@@ -125,7 +125,7 @@ export async function closeTrade(tradeId, quantityToClose) {
       { transaction: tx }
     );
 
-    // 🔄 Met à jour ou supprime le trade d’origine
+    // Met à jour ou supprime le trade d'origine
     const remainingQty = fullQty.minus(closeQty);
     if (remainingQty.lte(0)) {
       // Fermeture totale → on supprime le trade d’origine

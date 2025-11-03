@@ -82,7 +82,7 @@ Trade.init(
     },
 
     /**
-     * 💡 Ajouts pour le suivi
+     * Ajouts pour le suivi
      */
     opened_at: {
       type: DataTypes.DATE,

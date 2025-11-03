@@ -14,6 +14,12 @@ const CACHE_TTL_MS = Number(process.env.BINANCE_CACHE_TTL_MS || 30_000);
 const PAIRS = {
   BTC: process.env.BTC_PAIR || 'BTCUSDT',
   ETH: process.env.ETH_PAIR || 'ETHUSDT',
+  BNB: process.env.BNB_PAIR || 'BNBUSDT',
+  SOL: process.env.SOL_PAIR || 'SOLUSDT',
+  ADA: process.env.ADA_PAIR || 'ADAUSDT',
+  XRP: process.env.XRP_PAIR || 'XRPUSDT',
+  DOGE: process.env.DOGE_PAIR || 'DOGEUSDT',
+  DOT: process.env.DOT_PAIR || 'DOTUSDT',
 };
 
 /* ==============================
@@ -77,22 +83,26 @@ export async function getPrices() {
   const cached = getCache(key);
   if (cached) return cached;
 
-  const [btc, eth, fx] = await Promise.all([
-    httpJson(`${BINANCE_BASE}/api/v3/ticker/price?symbol=${PAIRS.BTC}`),
-    httpJson(`${BINANCE_BASE}/api/v3/ticker/price?symbol=${PAIRS.ETH}`),
+  const symbols = Object.keys(PAIRS);
+  const [fx, ...priceData] = await Promise.all([
     getForex().catch(() => null),
+    ...symbols.map(sym => httpJson(`${BINANCE_BASE}/api/v3/ticker/price?symbol=${PAIRS[sym]}`)),
   ]);
 
-  const usdBtc = Number(btc?.price ?? NaN);
-  const usdEth = Number(eth?.price ?? NaN);
   const eurRate = fx?.rates?.EUR ?? null;
+  const prices = {};
+
+  symbols.forEach((sym, idx) => {
+    const usdPrice = Number(priceData[idx]?.price ?? NaN);
+    prices[sym] = {
+      usd: usdPrice,
+      eur: eurRate ? +(usdPrice * eurRate).toFixed(2) : null,
+    };
+  });
 
   const out = {
     timestamp: new Date().toISOString(),
-    prices: {
-      BTC: { usd: usdBtc, eur: eurRate ? +(usdBtc * eurRate).toFixed(2) : null },
-      ETH: { usd: usdEth, eur: eurRate ? +(usdEth * eurRate).toFixed(2) : null },
-    },
+    prices,
     source: 'binance+frankfurter',
   };
   setCache(key, out);

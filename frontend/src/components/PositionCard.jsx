@@ -5,9 +5,11 @@ import MiniChart from "./MiniChart";
 
 const baseSymbol = (symbol = "") => {
   const s = String(symbol).toUpperCase();
-  if (s.includes("ETH")) return "ETH";
-  if (s.includes("BTC")) return "BTC";
-  return "BTC";
+  // Extraire le symbol de base (retire USDT, USD, etc.)
+  const match = s.match(/^([A-Z]+)(?:USDT|USD|BUSD|USDC)?$/);
+  if (match) return match[1];
+  // Fallback: retourne le symbol original
+  return s;
 };
 
 const fmtUSD = (v) => {

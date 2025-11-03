@@ -1,4 +1,4 @@
-// app/server.js — ✅ VERSION FINALE (Railway + Vercel)
+// app/server.js — VERSION FINALE (Railway + Vercel)
 
 import express from "express";
 import cors from "cors";
@@ -14,7 +14,7 @@ const cfg = loadConfig();
 const app = express();
 
 // ──────────────────────────────────────────────
-// 🌍 Configuration CORS (frontend Vercel + local)
+// Configuration CORS (frontend Vercel + local)
 const allowedOrigins = [
   "http://localhost:5173", // dev local
   "https://learn2-trade.vercel.app", // domaine principal
@@ -30,7 +30,7 @@ app.use(
   })
 );
 
-//  Autorise toutes les requêtes préflight (OPTIONS)
+// Autorise toutes les requêtes préflight (OPTIONS)
 app.options(/.*/, cors({ origin: allowedOrigins, credentials: true }));
 
 //app.options("*", cors({ origin: allowedOrigins, credentials: true }));
@@ -41,7 +41,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ──────────────────────────────────────────────
-// 🩺 HealthCheck
+// HealthCheck
 app.get("/healthz", (_req, res) => res.json({ status: "ok" }));
 
 // ──────────────────────────────────────────────
@@ -49,7 +49,7 @@ app.get("/healthz", (_req, res) => res.json({ status: "ok" }));
 app.use("/api/v1", v1Router);
 
 // ──────────────────────────────────────────────
-//  404 — Route non trouvée
+// 404 — Route non trouvée
 app.use((_req, res) => {
   res.status(404).json({
     status: "error",
@@ -58,7 +58,7 @@ app.use((_req, res) => {
 });
 
 // ──────────────────────────────────────────────
-//  Gestion des erreurs serveur
+// Gestion des erreurs serveur
 app.use((err, req, res, _next) => {
   console.error(" ERR:", err.message || err);
   res.status(500).json({
@@ -81,7 +81,7 @@ async function start() {
     console.log("Models chargés :", Object.keys(models));
     console.log("Origines CORS autorisées :", allowedOrigins);
 
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: false });
     console.log("Synchronisation Sequelize terminée");
 
     const PORT = process.env.PORT || 8000;
@@ -97,7 +97,7 @@ async function start() {
 start();
 
 // ──────────────────────────────────────────────
-// 🔌 Arrêt propre (Docker / Railway)
+// Arrêt propre (Docker / Railway)
 process.on("SIGTERM", async () => {
   console.log("SIGTERM reçu, arrêt du serveur...");
   try {

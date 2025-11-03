@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// 🔌 Récupère l’URL complète depuis .env
+// Récupère l'URL complète depuis .env
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
@@ -12,7 +12,7 @@ if (!databaseUrl) {
   process.exit(1);
 }
 
-// 🧩 Crée l’instance Sequelize
+// Crée l'instance Sequelize
 const sequelize = new Sequelize(databaseUrl, {
   dialect: "postgres",
   logging: false, // mets true si tu veux voir les requêtes SQL
@@ -24,7 +24,7 @@ const sequelize = new Sequelize(databaseUrl, {
   },
 });
 
-// 🚀 Test de connexion
+// Test de connexion
 (async () => {
   try {
     await sequelize.authenticate();

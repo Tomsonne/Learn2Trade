@@ -12,12 +12,19 @@ export default function TradesPage() {
   const [loading, setLoading] = useState(true);
   const [selectedAssetId, setSelectedAssetId] = useState("");
   const [qty, setQty] = useState("");
+  const [assets, setAssets] = useState([]);
 
   useEffect(() => {
     fetch(`${API_URL}/auth/check`, { credentials: "include" })
       .then((r) => r.json())
       .then((data) => setUser(data?.status === "ok" ? data.user : null))
       .catch(() => setUser(null));
+
+    // Load assets
+    fetch(`${API_URL}/assets`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => setAssets(data?.data || []))
+      .catch(() => setAssets([]));
   }, []);
 
   const fetchOpenTrades = useCallback(async () => {
@@ -103,8 +110,11 @@ export default function TradesPage() {
           onChange={(e) => setSelectedAssetId(e.target.value)}
         >
           <option value="">Choisir un actif</option>
-          <option value="1">ETH/USD</option>
-          <option value="2">BTC/USD</option>
+          {assets.map((asset) => (
+            <option key={asset.id} value={asset.id}>
+              {asset.symbol}
+            </option>
+          ))}
         </select>
 
         <label className="form-label">Quantité</label>

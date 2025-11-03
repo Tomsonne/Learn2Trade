@@ -9,7 +9,7 @@ import sequelize from './app/core/db.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ re-définis bien le dialect pour le setup
+// re-définis bien le dialect pour le setup
 const DIALECT = process.env.DB_DIALECT || 'sqlite';
 
 // charge les modèles (ils utilisent l'instance exportée par db.js)
