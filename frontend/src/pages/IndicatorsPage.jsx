@@ -1,5 +1,5 @@
 // src/pages/IndicatorsPage.jsx
-import React, { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { BookOpen, Target, Info, BarChart3 } from "lucide-react";
 import { useMarketSeries } from "../hooks/useMarketSeries.js";
 import CandleLite from "../components/CandleLite.jsx";
@@ -70,7 +70,7 @@ export function IndicatorsPage() {
         </div>
 
         <div className="flex items-center gap-3 mb-4">
-          <SymbolSelector value={symbol} onChange={setSymbol} />
+          <SymbolSelector value={symbol} onChange={setSymbol} options={["BTC", "ETH", "BNB", "SOL", "ADA", "XRP", "DOGE", "DOT"]} />
           <TimeframeToolbar value={tf} onChange={setTf} />
         </div>
 

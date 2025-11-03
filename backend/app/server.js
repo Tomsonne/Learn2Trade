@@ -81,7 +81,7 @@ async function start() {
     console.log("Models chargés :", Object.keys(models));
     console.log("Origines CORS autorisées :", allowedOrigins);
 
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: false });
     console.log("Synchronisation Sequelize terminée");
 
     const PORT = process.env.PORT || 8000;
