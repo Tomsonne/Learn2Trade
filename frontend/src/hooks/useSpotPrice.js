@@ -16,15 +16,27 @@ export function useSpotPrice({ symbol = "BTC", refreshMs = 60_000 } = {}) {
       const res = await fetch(`${API}/market/prices`);
       const json = await res.json();
       if (json.status !== "ok") throw new Error(json.error?.message || "API_ERROR");
-      const sym = String(symbol).toUpperCase();
-      setPrice(json.data?.prices?.[sym]?.usd ?? null);
+
+      // 🔧 Normalise le symbole (ex: ETHUSDT → ETH)
+      const sym = String(symbol).toUpperCase().replace(/USDT|USD|BUSD|USDC/g, "");
+
+      // 🔍 Récupère le prix dans l’objet renvoyé par le backend
+      const value =
+        json.data?.prices?.[sym]?.usd ??
+        json.data?.prices?.[symbol]?.usd ??
+        null;
+
+      setPrice(value);
       setError(null);
     } catch (e) {
       setError(String(e.message || e));
     }
   }
 
-  useEffect(() => { load(); }, [symbol]);
+  useEffect(() => {
+    load();
+  }, [symbol]);
+
   useEffect(() => {
     if (!refreshMs) return;
     const id = setInterval(load, refreshMs);
