@@ -31,7 +31,7 @@ export default function PositionCard({ trade, onClose }) {
   const symbol = trade.symbol || trade.asset?.symbol || `#${trade.asset_id}`;
 
   const spotKey = baseSymbol(symbol);
-  const { price: live } = useSpotPrice({ symbol: spotKey, refreshMs: 60_000 });
+  const { price: live } = useSpotPrice({ symbol: symbol, refreshMs: 60_000 });
 
   const px = Number(live);
   const hasPx = Number.isFinite(px) && px > 0;
