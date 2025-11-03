@@ -36,3 +36,7 @@ curl -sS -X POST "http://127.0.0.1:8000/api/v1/trade/open" \                    
   }'
 
   curl -sS -X POST "http://127.0.0.1:8000/api/v1/trade/e80f7b34-cb87-4789-919f-8352dcae8ae2/close"
+
+tests:
+cd backend && npm test
+cd frontend && npm test
