@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { checkAuth, logout } from '../api.js'; // ✅ pour gérer la session
+import { checkAuth, logout } from '../api.js'; // pour gérer la session
 
 function toggleTheme() {
   const html = document.documentElement;
@@ -15,14 +15,11 @@ function toggleTheme() {
 function Logo() {
   return (
     <Link to="/" className="flex items-center gap-2">
-      <svg className="size-8 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <rect x="3" y="3" width="18" height="18" rx="4" strokeWidth="1.5"/>
-        <path d="M7 14l3-3 3 3 4-5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-      <span className="text-xl font-semibold tracking-tight">
-        <span className="text-emerald-600">Skill</span>
-        <span className="ml-1">Vest</span>
-      </span>
+      <img
+        src="/images/skillvest.png"
+        alt="SkillVest"
+        className="h-32 w-auto"
+      />
     </Link>
   );
 }
@@ -31,7 +28,7 @@ export default function Header() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
-  // ✅ Vérifie si l’utilisateur est connecté
+  // Vérifie si l'utilisateur est connecté
   useEffect(() => {
     async function verify() {
       const res = await checkAuth();
