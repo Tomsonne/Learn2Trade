@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { SMA, RSI } from "technicalindicators";
 
-// ✅ Corrigé : détection auto backend
+// Corrigé : détection auto backend
 const API =
   import.meta.env.VITE_API_BASE ||
   (window.location.hostname.includes("localhost")

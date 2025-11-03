@@ -1,6 +1,6 @@
 export default {
   testEnvironment: 'node',
-  roots: ['<rootDir>/test'],   // ⬅️ dis à Jest où chercher
+  roots: ['<rootDir>/test'],   // dis à Jest où chercher
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   transform: {},
   moduleNameMapper: {

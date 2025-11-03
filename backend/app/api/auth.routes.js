@@ -5,16 +5,16 @@ import { verifyAuth } from "./middlewares/auth.middleware.js";
 
 const router = Router();
 
-// 🧠 Inscription
+// Inscription
 router.post("/signup", authController.signup);
 
-// 🔐 Connexion (pose le cookie JWT)
+// Connexion (pose le cookie JWT)
 router.post("/login", authController.login);
 
-// ✅ Vérification du cookie JWT
+// Vérification du cookie JWT
 router.get("/check", authController.check);
 
-// 🚪 Déconnexion (efface le cookie)
+// Déconnexion (efface le cookie)
 router.post("/logout", authController.logout);
 
 router.get("/me", verifyAuth, authController.me);
