@@ -90,21 +90,24 @@ export function IndicatorsPage() {
           <div className="text-sm text-muted-foreground">Cours interactif • Trading éducatif • Sans risque</div>
         </div>
         <div className="flex gap-2">
-          {menuItems.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setActiveSection(id)}
-              aria-pressed={activeSection===id}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
-                activeSection===id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-accent text-accent-foreground hover:bg-muted"
-              }`}
-            >
-              <Icon className="w-4 h-4" /><span className="text-sm font-medium">{label}</span>
-            </button>
-          ))}
+          {menuItems.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveSection(item.id)}
+                aria-pressed={activeSection===item.id}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                  activeSection===item.id
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-accent text-accent-foreground hover:bg-muted"
+                }`}
+              >
+                <IconComponent className="w-4 h-4" /><span className="text-sm font-medium">{item.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

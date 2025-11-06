@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useMarketSeries } from '../useMarketSeries';
 
 // Mock global fetch
-global.fetch = vi.fn();
+globalThis.fetch = vi.fn();
 
 describe('useMarketSeries Hook', () => {
   beforeEach(() => {
@@ -199,31 +199,5 @@ describe('useMarketSeries Hook', () => {
     // Verify new call has ETH
     const lastCall = fetch.mock.calls[1][0];
     expect(lastCall).toContain('symbol=ETH');
-  });
-
-  // Note: Tests with waitFor and timer manipulation are skipped
-  // due to async hook behavior in test environment
-  it.skip('should handle polling with refreshMs', async () => {
-    // Test implementation pending - requires better async handling
-  });
-
-  it.skip('should not poll if refreshMs is 0 or not provided', async () => {
-    // Test implementation pending - requires better async handling
-  });
-
-  it.skip('should calculate RSI values within valid range', async () => {
-    // Test implementation pending - requires better async handling
-  });
-
-  it.skip('should calculate SMA values correctly', async () => {
-    // Test implementation pending - requires better async handling
-  });
-
-  it.skip('should handle empty data response', async () => {
-    // Test implementation pending - requires better async handling
-  });
-
-  it.skip('should use default values for optional parameters', async () => {
-    // Test implementation pending - requires better async handling
   });
 });

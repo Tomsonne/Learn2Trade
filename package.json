@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "test": "cd frontend && npm test",
+    "test:ui": "cd frontend && npm run test:ui",
+    "test:coverage": "cd frontend && npm run test:coverage"
+  },
   "dependencies": {
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
