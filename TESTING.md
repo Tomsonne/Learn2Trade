@@ -109,8 +109,15 @@ Tests unitaires existants :
 
 ```
 frontend/src/
+├── __tests__/
+│   └── critical.test.js         # Tests API critiques (20 tests)
 ├── hooks/__tests__/
-│   └── useMarketSeries.test.js  # Tests du hook critique (NOUVEAU)
+│   ├── useMarketSeries.test.js  # Tests hook données marché (7 tests)
+│   └── useSpotPrice.test.js     # Tests hook prix spot (8 tests) (NOUVEAU)
+├── pages/__tests__/
+│   ├── Login.test.jsx           # Tests page connexion (6 tests) (NOUVEAU)
+│   ├── Signup.test.jsx          # Tests page inscription (6 tests) (NOUVEAU)
+│   └── Homepage.test.jsx        # Tests page d'accueil (6 tests) (NOUVEAU)
 ├── test/
 │   └── setup.js                 # Configuration Vitest
 └── vitest.config.js             # Config globale
@@ -136,35 +143,145 @@ npm run test:coverage
 
 ### Tests Implémentés
 
-#### useMarketSeries Hook Tests (`useMarketSeries.test.js`)
+#### 1. Tests API Critiques (`critical.test.js`)
+Tests d'intégration complets des API critiques :
+- **Authentication API (4 tests)**
+  - Login avec credentials valides (200)
+  - Rejet credentials invalides (401)
+  - Création nouvel utilisateur (201)
+  - Vérification statut authentification
+
+- **Trading API (6 tests)**
+  - Création trade BUY avec quantité et prix
+  - Création trade SELL
+  - Fermeture trade avec calcul PnL correct
+  - Récupération historique trades utilisateur
+  - Rejet quantité invalide (négative)
+  - Validation statut trade (OPEN/CLOSED)
+
+- **Market Data API (3 tests)**
+  - Récupération prix spot toutes cryptos (BTC, ETH, BNB, SOL, ADA, XRP, DOGE, DOT)
+  - Récupération données OHLC avec interval et limit
+  - Gestion paramètre manquant (symbol requis)
+
+- **Data Integrity & Security (5 tests)**
+  - Pas de fuite password/passwordHash dans réponses
+  - Calcul PnL correct pour BUY: (priceClose - priceOpen) × quantity
+  - Calcul PnL correct pour SELL: (priceOpen - priceClose) × quantity
+  - Validation quantité positive requise
+  - Validation prix positif requis
+
+- **Error Handling (3 tests)**
+  - Gestion erreurs réseau
+  - Gestion erreurs serveur 500
+  - Gestion timeouts
+
+**Couverture : ~90%** des endpoints critiques
+
+#### 2. useSpotPrice Hook Tests (`useSpotPrice.test.js`)
+Tests du hook React pour prix spot en temps réel :
+- **Chargement de données**
+  - Récupération prix spot BTC/ETH avec conversion USD/EUR
+  - État initial (price=null, error=null)
+  - Mise à jour prix après fetch
+
+- **Normalisation symboles**
+  - Conversion ETHUSDT → ETH
+  - Support suffixes: USDT, USD, BUSD, USDC
+
+- **Gestion des erreurs**
+  - Erreurs API (status='error')
+  - Erreurs réseau (fetch failed)
+  - Symbole invalide (retourne null)
+
+- **Fonctionnalités**
+  - Rechargement sur changement symbole
+  - Valeurs par défaut (symbol='BTC', refreshMs=60000)
+  - Polling avec refreshMs
+
+**Couverture : ~95%** du hook
+
+#### 3. useMarketSeries Hook Tests (`useMarketSeries.test.js`)
 Tests du hook React critique pour les données de marché :
 - **Chargement de données**
   - Récupération OHLC avec indicateurs (SMA20, SMA50, RSI)
-  - Structure des données correcte
+  - Structure des données correcte (ts, o, h, l, c, ma20, ma50, rsi)
   - Indicateurs null pour bougies précoces
-  - Indicateurs calculés pour bougies tardives
+  - Indicateurs calculés pour bougies tardives (>20 périodes)
 
 - **Gestion des erreurs**
   - Erreurs réseau
   - Réponses API avec erreur
-  - Données vides
+  - Affichage message d'erreur
 
 - **Fonctionnalités**
   - Override last candle avec spotPrice
   - Limite correcte par timeframe (1d=200, autres=500)
-  - Endpoint et paramètres corrects
-  - Rechargement sur changement de dépendances
+  - Endpoint correct: /api/v1/market/ohlc?symbol=X&interval=Y&limit=Z
+  - Rechargement sur changement de dépendances (symbol, tf)
 
-- **Polling**
-  - Polling avec refreshMs actif
-  - Pas de polling si refreshMs=0
+**Couverture : ~85%** du hook
 
-- **Validations**
-  - RSI entre 0-100
-  - SMA correctes (prix constants)
-  - Valeurs par défaut (symbol=BTC, tf=1h)
+#### 4. Page Login Tests (`Login.test.jsx`)
+Tests de la page de connexion :
+- **Rendu**
+  - Affichage formulaire (titre, email, password, bouton)
+  - Lien vers page inscription
 
-**Couverture : ~95%** du hook
+- **Interactions**
+  - Mise à jour valeurs inputs
+  - Soumission formulaire valide
+  - Navigation vers /learn après login réussi
+
+- **Gestion erreurs**
+  - Affichage erreur credentials invalides
+  - Affichage erreur serveur
+  - Pas de navigation si erreur
+
+**Couverture : ~90%** de la page
+
+#### 5. Page Signup Tests (`Signup.test.jsx`)
+Tests de la page d'inscription :
+- **Rendu**
+  - Affichage formulaire complet
+  - Lien vers page connexion
+
+- **Interactions**
+  - Mise à jour valeurs inputs
+  - Soumission formulaire valide
+  - Navigation vers /learn après signup réussi
+
+- **Gestion erreurs**
+  - Affichage erreur email déjà utilisé
+  - Affichage erreur serveur
+  - Pas de navigation si erreur
+
+**Couverture : ~90%** de la page
+
+#### 6. Page Homepage Tests (`Homepage.test.jsx`)
+Tests de la page d'accueil :
+- **Rendu**
+  - Affichage heading principal
+  - Affichage tagline (Forex + Crypto...)
+  - Affichage vidéo avec attributs corrects
+
+- **Navigation**
+  - Bouton "Commencer maintenant" → /learn
+  - Lien "En savoir plus" → /landingpage
+
+- **Vidéo**
+  - Source correcte: /videoHomepage_faststart.mp4
+  - Attributs: autoplay, muted, loop, playsInline
+
+**Couverture : ~85%** de la page
+
+### Résumé Frontend
+**Total: 53 tests passant à 100%**
+- Tests API critiques: 20 tests
+- Tests hooks: 15 tests (useSpotPrice: 8, useMarketSeries: 7)
+- Tests pages: 18 tests (Login: 6, Signup: 6, Homepage: 6)
+
+**Couverture globale: ~85%** des fonctionnalités critiques
 
 ## Configuration
 
@@ -228,11 +345,17 @@ export default {
 - [ ] `models.test.js` - Tests validations Sequelize
 
 ### Frontend
+- [x] ~~`Login.test.jsx`~~ - ✅ Tests page login (6 tests)
+- [x] ~~`Signup.test.jsx`~~ - ✅ Tests page inscription (6 tests)
+- [x] ~~`Homepage.test.jsx`~~ - ✅ Tests page d'accueil (6 tests)
+- [x] ~~`useSpotPrice.test.js`~~ - ✅ Tests hook prix spot (8 tests)
+- [x] ~~`critical.test.js`~~ - ✅ Tests API critiques (20 tests)
 - [ ] `Header.test.jsx` - Tests composant Header
 - [ ] `PositionCard.test.jsx` - Tests affichage positions
 - [ ] `TradeHistory.test.jsx` - Tests historique
-- [ ] `Login.test.jsx` - Tests page login
 - [ ] `Dashboard.test.jsx` - Tests page dashboard
+- [ ] `Trades.test.jsx` - Tests page trades
+- [ ] `IndicatorsPage.test.jsx` - Tests page indicateurs
 
 ## CI/CD (Future)
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
-// Mock global fetch
+// Simuler la fonction fetch globale
 globalThis.fetch = vi.fn();
 
 describe('Critical Features Tests', () => {
@@ -396,7 +396,7 @@ describe('Critical Features Tests', () => {
       const priceClose = 52000;
       const quantity = 0.1;
 
-      // PnL for BUY = (priceClose - priceOpen) * quantity
+      // PnL pour BUY = (priceClose - priceOpen) * quantity
       const expectedPnl = (priceClose - priceOpen) * quantity;
 
       expect(expectedPnl).toBe(200);
@@ -407,7 +407,7 @@ describe('Critical Features Tests', () => {
       const priceClose = 3100;
       const quantity = 1;
 
-      // PnL for SELL = (priceOpen - priceClose) * quantity
+      // PnL pour SELL = (priceOpen - priceClose) * quantity
       const expectedPnl = (priceOpen - priceClose) * quantity;
 
       expect(expectedPnl).toBe(-100);

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useMarketSeries } from '../useMarketSeries';
 
-// Mock global fetch
+// Simuler la fonction fetch globale
 globalThis.fetch = vi.fn();
 
 describe('useMarketSeries Hook', () => {
