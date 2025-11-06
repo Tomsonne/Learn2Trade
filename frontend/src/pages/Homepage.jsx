@@ -32,7 +32,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-5xl">
           <video
             className="w-full rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 object-cover"
-            src="/video.mp4"
+            src="/videoHomepage_faststart.mp4"
             autoPlay
             muted
             loop

@@ -58,7 +58,7 @@ export default function LandingPage() {
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-violet-200 dark:border-violet-900">
                 <video
                   className="w-full h-auto object-cover"
-                  src="/video.mp4"
+                  src="/videoHomepage_faststart.mp4"
                   autoPlay
                   muted
                   loop
