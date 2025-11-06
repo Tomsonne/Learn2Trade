@@ -5,6 +5,7 @@ import "./index.css";
 
 import App from "./App.jsx";
 
+import LandingPage from "./pages/LandingPage.jsx";
 import Homepage from "./pages/Homepage.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
@@ -17,12 +18,17 @@ import ProtectedRoute from "./ProtectedRoute.jsx";
 
 
 const router = createBrowserRouter([
-  // Groupe SANS sidebar
-  // ----------- PUBLIC -----------
+  // ----------- LANDING PAGE (standalone) -----------
+  {
+    path: "/landingpage",
+    element: <LandingPage />,
+  },
+
+  // ----------- PUBLIC (with header/footer) -----------
   {
     element: <App variant="public" />,
     children: [
-      { index: true, element: <Homepage /> },
+      { path: "/", element: <Homepage /> },
       { path: "login", element: <Login /> },
       { path: "signup", element: <Signup /> },
     ],

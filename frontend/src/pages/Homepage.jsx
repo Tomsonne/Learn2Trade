@@ -21,7 +21,7 @@ export default function HomePage() {
             Commencer maintenant
           </button>
 
-          <Link className="btn btn-outline" to="/learn">
+          <Link className="btn btn-outline" to="/landingpage">
             En savoir plus
           </Link>
         </div>
