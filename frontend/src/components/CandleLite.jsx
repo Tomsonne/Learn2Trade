@@ -1,5 +1,5 @@
 // src/components/CandleLite.jsx
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { createChart, CrosshairMode } from "lightweight-charts";
 import { formatDateOnly, formatTimeOnly, formatPublished } from "/src/utils/formatDate";
 
@@ -34,7 +34,7 @@ export default function CandleLite({
 
     return {
       text:  rgbNumsToRgb(muted),
-      grid:  rgbNumsToRgba(border, 0.12),
+      grid:  rgbNumsToRgba(border, 0.35),
       wick:  rgbNumsToRgba(muted, 0.6),
       up:    hslToRgb(`hsl(${ma20HSL})`),
       down:  hslToRgb(`hsl(${downHSL})`),
@@ -62,13 +62,16 @@ export default function CandleLite({
         horzLines: { color: grid },
       },
       rightPriceScale: {
-        borderVisible: false,
+        borderVisible: true,
+        borderColor: grid,
         scaleMargins: { top: 0.1, bottom: 0.2 },
       },
       timeScale: {
-        borderVisible: false,
-        timeVisible: tf !== "1d",
+        borderVisible: true,
+        borderColor: grid,
+        timeVisible: true,
         secondsVisible: false,
+        visible: true,
         tickMarkFormatter: (time /* Time */) => {
           const d = new Date(timeToMs(time));
           return tf === "1d" ? formatDateOnly(d) : formatTimeOnly(d);

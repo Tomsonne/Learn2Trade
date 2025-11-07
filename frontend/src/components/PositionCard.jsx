@@ -84,6 +84,11 @@ export default function PositionCard({ trade, onClose }) {
           <span className="text-card-foreground">Quantité à fermer</span>
           <span className="font-medium text-card-foreground">{fmt2(closeQty)} / {fmt2(maxQty)}</span>
         </div>
+        {closeQty > 0 && hasPx && (
+          <div className="text-xs text-muted-foreground mb-1 text-right">
+            Valeur: {fmtUSD(closeQty * px)}
+          </div>
+        )}
         <input
           type="range"
           min={0}

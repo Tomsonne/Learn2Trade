@@ -18,7 +18,7 @@ export default function MiniChart({ symbol, tf = "15m", height = 120, className 
 
   return (
     <div className={`w-full ${className}`}>
-      <div className="h-[120px] rounded-md overflow-hidden bg-card/50">
+      <div className="rounded-md bg-card/50" style={{ height: `${height}px` }}>
         {candles.length >= 2
           ? <CandleLite key={`${sym}-${tf}`} data={candles} height={height} tf={tf} locale="fr-FR" timeZone="Europe/Paris" />
           : <div className="h-full grid place-items-center text-xs text-muted-foreground">{loading ? "Chargement…" : "Pas de données"}</div>
