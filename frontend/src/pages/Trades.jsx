@@ -153,7 +153,7 @@ export default function TradesPage() {
         {positions.length === 0 ? (
           <div className="text-muted">Aucune position ouverte</div>
         ) : (
-          <div className="grid md:grid-cols-2 xl:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
             {positions.map((pos) => (
               <PositionCard key={pos.id} trade={pos} onClose={closeTrade} />
             ))}

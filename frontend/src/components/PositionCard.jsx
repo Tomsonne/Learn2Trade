@@ -3,15 +3,6 @@ import CardBase from "./ui/CardBase";
 import { useSpotPrice } from "../hooks/useSpotPrice";
 import MiniChart from "./MiniChart";
 
-const baseSymbol = (symbol = "") => {
-  const s = String(symbol).toUpperCase();
-  // Extraire le symbol de base (retire USDT, USD, etc.)
-  const match = s.match(/^([A-Z]+)(?:USDT|USD|BUSD|USDC)?$/);
-  if (match) return match[1];
-  // Fallback: retourne le symbol original
-  return s;
-};
-
 const fmtUSD = (v) => {
   const n = Number(v);
   if (!Number.isFinite(n)) return "—";
@@ -32,7 +23,6 @@ export default function PositionCard({ trade, onClose }) {
   const side = trade.side;
   const symbol = trade.symbol || trade.asset?.symbol || `#${trade.asset_id}`;
 
-  const spotKey = baseSymbol(symbol);
   const { price: live } = useSpotPrice({ symbol: symbol, refreshMs: 60_000 });
 
   const px = Number(live);
@@ -58,15 +48,18 @@ export default function PositionCard({ trade, onClose }) {
     <CardBase className="flex flex-col gap-3 bg-card border border-border rounded-2xl">
       {/* En-tête + mini-chart */}
       <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <div className="font-semibold text-card-foreground">{symbol}</div>
-          <div className={`text-sm ${pnlClass}`}>
+        <div className="min-w-0 flex-1">
+          <div className="font-semibold text-lg text-card-foreground">{symbol}</div>
+          <div className={`text-sm font-medium ${pnlClass}`}>
             {pnl == null ? "—" : `${pnl >= 0 ? "+" : ""}${fmtUSD(pnl)}`}
             {pnlPct == null ? "" : ` (${pnlPct >= 0 ? "+" : ""}${fmt2(pnlPct)}%)`}
           </div>
         </div>
-        <div className="w-40 sm:w-48 md:w-56 shrink-0">
-          <MiniChart symbol={symbol} tf="15m" height={110} />
+        <div className="flex flex-col gap-1 shrink-0">
+          <div className="text-xs text-muted-foreground text-right font-medium">Timeframe: 15min</div>
+          <div className="w-48 sm:w-52 md:w-64">
+            <MiniChart symbol={symbol} tf="15m" height={140} />
+          </div>
         </div>
       </div>
 
