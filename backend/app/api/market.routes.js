@@ -10,7 +10,6 @@ import {
 
 const router = Router();
 
-// ──────────────────────────────────────────────
 // Prix spot
 router.get('/prices', async (_req, res) => {
   try {
