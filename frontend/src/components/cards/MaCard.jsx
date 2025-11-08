@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { formatDateOnly, formatTimeOnly } from "../../utils/formatDate";
+import Tooltip from "../ui/Tooltip";
 import {
   ResponsiveContainer,
   LineChart,
@@ -74,7 +75,28 @@ export default function MaCard({
     <div className="bg-card rounded-2xl p-6 border border-border">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-medium text-card-foreground">Signal Moyennes Mobiles</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-medium text-card-foreground">Signal Moyennes Mobiles</h3>
+            <Tooltip
+              content={
+                <div className="space-y-2">
+                  <p className="font-semibold">Qu'est-ce que les Moyennes Mobiles ?</p>
+                  <p className="text-xs">Les moyennes mobiles lissent le prix pour identifier la tendance générale.</p>
+                  <ul className="text-xs space-y-1 list-disc list-inside mt-2">
+                    <li><strong>MA20 (ligne courte) :</strong> Moyenne sur 20 périodes, suit le prix de près</li>
+                    <li><strong>MA50 (ligne longue) :</strong> Moyenne sur 50 périodes, tendance générale</li>
+                  </ul>
+                  <p className="text-xs mt-2"><strong>Signaux de trading :</strong></p>
+                  <ul className="text-xs space-y-1 list-disc list-inside">
+                    <li>🟢 <strong>Golden Cross :</strong> MA20 croise MA50 vers le haut = Signal d'achat</li>
+                    <li>🔴 <strong>Death Cross :</strong> MA20 croise MA50 vers le bas = Signal de vente</li>
+                    <li>📈 <strong>Prix au-dessus des MA :</strong> Tendance haussière</li>
+                    <li>📉 <strong>Prix en-dessous des MA :</strong> Tendance baissière</li>
+                  </ul>
+                </div>
+              }
+            />
+          </div>
           <div className="text-sm text-muted-foreground mt-1">
             Prix actuel : {price != null ? fmt(price) : "—"}
           </div>

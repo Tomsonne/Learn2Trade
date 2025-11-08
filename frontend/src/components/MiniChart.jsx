@@ -13,7 +13,14 @@ export default function MiniChart({ symbol, tf = "15m", height = 120, className 
     series
       .filter(d => [d.ts,d.o,d.h,d.l,d.c].every(Number.isFinite))
       .slice(-60) // 60 dernières bougies pour un mini aperçu
-      .map(d => ({ time: Math.floor(d.ts/1000), open:+d.o, high:+d.h, low:+d.l, close:+d.c }))
+      .map(d => ({
+        time: Math.floor(d.ts/1000),
+        open:+d.o,
+        high:+d.h,
+        low:+d.l,
+        close:+d.c,
+        volume: Number.isFinite(d.v) ? +d.v : 0
+      }))
   , [series]);
 
   return (

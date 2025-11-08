@@ -152,11 +152,11 @@ export async function getKlines(symbol = 'BTC', { interval = '1h', limit = 500, 
 export async function getChartOHLC(symbol = 'BTC', { interval = '1d', limit = 30, format = 'raw' } = {}) {
   const lim = Math.min(Math.max(Number(limit) || 1, 1), 1000);
   const ks = await getKlines(symbol, { interval, limit: lim });
-  // garde le format historique {t,o,h,l,c}
+  // garde le format historique {t,o,h,l,c,v} avec volume
   if (format === 'lw') {
-    return ks.map(k => ({ time: Math.floor(k.t/1000), open: k.o, high: k.h, low: k.l, close: k.c }));
+    return ks.map(k => ({ time: Math.floor(k.t/1000), open: k.o, high: k.h, low: k.l, close: k.c, volume: k.v }));
   }
-  return ks.map(({ t, o, h, l, c }) => ({ t, o, h, l, c }));
+  return ks.map(({ t, o, h, l, c, v }) => ({ t, o, h, l, c, v }));
 }
 
 /**

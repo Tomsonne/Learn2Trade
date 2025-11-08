@@ -1,6 +1,7 @@
 // src/components/cards/RsiCard.jsx
 import React, { useMemo } from "react";
 import { formatDateOnly, formatTimeOnly } from "/src/utils/formatDate";
+import Tooltip from "../ui/Tooltip";
 import {
   ResponsiveContainer,
   LineChart,
@@ -38,22 +39,41 @@ export default function RsiCard({
   return (
     <div className="bg-card rounded-2xl p-6 border border-border">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-card-foreground">Signal RSI</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-medium text-card-foreground">Signal RSI</h3>
+          <Tooltip
+            content={
+              <div className="space-y-2">
+                <p className="font-semibold">Qu'est-ce que le RSI ?</p>
+                <p className="text-xs">Le RSI (Relative Strength Index) mesure la force d'un mouvement de prix sur une échelle de 0 à 100.</p>
+                <ul className="text-xs space-y-1 list-disc list-inside mt-2">
+                  <li><strong>RSI &gt; 70 :</strong> Suracheté 🔴 (le prix pourrait baisser)</li>
+                  <li><strong>RSI 30-70 :</strong> Zone neutre ⚪</li>
+                  <li><strong>RSI &lt; 30 :</strong> Survendu 🟢 (le prix pourrait monter)</li>
+                </ul>
+                <p className="text-xs mt-2">💡 <strong>Conseil :</strong> Évitez d'acheter quand RSI &gt; 70 et de vendre quand RSI &lt; 30.</p>
+              </div>
+            }
+          />
+        </div>
         <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${rsiSignal.bg}`} title={rsiSignal.text}>
           <Icon className={`w-4 h-4 ${rsiSignal.color}`} />
           <span className={`text-sm font-medium ${rsiSignal.color}`}>{rsiSignal.text}</span>
         </div>
       </div>
 
-      <div className="text-3xl font-medium text-card-foreground mb-2">
-        {currentRSI == null ? "—" : Number(currentRSI).toFixed(1)}
+      <div className="flex items-center gap-2 mb-2">
+        <div className="text-3xl font-medium text-card-foreground">
+          {currentRSI == null ? "—" : Number(currentRSI).toFixed(1)}
+        </div>
+        <span className="text-sm text-muted-foreground">/ 100</span>
       </div>
 
       <div style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={rsiData} margin={{ top: 8, right: 12, bottom: 6, left: 8 }}>
             {/* Grille douce */}
-            <CartesianGrid vertical stroke="rgba(148,163,184,.18)" horizontal stroke="rgba(148,163,184,.18)" />
+            <CartesianGrid stroke="rgba(148,163,184,.18)" />
 
             {/* Axe X = temps (en secondes) -> format selon TF */}
             <XAxis

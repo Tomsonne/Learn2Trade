@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import CardBase from "./ui/CardBase";
+import CryptoLogo from "./CryptoLogo";
 import { useSpotPrice } from "../hooks/useSpotPrice";
 import MiniChart from "./MiniChart";
 
@@ -45,37 +46,60 @@ export default function PositionCard({ trade, onClose }) {
   const pnlClass = pnl == null ? "text-muted-foreground" : pnl >= 0 ? "text-green-600" : "text-red-600";
 
   return (
-    <CardBase className="flex flex-col gap-3 bg-card border border-border rounded-2xl">
-      {/* En-tête + mini-chart */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <div className="font-semibold text-lg text-card-foreground">{symbol}</div>
-          <div className={`text-sm font-medium ${pnlClass}`}>
-            {pnl == null ? "—" : `${pnl >= 0 ? "+" : ""}${fmtUSD(pnl)}`}
-            {pnlPct == null ? "" : ` (${pnlPct >= 0 ? "+" : ""}${fmt2(pnlPct)}%)`}
+    <CardBase className="flex flex-col gap-4 bg-card border border-border rounded-2xl">
+      {/* En-tête */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <CryptoLogo symbol={symbol} size="lg" />
+          <div>
+            <div className="font-semibold text-2xl text-card-foreground">{symbol}</div>
+            <div className={`text-lg font-medium mt-1 ${pnlClass}`}>
+              {pnl == null ? "—" : `${pnl >= 0 ? "+" : ""}${fmtUSD(pnl)}`}
+              {pnlPct == null ? "" : ` (${pnlPct >= 0 ? "+" : ""}${fmt2(pnlPct)}%)`}
+            </div>
           </div>
         </div>
-        <div className="flex flex-col gap-1 shrink-0">
-          <div className="text-xs text-muted-foreground text-right font-medium">Timeframe: 15min</div>
-          <div className="w-48 sm:w-52 md:w-64">
-            <MiniChart symbol={symbol} tf="15m" height={140} />
-          </div>
+        <div className={`px-4 py-2 rounded-lg text-sm font-semibold ${
+          side === 'BUY' ? 'bg-green-500/20 text-green-600' : 'bg-red-500/20 text-red-600'
+        }`}>
+          {side}
         </div>
       </div>
 
-      {/* Détails */}
-      <div className="grid grid-cols-2 gap-x-3 text-sm">
-        <div className="text-muted-foreground">Côté</div>
-        <div className="text-right font-medium text-card-foreground">{side}</div>
+      {/* Mini-chart pleine largeur */}
+      <div className="w-full bg-accent/30 rounded-xl p-4">
+        <div className="text-xs text-muted-foreground mb-3 font-medium">Timeframe: 15min</div>
+        <div className="w-full">
+          <MiniChart symbol={symbol} tf="15m" height={220} />
+        </div>
+      </div>
 
-        <div className="text-muted-foreground">Quantité</div>
-        <div className="text-right text-card-foreground">{fmt2(qty)}</div>
-
-        <div className="text-muted-foreground">Prix d’achat</div>
-        <div className="text-right text-card-foreground">{Number.isFinite(priceOpen) ? fmtUSD(priceOpen) : "—"}</div>
-
-        <div className="text-muted-foreground">Prix actuel</div>
-        <div className="text-right text-card-foreground">{hasPx ? fmtUSD(px) : "—"}</div>
+      {/* Détails en 2 colonnes */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-accent rounded-lg p-3">
+          <div className="text-xs text-muted-foreground mb-1">Quantité</div>
+          <div className="text-lg font-semibold text-card-foreground">{fmt2(qty)}</div>
+        </div>
+        <div className="bg-accent rounded-lg p-3">
+          <div className="text-xs text-muted-foreground mb-1">Prix d'achat</div>
+          <div className="text-lg font-semibold text-card-foreground">
+            {Number.isFinite(priceOpen) ? fmtUSD(priceOpen) : "—"}
+          </div>
+        </div>
+        <div className="bg-accent rounded-lg p-3">
+          <div className="text-xs text-muted-foreground mb-1">Prix actuel</div>
+          <div className="text-lg font-semibold text-card-foreground">
+            {hasPx ? fmtUSD(px) : "—"}
+          </div>
+        </div>
+        <div className={`rounded-lg p-3 ${
+          pnl == null ? 'bg-accent' : pnl >= 0 ? 'bg-green-500/10' : 'bg-red-500/10'
+        }`}>
+          <div className="text-xs text-muted-foreground mb-1">PnL</div>
+          <div className={`text-lg font-semibold ${pnlClass}`}>
+            {pnl == null ? "—" : `${pnl >= 0 ? "+" : ""}${fmtUSD(pnl)}`}
+          </div>
+        </div>
       </div>
 
       {/* Slider fermeture */}

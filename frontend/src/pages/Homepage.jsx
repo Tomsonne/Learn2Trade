@@ -1,7 +1,27 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+
+const API_URL = window.location.hostname.includes("localhost")
+  ? "http://localhost:8000/api/v1"
+  : "https://skillvest-production.up.railway.app/api/v1";
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_URL}/auth/check`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => {
+        setUser(data?.status === "ok" ? data.user : null);
+        setLoading(false);
+      })
+      .catch(() => {
+        setUser(null);
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <main className="bg-white dark:bg-gray-900">
@@ -14,12 +34,21 @@ export default function HomePage() {
         </p>
 
         <div className="mt-8 flex justify-center gap-4">
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate("/learn")}
-          >
-            Commencer maintenant
-          </button>
+          {!loading && user ? (
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate("/dashboard")}
+            >
+              Aller au Dashboard
+            </button>
+          ) : (
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate("/learn")}
+            >
+              Commencer maintenant
+            </button>
+          )}
 
           <Link className="btn btn-outline" to="/landingpage">
             En savoir plus
