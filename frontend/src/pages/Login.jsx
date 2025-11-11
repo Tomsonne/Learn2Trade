@@ -33,7 +33,7 @@ export default function Login() {
       <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-md rounded-xl p-8">
         <h2 className="text-2xl font-bold text-center mb-2">Connexion</h2>
         <p className="text-center text-gray-500 mb-6">
-          Connectez-vous à votre compte Learn2Trade
+          Connectez-vous à votre compte SkillVest
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -87,11 +87,6 @@ export default function Login() {
           <Link to="/signup" className="text-blue-600 hover:underline">
             Créer un compte
           </Link>
-        </p>
-        <p className="text-center text-sm mt-1">
-          <a href="#" className="text-gray-400 hover:underline">
-            Mot de passe oublié ?
-          </a>
         </p>
       </div>
     </div>
