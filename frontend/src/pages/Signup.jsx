@@ -31,7 +31,7 @@ export default function Signup() {
       <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-md rounded-xl p-8">
         <h2 className="text-2xl font-bold text-center mb-2">Créer un compte</h2>
         <p className="text-center text-gray-500 mb-6">
-          Inscrivez-vous pour rejoindre Learn2Trade
+          Inscrivez-vous pour rejoindre SkillVest
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
