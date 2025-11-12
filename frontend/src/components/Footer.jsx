@@ -9,7 +9,7 @@ export default function Footer() {
           <a className="hover:text-slate-700 dark:hover:text-slate-200" href="#">Confidentialité</a>
           <a className="hover:text-slate-700 dark:hover:text-slate-200" href="#">Contact</a>
         </nav>
-        <p>© {new Date().getFullYear()} Learn2Trade. Tous droits réservés.</p>
+        <p>© {new Date().getFullYear()} SkillVest. Tous droits réservés.</p>
       </div>
     </footer>
   );
