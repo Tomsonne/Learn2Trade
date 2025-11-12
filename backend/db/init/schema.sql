@@ -1,3 +1,4 @@
+-- Extensions nécessaires
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS citext;
 
@@ -8,7 +9,10 @@ CREATE TABLE users (
   password_hash TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   is_admin BOOLEAN NOT NULL DEFAULT false,
-  cash NUMERIC(24,10) NOT NULL DEFAULT 10000 -- portefeuille initial
+  cash NUMERIC(24,10) NOT NULL DEFAULT 10000 -- solde de départ pour la simulation
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+
+
 );
 
 -- Actifs supportés
@@ -18,17 +22,23 @@ CREATE TABLE assets (
   kind TEXT NOT NULL CHECK (kind IN ('crypto','forex','index'))
 );
 
+
 -- Stratégies configurées par l’utilisateur
-CREATE TABLE strategies (
+CREATE TABLE strategy (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   type TEXT NOT NULL CHECK (type IN ('RSI','MA_CROSS')),
   params JSONB NOT NULL,
   is_enabled BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  updated_at TIMESTAMPTZ DEFAULT NOW() 
 );
 
+
+-- Signaux générés par une stratégie
+
 -- Signaux & exécutions liées à une stratégie
+
 CREATE TABLE strategy_signals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   strategy_id UUID NOT NULL REFERENCES strategies(id) ON DELETE CASCADE,
@@ -39,7 +49,7 @@ CREATE TABLE strategy_signals (
 );
 
 -- Transactions (trades simulés)
-CREATE TABLE trades (
+CREATE TABLE trade (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   strategy_id UUID REFERENCES strategies(id) ON DELETE SET NULL,
@@ -53,7 +63,9 @@ CREATE TABLE trades (
   close_at TIMESTAMPTZ NULL
 );
 
--- Positions (portefeuille)
+
+-- Positions (portefeuille de l’utilisateur)
+
 CREATE TABLE positions (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   asset_id INT NOT NULL REFERENCES assets(id),
@@ -62,8 +74,10 @@ CREATE TABLE positions (
   PRIMARY KEY (user_id, asset_id)
 );
 
--- Cache news
-CREATE TABLE news_cache (
+
+-- Cache news (optionnel MVP)
+
+CREATE TABLE news (
   id BIGSERIAL PRIMARY KEY,
   source TEXT,
   title TEXT,

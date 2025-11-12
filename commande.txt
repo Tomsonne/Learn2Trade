@@ -1,0 +1,42 @@
+docker-compose down -v
+arrete et supprime le conteneur 
+
+docker-compose up --build
+construit le conteneur et rejoue schema.sql
+
+node backend/test/user.test.js
+etre dans Learn2Trade et lancer puis sur dbeaver regarder sa classe
+
+
+
+lancer container docker : docker compose build --no-cache && docker compose up
+
+lancer container docker : docker compose build --no-cache && docker compose up
+
+docker compose up -d frontend
+
+docker compose restart frontend
+
+
+token user toto@toto.com
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE1M2M2OTJlLTcxNDM
+tNDg0YS1iOTgzLTFlY2I2NTQyYjc0ZCIsImVtYWlsIjoidG90b0B0b3RvLmNvbSI
+sImlzX2FkbWluIjpmYWxzZSwiaWF0IjoxNzYwMjg5ODgyLCJleHAiOjE3NjAyOTM
+0ODJ9.GvLy6NfR0YoJnTFEpfwcok0Qq0kvod1qhEYqXFFBvgQ
+
+docker exec -it learn2trade_backend npm install decimal.js
+
+curl trade:
+curl -sS -X POST "http://127.0.0.1:8000/api/v1/trade/open" \                                     -H "Content-Type: application/json" \
+  -d '{                                               
+    "user_id": "c4a98678-51f0-4c26-8dd4-a27328b7cba0",
+    "asset_id": 2,
+    "side": "BUY",
+    "quantity": "0.002"
+  }'
+
+  curl -sS -X POST "http://127.0.0.1:8000/api/v1/trade/e80f7b34-cb87-4789-919f-8352dcae8ae2/close"
+
+tests:
+cd backend && npm test
+cd frontend && npm test

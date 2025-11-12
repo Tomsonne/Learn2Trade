@@ -1,0 +1,107 @@
+/* Tailwind v3 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Tokens ─────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    --font-sans: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", Arial, sans-serif;
+
+    --bg:       255 255 255;
+    --surface:  248 250 252;
+    --text:     15 23 42;
+    --muted:    100 116 139;
+    --border:   226 232 240;
+    --brand:    34 197 94;
+    --primary:  37 99 235;
+    --ma20: 142 72% 45%;   /* vert */
+    --ma50: 38 92% 50%;    /* orange */
+    --danger: 239 68 68;
+    --violet: 28 31 65;
+  }
+  .dark {
+    --bg:       2 6 23;
+    --surface:  15 23 42;
+    --text:     241 245 249;
+    --muted:    148 163 184;
+    --border:   30 41 59;
+    --brand:    16 185 129;
+    --primary:  59 130 246;
+    --ma20: 142 72% 45%;   /* vert */
+    --ma50: 38 92% 50%;    /* orange */
+    --danger: 239 68 68;
+    --violet: 28 31 65;
+  }
+  html, body, #root { height: 100%; }
+  body { background: rgb(var(--bg)); color: rgb(var(--text)); @apply font-sans; }
+}
+
+/* ── Utilities perso ─────────────────────────────────────────────── */
+@layer utilities {
+  .bg-app      { background-color: rgb(var(--bg)); }
+  .bg-surface  { background-color: rgb(var(--surface)); }
+  .text-app    { color: rgb(var(--text)); }
+  .text-muted  { color: rgb(var(--muted)); }
+  .border-app  { border-color: rgb(var(--border) / 1); }
+
+  /* Mappings “shadcn-like” */
+  .bg-card               { background-color: rgb(var(--surface)); }
+  .text-card-foreground  { color: rgb(var(--text)); }
+  .bg-muted              { background-color: rgb(var(--surface)); }
+  .text-muted-foreground { color: rgb(var(--muted)); }
+  .border-border         { border-color: rgb(var(--border) / 1); }
+
+  .text-primary              { color: rgb(var(--primary)); }
+  .bg-primary                { background-color: rgb(var(--primary)); }
+  .text-primary-foreground   { color: #fff; }
+  .bg-primary\/10            { background-color: rgb(var(--primary) / .10); }
+  .border-primary\/30        { border-color: rgb(var(--primary) / .30); }
+
+  .bg-accent              { background-color: rgb(var(--surface)); }
+  .text-accent-foreground { color: rgb(var(--text)); }
+}
+
+/* ── Components perso ────────────────────────────────────────────── */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center font-semibold rounded-full;
+    padding: .65rem 1.1rem;
+    transition: opacity .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(var(--primary) / .3); }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
+
+  .btn-primary { color: #fff; background: rgb(var(--primary)); }
+  .btn-primary:hover { opacity: .95; }
+
+  .btn-outline { color: rgb(var(--text)); border: 1px solid rgb(var(--border)); background: transparent; }
+  .btn-outline:hover { background: rgb(var(--surface)); }
+
+  .btn-brand { color: #fff; background: rgb(var(--brand)); }
+  .btn-brand:hover { opacity: .95; }
+}
+
+/* Accessibilité animation */
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+}
+
+/* ── Form controls & variants ─────────────────*/
+@layer components {
+  .form-label {
+    @apply block text-sm mb-2 text-muted-foreground;
+  }
+
+  .input, .select {
+    @apply w-full rounded-xl border border-border bg-surface text-app
+           placeholder:text-muted px-3 py-2
+           focus:outline-none focus:ring-2 focus:ring-primary/30;
+  }
+
+  .btn-danger { color:#fff; background: rgb(var(--danger)); }
+  .btn-danger:hover { opacity:.95; }
+
+  .btn-violet { color:#fff; background: rgb(var(--violet)); }
+  .btn-violet:hover { opacity:.95; }
+}
