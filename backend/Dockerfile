@@ -13,12 +13,8 @@ RUN npm install --production
 # Étape 5 : Copier le code source
 COPY . .
 
-# Étape 6 : Variables d'environnement
-ENV PORT=8000
-ENV NODE_ENV=production
-
-# Étape 7 : Exposer le port
+# Étape 6 : Exposer le port
 EXPOSE 8000
 
-# Étape 8 : Commande de démarrage
+# Étape 7 : Commande de démarrage
 CMD ["npm", "start"]
