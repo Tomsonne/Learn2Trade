@@ -13,14 +13,14 @@ if (!databaseUrl) {
   console.error("Variables d'environnement disponibles:", Object.keys(process.env).join(", "));
   console.error("NODE_ENV:", process.env.NODE_ENV);
   console.error("PORT:", process.env.PORT);
-  // Commenté temporairement pour debug Railway
-  // process.exit(1);
+  console.error("Toutes les variables d'environnement:", process.env);
+  process.exit(1);
 }
 
 // Crée l'instance Sequelize
 const sequelize = new Sequelize(databaseUrl, {
   dialect: "postgres",
-  logging: false, // mets true si tu veux voir les requêtes SQL
+  logging: console.log, // Active les logs SQL pour debug
   dialectOptions: {
     ssl: {
       require: true,
