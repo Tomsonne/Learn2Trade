@@ -23,14 +23,24 @@ const allowedOrigins = [
   "https://learn2-trade-oyidrp70d-tomsonnes-projects.vercel.app", // preview (nouveau déploiement)
 ];
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true, // autorise l’envoi des cookies
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+// Fonction pour vérifier les origins autorisées
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Autorise localhost et tous les domaines .vercel.app
+    if (!origin || origin === 'http://localhost:5173' || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
 
 // Autorise toutes les requêtes préflight (OPTIONS)
 app.options(/.*/, cors({ origin: allowedOrigins, credentials: true }));
