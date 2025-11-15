@@ -14,7 +14,7 @@ const cfg = loadConfig();
 const app = express();
 
 // ──────────────────────────────────────────────
-// Configuration CORS (frontend Vercel + local)
+// Configuration CORS (frontend Vercel + local + ngrok pour demoday)
 const allowedOrigins = [
   "http://localhost:5173", // dev local
   "https://learn2-trade.vercel.app", // domaine principal
@@ -26,8 +26,8 @@ const allowedOrigins = [
 // Fonction pour vérifier les origins autorisées
 const corsOptions = {
   origin: function (origin, callback) {
-    // Autorise localhost et tous les domaines .vercel.app
-    if (!origin || origin === 'http://localhost:5173' || origin.endsWith('.vercel.app')) {
+    // Autorise localhost et tous les domaines .vercel.app, .ngrok-free.dev, .loca.lt
+    if (!origin || origin === 'http://localhost:5173' || origin.endsWith('.vercel.app') || origin.endsWith('.ngrok-free.dev') || origin.endsWith('.loca.lt')) {
       callback(null, true);
     } else if (allowedOrigins.includes(origin)) {
       callback(null, true);
