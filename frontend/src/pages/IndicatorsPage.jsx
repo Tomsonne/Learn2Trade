@@ -5,7 +5,7 @@ import { useMarketSeries } from "../hooks/useMarketSeries.js";
 import CandleLite from "../components/CandleLite.jsx";
 import RsiCard from "../components/cards/RsiCard.jsx";
 import MaCard from "../components/cards/MaCard.jsx";
-import CourseSection from "../components/CourseSection.jsx";
+import InteractiveCourseSection from "../components/InteractiveCourseSection.jsx";
 import StrategiesSection from "../components/StrategiesSection.jsx";
 import Glossary from "../components/Glossary.jsx";
 import { strategies } from "../data/strategies.js";
@@ -184,7 +184,7 @@ export function IndicatorsPage() {
         </div>
       </div>
 
-      {activeSection === "course" && <CourseSection />}
+      {activeSection === "course" && <InteractiveCourseSection />}
       {activeSection === "strategies" && (
         <StrategiesSection strategies={strategies} selectedStrategy={selectedStrategy} setSelectedStrategy={setSelectedStrategy} />
       )}

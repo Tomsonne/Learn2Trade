@@ -21,14 +21,14 @@ export default function TickerWidget() {
           "name": "Crypto",
           "originalName": "Crypto",
           "symbols": [
-            { "name": "BINANCE:BTCUSDT", "displayName": "BTC" },
-            { "name": "BINANCE:ETHUSDT", "displayName": "ETH" },
-            { "name": "BINANCE:BNBUSDT", "displayName": "BNB" },
-            { "name": "BINANCE:SOLUSDT", "displayName": "SOL" },
-            { "name": "BINANCE:ADAUSDT", "displayName": "ADA" },
-            { "name": "BINANCE:XRPUSDT", "displayName": "XRP" },
-            { "name": "BINANCE:DOGEUSDT", "displayName": "DOGE" },
-            { "name": "BINANCE:DOTUSDT", "displayName": "DOT" }
+            { "name": "BINANCE:BTCUSDT", "displayName": "BTC/USD" },
+            { "name": "BINANCE:ETHUSDT", "displayName": "ETH/USD" },
+            { "name": "BINANCE:BNBUSDT", "displayName": "BNB/USD" },
+            { "name": "BINANCE:SOLUSDT", "displayName": "SOL/USD" },
+            { "name": "BINANCE:ADAUSDT", "displayName": "ADA/USD" },
+            { "name": "BINANCE:XRPUSDT", "displayName": "XRP/USD" },
+            { "name": "BINANCE:DOGEUSDT", "displayName": "DOGE/USD" },
+            { "name": "BINANCE:DOTUSDT", "displayName": "DOT/USD" }
           ]
         }
       ],

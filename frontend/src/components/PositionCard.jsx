@@ -1,13 +1,23 @@
 import { useState, useMemo } from "react";
+import { Clock } from "lucide-react";
 import CardBase from "./ui/CardBase";
 import CryptoLogo from "./CryptoLogo";
+import ConfirmationModal from "./ConfirmationModal";
 import { useSpotPrice } from "../hooks/useSpotPrice";
 import MiniChart from "./MiniChart";
+import { formatTimeElapsed } from "../utils/timeElapsed";
 
 const fmtUSD = (v) => {
   const n = Number(v);
   if (!Number.isFinite(n)) return "—";
-  return n.toLocaleString("fr-FR", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
+  // Pour les petits montants (< 1$), afficher plus de décimales
+  const decimals = n < 1 ? 6 : n < 100 ? 4 : 2;
+  return n.toLocaleString("fr-FR", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: decimals
+  });
 };
 const fmt2 = (v) => {
   const n = Number(v);
@@ -16,15 +26,25 @@ const fmt2 = (v) => {
 };
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v ?? 0));
 
+// Convertit BTCUSDT en BTC/USD pour l'affichage
+const toUiSymbol = (symbol) => {
+  if (!symbol || typeof symbol !== "string") return symbol;
+  if (symbol.endsWith("USDT")) return `${symbol.slice(0, -4)}/USD`;
+  if (symbol.endsWith("USD") && !symbol.endsWith("/USD")) return `${symbol.slice(0, -3)}/USD`;
+  return symbol;
+};
+
 export default function PositionCard({ trade, onClose }) {
   const [closeQty, setCloseQty] = useState(0);
+  const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
 
   const priceOpen = Number(trade.price_open);
   const qty = Number(trade.quantity);
   const side = trade.side;
-  const symbol = trade.symbol || trade.asset?.symbol || `#${trade.asset_id}`;
+  const symbolRaw = trade.symbol || trade.asset?.symbol || `#${trade.asset_id}`;
+  const symbol = toUiSymbol(symbolRaw); // Affichage converti (BTC/USD)
 
-  const { price: live } = useSpotPrice({ symbol: symbol, refreshMs: 60_000 });
+  const { price: live } = useSpotPrice({ symbol: symbolRaw, refreshMs: 60_000 });
 
   const px = Number(live);
   const hasPx = Number.isFinite(px) && px > 0;
@@ -44,18 +64,23 @@ export default function PositionCard({ trade, onClose }) {
   }, [hasPx, px, priceOpen, side]);
 
   const pnlClass = pnl == null ? "text-muted-foreground" : pnl >= 0 ? "text-green-600" : "text-red-600";
+  const timeElapsed = formatTimeElapsed(trade.opened_at);
 
   return (
     <CardBase className="flex flex-col gap-4 bg-card border border-border rounded-2xl">
       {/* En-tête */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <CryptoLogo symbol={symbol} size="lg" />
+          <CryptoLogo symbol={symbolRaw} size="lg" />
           <div>
             <div className="font-semibold text-2xl text-card-foreground">{symbol}</div>
             <div className={`text-lg font-medium mt-1 ${pnlClass}`}>
               {pnl == null ? "—" : `${pnl >= 0 ? "+" : ""}${fmtUSD(pnl)}`}
               {pnlPct == null ? "" : ` (${pnlPct >= 0 ? "+" : ""}${fmt2(pnlPct)}%)`}
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
+              <Clock className="w-3.5 h-3.5" />
+              <span>Ouvert depuis {timeElapsed}</span>
             </div>
           </div>
         </div>
@@ -70,7 +95,7 @@ export default function PositionCard({ trade, onClose }) {
       <div className="w-full bg-accent/30 rounded-xl p-4">
         <div className="text-xs text-muted-foreground mb-3 font-medium">Timeframe: 15min</div>
         <div className="w-full">
-          <MiniChart symbol={symbol} tf="15m" height={220} />
+          <MiniChart symbol={symbolRaw} tf="15m" height={220} />
         </div>
       </div>
 
@@ -143,11 +168,28 @@ export default function PositionCard({ trade, onClose }) {
       <button
         type="button"
         disabled={!closeQty || closeQty <= 0}
-        onClick={() => onClose(trade.id, closeQty)}
+        onClick={() => setShowCloseConfirmation(true)}
         className="btn btn-violet w-full rounded-2xl mt-1"
       >
         Fermer {fmt2(closeQty)} {symbol}
       </button>
+
+      {/* Modal de confirmation de clôture */}
+      <ConfirmationModal
+        isOpen={showCloseConfirmation}
+        onClose={() => setShowCloseConfirmation(false)}
+        onConfirm={() => onClose(trade.id, closeQty)}
+        title="Confirmer la clôture"
+        type="close"
+        details={{
+          symbol,
+          quantity: closeQty,
+          price: px,
+          total: closeQty * px,
+          pnl,
+          pnlPct,
+        }}
+      />
     </CardBase>
   );
 }

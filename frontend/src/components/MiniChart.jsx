@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useMarketSeries } from "../hooks/useMarketSeries";
 import CandleLite from "./CandleLite";
 
-// "BTCUSDT" -> "BTC" ; "ETHUSD" -> "ETH"
+// Nettoie le symbole: "BTCUSDT" -> "BTC" ; "ETHUSD" -> "ETH"
 const baseSymbol = (s="") => s.replace(/USDT$|USD$/i, "");
 
 export default function MiniChart({ symbol, tf = "15m", height = 120, className = "" }) {

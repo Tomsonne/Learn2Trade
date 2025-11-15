@@ -5,8 +5,10 @@ import SmartTradeAssistant from "../components/SmartTradeAssistant";
 import AssetAnalysisModal from "../components/AssetAnalysisModal";
 import CompactKPIs from "../components/CompactKPIs";
 import MiniChart from "../components/MiniChart";
+import PortfolioPerformanceChart from "../components/PortfolioPerformanceChart";
+import ConfirmationModal from "../components/ConfirmationModal";
 import { useSpotPrice } from "../hooks/useSpotPrice";
-import { TrendingUp, BarChart3, ShoppingCart, ChevronDown, ChevronUp, Rocket } from "lucide-react";
+import { TrendingUp, BarChart3, ShoppingCart, ChevronDown, ChevronUp, Rocket, ArrowUpDown, Filter } from "lucide-react";
 
 const API_URL = window.location.hostname.includes("localhost")
   ? "http://localhost:8000/api/v1"
@@ -22,6 +24,10 @@ export default function TradesPage() {
   const [assets, setAssets] = useState([]);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [isOrderFormExpanded, setIsOrderFormExpanded] = useState(false);
+  const [sortBy, setSortBy] = useState("time"); // time, pnl, value, symbol
+  const [filterProfitable, setFilterProfitable] = useState("all"); // all, profit, loss
+  const [showBuyConfirmation, setShowBuyConfirmation] = useState(false);
+  const [pendingOrderSide, setPendingOrderSide] = useState(null);
 
   // Récupérer le symbole de l'actif sélectionné
   const selectedAsset = useMemo(() => {
@@ -83,11 +89,18 @@ export default function TradesPage() {
     }
   }, [loading, trades.length]);
 
-  const placeOrder = async (side) => {
+  const handleBuyClick = (side) => {
     if (!user?.id || !selectedAssetId || !qty) {
-      alert("Remplis l’actif et la quantité.");
+      alert("Remplis l'actif et la quantité.");
       return;
     }
+    setPendingOrderSide(side);
+    setShowBuyConfirmation(true);
+  };
+
+  const placeOrder = async () => {
+    if (!user?.id || !selectedAssetId || !qty || !pendingOrderSide) return;
+
     try {
       const r = await fetch(`${API_URL}/trade/open`, {
         method: "POST",
@@ -96,12 +109,13 @@ export default function TradesPage() {
         body: JSON.stringify({
           user_id: user.id,
           asset_id: Number(selectedAssetId),
-          side,
+          side: pendingOrderSide,
           quantity: Number(qty),
         }),
       });
       if (!r.ok) throw new Error("Erreur solde insuffisant");
       setQty("");
+      setPendingOrderSide(null);
       await fetchOpenTrades();
     } catch (e) {
       alert(e.message);
@@ -137,6 +151,71 @@ export default function TradesPage() {
 
     return balance;
   }, [positions, user?.cash]);
+
+  // Trier et filtrer les trades avec calcul du PnL en temps réel
+  const tradesWithPnL = useMemo(() => {
+    return trades.map(trade => {
+      // Trouver la position correspondante
+      const position = positions.find(p => p.asset_id === trade.asset_id);
+
+      return {
+        ...trade,
+        calculatedPnL: Number(position?.pnl || 0),
+        calculatedValue: Number(position?.value || 0)
+      };
+    });
+  }, [trades, positions]);
+
+  const filteredAndSortedTrades = useMemo(() => {
+    let result = [...tradesWithPnL];
+
+    console.log('🔍 Filtering trades:', {
+      totalTrades: result.length,
+      filterProfitable,
+      tradesWithPnL: result.map(t => ({ id: t.id, pnl: t.calculatedPnL, value: t.calculatedValue }))
+    });
+
+    // Filtre par profit/perte
+    if (filterProfitable !== "all") {
+      result = result.filter((trade) => {
+        const pnl = trade.calculatedPnL;
+        if (filterProfitable === "profit") return pnl >= 0;
+        if (filterProfitable === "loss") return pnl < 0;
+        return true;
+      });
+
+      console.log('🔍 After filter:', {
+        remainingTrades: result.length,
+        filter: filterProfitable
+      });
+    }
+
+    // Tri
+    result.sort((a, b) => {
+      if (sortBy === "time") {
+        // Plus récent en premier
+        return new Date(b.opened_at || 0) - new Date(a.opened_at || 0);
+      }
+
+      if (sortBy === "symbol") {
+        const symbolA = a.symbol || a.asset?.symbol || "";
+        const symbolB = b.symbol || b.asset?.symbol || "";
+        return symbolA.localeCompare(symbolB);
+      }
+
+      if (sortBy === "pnl") {
+        return b.calculatedPnL - a.calculatedPnL; // Plus grand PnL en premier
+      }
+
+      if (sortBy === "value") {
+        return b.calculatedValue - a.calculatedValue; // Plus grande valeur en premier
+      }
+
+      return 0;
+    });
+
+    return result;
+  }, [tradesWithPnL, sortBy, filterProfitable]);
 
   if (loading) return <div className="p-6 text-center">Chargement…</div>;
   if (!user)
@@ -255,7 +334,7 @@ export default function TradesPage() {
               )}
 
               <button
-                onClick={() => placeOrder("BUY")}
+                onClick={() => handleBuyClick("BUY")}
                 className="btn btn-brand w-full rounded-2xl"
               >
                 Acheter
@@ -306,11 +385,80 @@ export default function TradesPage() {
         {/* KPIs compacts */}
         <CompactKPIs positions={positions} cash={user?.cash || 0} />
 
-        <h2 className="text-xl font-semibold mb-4 text-card-foreground">
-          Mes positions (ouvertes)
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-card-foreground">
+            Mes positions ({filteredAndSortedTrades.length})
+          </h2>
 
-        {trades.length === 0 ? (
+          {trades.length > 0 && (
+            <div className="flex items-center gap-2">
+              {/* Filtre Profit/Perte */}
+              <div className="flex items-center gap-1 bg-accent/50 border border-border rounded-lg p-1">
+                <button
+                  onClick={() => setFilterProfitable("all")}
+                  className={`px-2.5 py-1 text-xs rounded transition-colors ${
+                    filterProfitable === "all"
+                      ? "bg-primary text-primary-foreground font-medium"
+                      : "text-muted-foreground hover:text-card-foreground"
+                  }`}
+                >
+                  Tous
+                </button>
+                <button
+                  onClick={() => setFilterProfitable("profit")}
+                  className={`px-2.5 py-1 text-xs rounded transition-colors ${
+                    filterProfitable === "profit"
+                      ? "bg-green-500 text-white font-medium"
+                      : "text-muted-foreground hover:text-card-foreground"
+                  }`}
+                >
+                  Profit
+                </button>
+                <button
+                  onClick={() => setFilterProfitable("loss")}
+                  className={`px-2.5 py-1 text-xs rounded transition-colors ${
+                    filterProfitable === "loss"
+                      ? "bg-red-500 text-white font-medium"
+                      : "text-muted-foreground hover:text-card-foreground"
+                  }`}
+                >
+                  Perte
+                </button>
+              </div>
+
+              {/* Tri */}
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="appearance-none bg-accent/50 border border-border rounded-lg px-3 py-1.5 pr-8 text-xs text-card-foreground cursor-pointer hover:bg-accent transition-colors"
+                >
+                  <option value="time">Plus récent</option>
+                  <option value="pnl">PnL (plus grand)</option>
+                  <option value="value">Valeur (plus grande)</option>
+                  <option value="symbol">Symbole (A-Z)</option>
+                </select>
+                <ArrowUpDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {filteredAndSortedTrades.length === 0 && trades.length > 0 ? (
+          <CardBase className="text-center py-12 bg-accent/30 border-2 border-dashed border-border">
+            <div className="flex flex-col items-center gap-4">
+              <Filter className="w-12 h-12 text-muted-foreground" />
+              <div>
+                <h3 className="text-lg font-semibold text-card-foreground mb-2">
+                  Aucune position ne correspond aux filtres
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Essayez de modifier vos critères de filtrage
+                </p>
+              </div>
+            </div>
+          </CardBase>
+        ) : trades.length === 0 ? (
           <CardBase className="text-center py-12 bg-gradient-to-br from-primary/5 to-violet-500/5 border-2 border-dashed border-primary/20">
             <div className="flex flex-col items-center gap-4">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
@@ -335,7 +483,7 @@ export default function TradesPage() {
           </CardBase>
         ) : (
           <div className="space-y-2">
-            {trades.map((pos) => (
+            {filteredAndSortedTrades.map((pos) => (
               <PositionSummary key={pos.id} trade={pos} onClose={closeTrade} />
             ))}
           </div>
@@ -351,6 +499,25 @@ export default function TradesPage() {
           onClose={() => setShowAnalysisModal(false)}
         />
       )}
+
+      {/* Modal de confirmation d'achat */}
+      <ConfirmationModal
+        isOpen={showBuyConfirmation}
+        onClose={() => {
+          setShowBuyConfirmation(false);
+          setPendingOrderSide(null);
+        }}
+        onConfirm={placeOrder}
+        title="Confirmer l'achat"
+        type="buy"
+        details={{
+          symbol: selectedAsset?.symbol || "",
+          quantity: Number(qty),
+          price: assetPrice,
+          total: Number(qty) * Number(assetPrice),
+          side: pendingOrderSide,
+        }}
+      />
     </div>
   );
 }

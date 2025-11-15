@@ -6,11 +6,11 @@ export default defineConfig({
   server: {
     host: true,                // 0.0.0.0
     port: 5173,
-    strictPort: true,          // échoue s’il ne peut pas utiliser 5173
+    strictPort: false,          // échoue s'il ne peut pas utiliser 5173
     hmr: { clientPort: 5173 },
     proxy: {
       "/api": {
-        target: "http://learn2trade_backend:8000",
+        target: "http://localhost:8000",
         changeOrigin: true,
       },
     },    

@@ -1,13 +1,21 @@
 import { useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Clock } from "lucide-react";
 import PositionCard from "./PositionCard";
 import CryptoLogo from "./CryptoLogo";
 import { useSpotPrice } from "../hooks/useSpotPrice";
+import { formatTimeElapsed } from "../utils/timeElapsed";
 
 const fmtUSD = (v) => {
   const n = Number(v);
   if (!Number.isFinite(n)) return "—";
-  return n.toLocaleString("fr-FR", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
+  // Pour les petits montants (< 1$), afficher plus de décimales
+  const decimals = n < 1 ? 6 : n < 100 ? 4 : 2;
+  return n.toLocaleString("fr-FR", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: decimals
+  });
 };
 
 const fmt2 = (v) => {
@@ -16,15 +24,24 @@ const fmt2 = (v) => {
   return n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
+// Convertit BTCUSDT en BTC/USD pour l'affichage
+const toUiSymbol = (symbol) => {
+  if (!symbol || typeof symbol !== "string") return symbol;
+  if (symbol.endsWith("USDT")) return `${symbol.slice(0, -4)}/USD`;
+  if (symbol.endsWith("USD") && !symbol.endsWith("/USD")) return `${symbol.slice(0, -3)}/USD`;
+  return symbol;
+};
+
 export default function PositionSummary({ trade, onClose }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const priceOpen = Number(trade.price_open);
   const qty = Number(trade.quantity);
   const side = trade.side;
-  const symbol = trade.symbol || trade.asset?.symbol || `#${trade.asset_id}`;
+  const symbolRaw = trade.symbol || trade.asset?.symbol || `#${trade.asset_id}`;
+  const symbol = toUiSymbol(symbolRaw); // Affichage converti (BTC/USD)
 
-  const { price: live } = useSpotPrice({ symbol: symbol, refreshMs: 60_000 });
+  const { price: live } = useSpotPrice({ symbol: symbolRaw, refreshMs: 60_000 });
 
   const px = Number(live);
   const hasPx = Number.isFinite(px) && px > 0;
@@ -46,6 +63,8 @@ export default function PositionSummary({ trade, onClose }) {
   const bgClass = isProfitable ? "bg-green-500/5" : "bg-red-500/5";
   const borderClass = isProfitable ? "border-green-500/20" : "border-red-500/20";
 
+  const timeElapsed = formatTimeElapsed(trade.opened_at);
+
   return (
     <>
       {/* Vue résumée - Version compacte */}
@@ -55,7 +74,7 @@ export default function PositionSummary({ trade, onClose }) {
       >
         <div className="flex items-center justify-between gap-2">
           {/* Crypto Logo */}
-          <CryptoLogo symbol={symbol} size="sm" className="flex-shrink-0" />
+          <CryptoLogo symbol={symbolRaw} size="sm" className="flex-shrink-0" />
 
           {/* Info principale - plus compact */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -66,6 +85,10 @@ export default function PositionSummary({ trade, onClose }) {
               </span>
             </div>
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                <span className="font-medium text-card-foreground">{timeElapsed}</span>
+              </div>
               <div>
                 <span className="text-muted-foreground/70">Qté:</span> <span className="font-medium text-card-foreground">{fmt2(qty)}</span>
               </div>

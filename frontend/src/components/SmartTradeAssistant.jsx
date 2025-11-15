@@ -1,37 +1,31 @@
 import { useState, useMemo } from 'react';
-import { PieChart, Lightbulb, AlertCircle, ChevronRight } from 'lucide-react';
+import { PieChart, Lightbulb, AlertCircle, ChevronRight, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
 import CardBase from './ui/CardBase';
 import CryptoLogo from './CryptoLogo';
+import MiniChart from './MiniChart';
 import { useCryptoData } from '../hooks/useCryptoData';
 
 const TABS = [
   { id: 'analytics', label: 'Analytics', icon: PieChart },
   { id: 'suggestions', label: 'Suggestions AI', icon: Lightbulb },
+  { id: 'alerts', label: 'Alertes', icon: AlertTriangle },
 ];
 
-// Estimation RSI simplifié basé sur le changement 24h
-const estimateRSI = (change24h) => {
-  // RSI simplifié: plus le changement est positif, plus RSI est élevé
-  // Mapping approximatif: -10% -> RSI 20, 0% -> RSI 50, +10% -> RSI 80
-  const rsi = 50 + (change24h * 3);
-  return Math.max(0, Math.min(100, rsi));
-};
-
-// Calcul du score de confiance basé sur les indicateurs
-const calculateConfidence = (rsi, change24h, volume24h) => {
+// Calcul du score de confiance basé sur les indicateurs réels
+const calculateConfidence = (change24h, volume24h) => {
   let score = 50; // Base neutre
 
-  // RSI
-  if (rsi < 30) score += 20; // Survente = bon signal achat
-  else if (rsi > 70) score -= 20; // Surachat = mauvais signal achat
-  else if (rsi >= 40 && rsi <= 60) score += 10; // Zone neutre = stable
+  // Tendance 24h (facteur le plus important)
+  const absChange = Math.abs(change24h);
+  if (absChange > 10) score += 30; // Très forte variation = signal fort
+  else if (absChange > 5) score += 20; // Forte variation
+  else if (absChange > 2) score += 10; // Variation modérée
+  else score -= 10; // Faible variation = incertitude
 
-  // Tendance 24h
-  if (change24h > 5) score += 10; // Forte hausse
-  else if (change24h < -5) score -= 10; // Forte baisse
-
-  // Volume (si élevé = plus de confiance)
-  if (volume24h > 1000000000) score += 10;
+  // Volume (indicateur de conviction du marché)
+  if (volume24h > 5000000000) score += 20; // Volume très élevé
+  else if (volume24h > 1000000000) score += 10; // Volume élevé
+  else score -= 5; // Volume faible = moins fiable
 
   return Math.max(0, Math.min(100, score));
 };
@@ -83,7 +77,7 @@ export default function SmartTradeAssistant({ positions = [], totalValue = 0 }) 
 
     // Win rate
     const closedTrades = positionsArray.filter(p => p.is_closed);
-    const winningTrades = closedTrades.filter(p => (p.pnl || 0) > 0);
+    const winningTrades = closedTrades.filter(p => (p.unrealized_pnl_abs || 0) > 0);
     const winRate = closedTrades.length > 0 ? (winningTrades.length / closedTrades.length) * 100 : 0;
 
     // Calculer equity et cash (méthode Dashboard)
@@ -102,36 +96,94 @@ export default function SmartTradeAssistant({ positions = [], totalValue = 0 }) 
     };
   }, [positions, cryptoData, totalValue]);
 
-  // Suggestions AI
+  // Suggestions AI avec alertes basées sur les positions
   const suggestions = useMemo(() => {
     if (!cryptoData || Object.keys(cryptoData).length === 0) return [];
 
+    const positionsArray = Array.isArray(positions) ? positions : [];
+    console.log('🔍 [SmartAssistant] Positions reçues:', positionsArray.length, positionsArray);
+
+    const positionsMap = positionsArray.reduce((acc, pos) => {
+      const symbol = pos.symbol || pos.asset?.symbol;
+      if (symbol) {
+        acc[symbol] = pos;
+        console.log(`📍 [SmartAssistant] Position ${symbol}:`, {
+          unrealized_pnl_abs: pos.unrealized_pnl_abs,
+          unrealized_pnl_pct: pos.unrealized_pnl_pct,
+          value: pos.value
+        });
+      }
+      return acc;
+    }, {});
+
     return Object.entries(cryptoData).map(([symbol, data]) => {
-      const rsi = estimateRSI(data.change24h);
-      const confidence = calculateConfidence(rsi, data.change24h, data.volume);
+      const confidence = calculateConfidence(data.change24h, data.volume);
+      const hasPosition = !!positionsMap[symbol];
+      const position = positionsMap[symbol];
 
       let action = 'HOLD';
       let reason = [];
+      let alerts = [];
 
-      // Signal basé sur RSI et tendance 24h
-      if (rsi < 30 && data.change24h > 0) {
+      // Alertes basées sur les positions actuelles
+      if (hasPosition) {
+        const pnl = Number(position?.unrealized_pnl_abs || 0);
+        const pnlPct = Number(position?.unrealized_pnl_pct || 0);
+
+        // Alerte si grosse perte sur position ouverte (seuil à -5% au lieu de -10%)
+        if (pnl < 0 && pnlPct < -5) {
+          alerts.push({
+            type: 'danger',
+            message: `Position en perte ${pnlPct.toFixed(1)}% - Envisager stop-loss`
+          });
+        }
+        // Alerte si bon profit à sécuriser (seuil à +8% au lieu de +15%)
+        else if (pnl > 0 && pnlPct > 8) {
+          alerts.push({
+            type: 'success',
+            message: `Position en profit ${pnlPct.toFixed(1)}% - Envisager prise de bénéfices`
+          });
+        }
+
+        // Alerte basée sur la tendance 24h pour les positions
+        if (data.change24h < -5) {
+          // Forte baisse sur une position
+          alerts.push({
+            type: 'warning',
+            message: `Forte baisse (-${Math.abs(data.change24h).toFixed(1)}%) - Surveiller la position`
+          });
+        } else if (data.change24h > 5 && pnl > 0) {
+          // Forte hausse + position profitable
+          alerts.push({
+            type: 'success',
+            message: `Forte hausse (+${data.change24h.toFixed(1)}%) - Opportunité de vente`
+          });
+        }
+      }
+
+      // Signal basé sur la tendance 24h (plus fiable que RSI estimé)
+      if (data.change24h > 5) {
+        // Forte hausse
         action = 'BUY';
-        reason.push(`RSI en survente (${rsi.toFixed(0)})`);
-        reason.push(`Tendance positive (+${data.change24h.toFixed(1)}%)`);
-      } else if (rsi > 70 && data.change24h < 0) {
+        reason.push(`Forte hausse +${data.change24h.toFixed(1)}% (24h)`);
+        reason.push(`Momentum positif détecté`);
+      } else if (data.change24h < -5) {
+        // Forte baisse
         action = 'SELL';
-        reason.push(`RSI en surachat (${rsi.toFixed(0)})`);
-        reason.push(`Tendance négative (${data.change24h.toFixed(1)}%)`);
-      } else if (rsi < 35) {
+        reason.push(`Forte baisse ${data.change24h.toFixed(1)}% (24h)`);
+        reason.push(`Tendance baissière confirmée`);
+      } else if (data.change24h > 2) {
+        // Hausse modérée
         action = 'BUY';
-        reason.push(`RSI bas (${rsi.toFixed(0)}) - Survente`);
-      } else if (rsi > 65) {
+        reason.push(`Tendance haussière +${data.change24h.toFixed(1)}% (24h)`);
+      } else if (data.change24h < -2) {
+        // Baisse modérée
         action = 'SELL';
-        reason.push(`RSI élevé (${rsi.toFixed(0)}) - Surachat`);
+        reason.push(`Tendance baissière ${data.change24h.toFixed(1)}% (24h)`);
       } else {
-        reason.push(`RSI neutre (${rsi.toFixed(0)})`);
-        if (data.change24h > 0) reason.push(`+${data.change24h.toFixed(1)}% (24h)`);
-        else reason.push(`${data.change24h.toFixed(1)}% (24h)`);
+        // Stable
+        reason.push(`Marché stable ${data.change24h >= 0 ? '+' : ''}${data.change24h.toFixed(1)}% (24h)`);
+        reason.push(`Attendre un signal plus clair`);
       }
 
       // Ajouter info volume si pertinent
@@ -144,12 +196,20 @@ export default function SmartTradeAssistant({ positions = [], totalValue = 0 }) 
         action,
         confidence,
         reasons: reason,
-        rsi,
+        alerts,
         price: data.price,
         change24h: data.change24h,
+        hasPosition,
+        position,
       };
-    }).sort((a, b) => b.confidence - a.confidence);
-  }, [cryptoData]);
+    }).sort((a, b) => {
+      // Prioriser les alertes en premier
+      if (a.alerts.length > 0 && b.alerts.length === 0) return -1;
+      if (a.alerts.length === 0 && b.alerts.length > 0) return 1;
+      // Puis par confiance
+      return b.confidence - a.confidence;
+    });
+  }, [cryptoData, positions]);
 
   const renderAnalytics = () => (
     <div className="space-y-4">
@@ -240,6 +300,101 @@ export default function SmartTradeAssistant({ positions = [], totalValue = 0 }) 
     </div>
   );
 
+  const renderAlerts = () => {
+    const alertSuggestions = suggestions.filter(s => s.alerts && s.alerts.length > 0);
+    const hasPositions = Array.isArray(positions) && positions.length > 0;
+
+    if (cryptoLoading) {
+      return (
+        <div className="flex items-center justify-center py-8 text-muted-foreground">
+          <div className="text-sm">Chargement...</div>
+        </div>
+      );
+    }
+
+    if (alertSuggestions.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className={`w-16 h-16 ${hasPositions ? 'bg-green-500/10' : 'bg-blue-500/10'} rounded-full flex items-center justify-center mb-4`}>
+            {hasPositions ? (
+              <TrendingUp className="w-8 h-8 text-green-600" />
+            ) : (
+              <Lightbulb className="w-8 h-8 text-blue-600" />
+            )}
+          </div>
+          <h3 className="font-semibold text-card-foreground mb-2">
+            {hasPositions ? 'Aucune alerte' : 'Aucune position ouverte'}
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            {hasPositions
+              ? 'Vos positions sont dans les zones normales. Les alertes apparaîtront ici si une action est recommandée.'
+              : 'Ouvrez des positions pour recevoir des alertes personnalisées sur vos investissements.'
+            }
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        {alertSuggestions.map((suggestion) => {
+          const pnlPct = Number(suggestion.position?.unrealized_pnl_pct || 0);
+          const pnl = Number(suggestion.position?.unrealized_pnl_abs || 0);
+
+          return (
+            <div key={suggestion.symbol} className="rounded-xl border border-border bg-card overflow-hidden">
+              {/* En-tête avec crypto et PnL */}
+              <div className="p-4 bg-accent/30">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <CryptoLogo symbol={suggestion.symbol} size="md" />
+                    <div>
+                      <div className="font-semibold text-card-foreground">{suggestion.symbol}</div>
+                      <div className="text-xs text-muted-foreground">
+                        ${suggestion.price.toLocaleString('fr-FR')}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`text-sm font-semibold ${pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {pnl >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%
+                    </div>
+                    <div className={`text-xs ${pnl >= 0 ? 'text-green-600/80' : 'text-red-600/80'}`}>
+                      {pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Alertes */}
+              <div className="p-4 space-y-2">
+                {suggestion.alerts.map((alert, i) => {
+                  const alertBg = alert.type === 'danger' ? 'bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-400' :
+                                  alert.type === 'success' ? 'bg-green-500/10 border-green-500/30 text-green-700 dark:text-green-400' :
+                                  'bg-yellow-500/10 border-yellow-500/30 text-yellow-700 dark:text-yellow-400';
+                  const AlertIcon = alert.type === 'danger' ? AlertTriangle :
+                                   alert.type === 'success' ? TrendingUp : TrendingDown;
+
+                  return (
+                    <div key={i} className={`flex items-start gap-3 px-3 py-2.5 rounded-lg border ${alertBg}`}>
+                      <AlertIcon className="w-5 h-5 shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <div className="text-sm font-medium mb-1">{alert.message}</div>
+                        <div className="text-xs opacity-80">
+                          Signal {suggestion.action} • Confiance {suggestion.confidence}%
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const renderSuggestions = () => {
     if (cryptoLoading) {
       return (
@@ -285,47 +440,92 @@ export default function SmartTradeAssistant({ positions = [], totalValue = 0 }) 
                            suggestion.action === 'SELL' ? 'text-red-600' : 'text-yellow-600';
         const bgColor = suggestion.action === 'BUY' ? 'bg-green-500/10 border-green-500/30' :
                        suggestion.action === 'SELL' ? 'bg-red-500/10 border-red-500/30' : 'bg-yellow-500/10 border-yellow-500/30';
+        const hasAlerts = suggestion.alerts && suggestion.alerts.length > 0;
 
         return (
-          <div key={suggestion.symbol} className={`rounded-xl p-4 border ${bgColor}`}>
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <CryptoLogo symbol={suggestion.symbol} size="md" />
-                <div>
-                  <div className="font-semibold text-card-foreground">{suggestion.symbol}</div>
-                  <div className="text-xs text-muted-foreground">
-                    ${suggestion.price.toLocaleString('fr-FR')}
+          <div key={suggestion.symbol} className={`rounded-xl border ${bgColor} overflow-hidden`}>
+            {/* Alertes en haut si position ouverte */}
+            {hasAlerts && (
+              <div className="px-4 pt-3 pb-2 space-y-1.5">
+                {suggestion.alerts.map((alert, i) => {
+                  const alertBg = alert.type === 'danger' ? 'bg-red-500/20 border-red-500/40 text-red-700 dark:text-red-400' :
+                                  alert.type === 'success' ? 'bg-green-500/20 border-green-500/40 text-green-700 dark:text-green-400' :
+                                  'bg-yellow-500/20 border-yellow-500/40 text-yellow-700 dark:text-yellow-400';
+                  const AlertIcon = alert.type === 'danger' ? AlertTriangle :
+                                   alert.type === 'success' ? TrendingUp : TrendingDown;
+
+                  return (
+                    <div key={i} className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${alertBg}`}>
+                      <AlertIcon className="w-4 h-4 shrink-0" />
+                      <span className="text-xs font-medium">{alert.message}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Contenu principal avec mini-chart */}
+            <div className="p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3 flex-1">
+                  <CryptoLogo symbol={suggestion.symbol} size="md" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <div className="font-semibold text-card-foreground">{suggestion.symbol}</div>
+                      {suggestion.hasPosition && (
+                        <span className="px-2 py-0.5 text-xs font-medium bg-primary/20 text-primary rounded-full">
+                          Position ouverte
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      ${suggestion.price.toLocaleString('fr-FR')}
+                      <span className={`ml-2 font-medium ${suggestion.change24h >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {suggestion.change24h >= 0 ? '+' : ''}{suggestion.change24h.toFixed(2)}%
+                      </span>
+                    </div>
                   </div>
                 </div>
+                <div className={`px-3 py-1 rounded-full text-sm font-semibold ${actionColor} bg-card shadow-sm`}>
+                  {suggestion.action}
+                </div>
               </div>
-              <div className={`px-3 py-1 rounded-full text-sm font-semibold ${actionColor} bg-card`}>
-                {suggestion.action}
-              </div>
-            </div>
 
-            <div className="mb-3">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-muted-foreground">Confiance</span>
-                <span className={`font-semibold ${actionColor}`}>{suggestion.confidence}%</span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div
-                  className={`h-2 rounded-full transition-all ${
-                    suggestion.action === 'BUY' ? 'bg-green-500' :
-                    suggestion.action === 'SELL' ? 'bg-red-500' : 'bg-yellow-500'
-                  }`}
-                  style={{ width: `${suggestion.confidence}%` }}
+              {/* Mini chart */}
+              <div className="mb-3 rounded-lg overflow-hidden border border-border/50 bg-accent/30">
+                <MiniChart
+                  symbol={suggestion.symbol}
+                  tf="1h"
+                  height={80}
                 />
               </div>
-            </div>
 
-            <div className="space-y-1">
-              {suggestion.reasons.map((reason, i) => (
-                <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                  <ChevronRight className="w-3 h-3 mt-0.5 shrink-0" />
-                  <span>{reason}</span>
+              {/* Barre de confiance */}
+              <div className="mb-3">
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-muted-foreground">Confiance</span>
+                  <span className={`font-semibold ${actionColor}`}>{suggestion.confidence}%</span>
                 </div>
-              ))}
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all ${
+                      suggestion.action === 'BUY' ? 'bg-green-500' :
+                      suggestion.action === 'SELL' ? 'bg-red-500' : 'bg-yellow-500'
+                    }`}
+                    style={{ width: `${suggestion.confidence}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Raisons */}
+              <div className="space-y-1">
+                {suggestion.reasons.map((reason, i) => (
+                  <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <ChevronRight className="w-3 h-3 mt-0.5 shrink-0" />
+                    <span>{reason}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         );
@@ -354,11 +554,14 @@ export default function SmartTradeAssistant({ positions = [], totalValue = 0 }) 
         {TABS.map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
+          const alertCount = tab.id === 'alerts' ? suggestions.filter(s => s.alerts?.length > 0).length : 0;
+          const hasAlerts = alertCount > 0;
+
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`relative flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                 isActive
                   ? 'bg-primary text-primary-foreground shadow-md'
                   : 'bg-accent text-accent-foreground hover:bg-muted'
@@ -366,6 +569,11 @@ export default function SmartTradeAssistant({ positions = [], totalValue = 0 }) 
             >
               <Icon className="w-4 h-4" />
               <span className="hidden sm:inline">{tab.label}</span>
+              {tab.id === 'alerts' && hasAlerts && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                  {alertCount}
+                </span>
+              )}
             </button>
           );
         })}
@@ -375,6 +583,7 @@ export default function SmartTradeAssistant({ positions = [], totalValue = 0 }) 
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'analytics' && renderAnalytics()}
         {activeTab === 'suggestions' && renderSuggestions()}
+        {activeTab === 'alerts' && renderAlerts()}
       </div>
 
       {/* Footer */}
