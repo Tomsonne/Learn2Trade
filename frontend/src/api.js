@@ -20,8 +20,8 @@ if (!API_BASE) {
     //  En tunnel localtunnel → utilise le proxy Vite vers backend local
     API_BASE = "/api/v1";
   } else {
-    //  En production Vercel → backend Railway (normalement)
-    API_BASE = "https://learn2trade.loca.lt/api/v1";
+    //  En production Vercel → backend Railway
+    API_BASE = "https://learn2trade-production.up.railway.app/api/v1";
   }
 }
 
