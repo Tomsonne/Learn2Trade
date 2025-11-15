@@ -16,8 +16,11 @@ if (!API_BASE) {
   if (/^(localhost|127\.|::1)$/.test(host)) {
     //  En local → backend local
     API_BASE = "http://localhost:8000/api/v1";
+  } else if (host.endsWith('.loca.lt')) {
+    //  En tunnel localtunnel → utilise le proxy Vite vers backend local
+    API_BASE = "/api/v1";
   } else {
-    //  En production → utilise localtunnel pour demoday
+    //  En production Vercel → backend Railway (normalement)
     API_BASE = "https://learn2trade.loca.lt/api/v1";
   }
 }

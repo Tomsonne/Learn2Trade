@@ -7,7 +7,7 @@ const API =
   import.meta.env.VITE_API_BASE ||
   (window.location.hostname.includes("localhost")
     ? "http://localhost:8000/api/v1"
-    : "https://learn2trade.loca.lt/api/v1");
+    : "https://learn2trade-production.up.railway.app/api/v1");
 
 // combien de bougies à charger par timeframe
 const LIMIT_BY_TF = {
