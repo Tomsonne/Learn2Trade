@@ -18,6 +18,7 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173", // dev local
   "https://learn2-trade.vercel.app", // domaine principal
+  "https://learn2-trade-lemon.vercel.app", // domaine Julien
   "https://learn2-trade-iovrk9oci-tomsonnes-projects.vercel.app", // preview (branche Thomas)
   "https://learn2-trade-oyidrp70d-tomsonnes-projects.vercel.app", // preview (nouveau déploiement)
 ];
