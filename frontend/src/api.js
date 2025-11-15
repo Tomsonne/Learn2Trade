@@ -34,7 +34,7 @@ export async function login(email, password) {
   const res = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include", // cookies JWT
+    // credentials: "include", // TEMPORAIREMENT DÉSACTIVÉ pour ngrok demoday
     body: JSON.stringify({ email, password }),
   });
 
@@ -51,7 +51,7 @@ export async function signup(email, password) {
   const res = await fetch(`${API_BASE}/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
+    // credentials: "include", // TEMPORAIREMENT DÉSACTIVÉ pour ngrok demoday
     body: JSON.stringify({ email, password }),
   });
 
@@ -67,7 +67,7 @@ export async function signup(email, password) {
 export async function checkAuth() {
   try {
     const res = await fetch(`${API_BASE}/auth/check`, {
-      credentials: "include",
+      // credentials: "include", // TEMPORAIREMENT DÉSACTIVÉ pour ngrok demoday
     });
     return await res.json();
   } catch (err) {
@@ -81,7 +81,7 @@ export async function logout() {
   try {
     const res = await fetch(`${API_BASE}/auth/logout`, {
       method: "POST",
-      credentials: "include",
+      // credentials: "include", // TEMPORAIREMENT DÉSACTIVÉ pour ngrok demoday
     });
     return await res.json();
   } catch (err) {
