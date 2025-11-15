@@ -56,7 +56,7 @@ export function useMarketSeries({
       const rsi  = padToLen(rows.length, rsiArr);
 
       const enriched = rows.map((r, i) => ({
-        ts: r.t, o: r.o, h: r.h, l: r.l, c: r.c,
+        ts: r.t, o: r.o, h: r.h, l: r.l, c: r.c, v: r.v,
         ma20: ma20[i], ma50: ma50[i], rsi: rsi[i],
       }));
 

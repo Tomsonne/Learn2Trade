@@ -14,11 +14,11 @@ if (!API_BASE) {
   const host = window.location.hostname;
 
   if (/^(localhost|127\.|::1)$/.test(host)) {
-    //  En local → backend Railway local
+    //  En local → backend local
     API_BASE = "http://localhost:8000/api/v1";
   } else {
-    //  En production → backend hébergé sur Railway
-    API_BASE = "https://skillvest-production.up.railway.app/api/v1";
+    //  En production → utilise localtunnel pour demoday
+    API_BASE = "https://learn2trade.loca.lt/api/v1";
   }
 }
 

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login } from "../api.js";
-import { useAuthStore } from "../store";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -18,7 +17,7 @@ export default function Login() {
 
       //  nouvelle logique : cookie géré par le backend
       if (data.status === "ok") {
-        navigate("/learn"); // redirection
+        navigate("/dashboard"); // redirection vers le dashboard
       } else {
         setError(data.message || "Identifiants invalides");
       }

@@ -1,5 +1,4 @@
 // src/components/Sidebar.jsx — super slim 160px
-import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import { LayoutDashboard, BookOpen, TrendingUp, History, Newspaper } from "lucide-react";
 
@@ -35,9 +34,9 @@ export default function SidebarLayout({ items = DEFAULT_ITEMS, children }) {
 
   return (
     <div className="min-h-full grid grid-cols-[160px_minmax(0,1fr)] bg-white dark:bg-gray-900">
-      <aside className="min-h-full border-r border-slate-200 dark:border-gray-700 p-3">
+      <aside className="min-h-full border-r border-slate-200 dark:border-gray-700 p-3 flex flex-col">
         {/* menu */}
-        <nav className="space-y-0.5">
+        <nav className="space-y-0.5 flex-1">
           {items.map((it) => (
             <SidebarItem
               key={it.to}

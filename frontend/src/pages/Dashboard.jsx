@@ -21,7 +21,7 @@ const nfPct = new Intl.NumberFormat("fr-FR", {
   maximumFractionDigits: 2,
 });
 
-// Affiche BTC/USD au lieu de BTCUSDT
+// Affiche BTC/USD au lieu du format technique Binance
 const SHOW_USD_SUFFIX = true;
 const toUiPair = (symbol) => {
   if (!SHOW_USD_SUFFIX || !symbol || typeof symbol !== "string") return symbol;
