@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 
 const API_URL = window.location.hostname.includes("localhost")
   ? "http://localhost:8000/api/v1"
-  : "https://skillvest-production.up.railway.app/api/v1";
+  : "https://learn2trade.loca.lt/api/v1";
 
 export default function HomePage() {
   const navigate = useNavigate();

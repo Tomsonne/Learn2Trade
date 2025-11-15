@@ -4,7 +4,7 @@ import CardBase from "../components/ui/CardBase";
 
 const API_URL = window.location.hostname.includes("localhost")
   ? "http://localhost:8000/api/v1"
-  : "https://skillvest-production.up.railway.app/api/v1";
+  : "https://learn2trade.loca.lt/api/v1";
 
 const nfUsd = new Intl.NumberFormat("fr-FR", {
   style: "currency",
