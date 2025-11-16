@@ -50,12 +50,19 @@ export async function login(email, password) {
 }
 
 // --- Inscription utilisateur ---
-export async function signup(email, password) {
+export async function signup(email, password, username = null, firstName = null, lastName = null) {
+  const body = { email, password };
+
+  // Ajouter les champs optionnels seulement s'ils sont remplis
+  if (username) body.username = username;
+  if (firstName) body.first_name = firstName;
+  if (lastName) body.last_name = lastName;
+
   const res = await fetch(`${API_BASE}/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {

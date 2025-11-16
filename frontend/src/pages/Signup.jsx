@@ -6,6 +6,9 @@ import { useAuthStore } from "../store";
 export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const setAuth = useAuthStore((s) => s.login);
   const navigate = useNavigate();
   const [error, setError] = useState(null);
@@ -14,7 +17,7 @@ export default function Signup() {
     e.preventDefault();
     setError(null);
     try {
-      const data = await signup(email, password);
+      const data = await signup(email, password, username, firstName, lastName);
       if (data.access_token) {
         setAuth(data.user, data.access_token);
         navigate("/learn");
@@ -46,6 +49,46 @@ export default function Signup() {
               required
               className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-2 dark:bg-gray-700 dark:text-white"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Pseudo <span className="text-gray-400 text-xs">(optionnel)</span>
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="VotresPseudo"
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-2 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Prénom <span className="text-gray-400 text-xs">(optionnel)</span>
+              </label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Prénom"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-2 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Nom <span className="text-gray-400 text-xs">(optionnel)</span>
+              </label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Nom"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-2 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
           </div>
 
           <div>

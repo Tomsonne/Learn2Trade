@@ -7,8 +7,14 @@ import  User from "../models/user.model.js";
 /* -------------------------------------------------------------------------- */
 export async function signup(req, res) {
   try {
-    const { email, password } = req.body;
-    const result = await authService.signup({ email, password });
+    const { email, password, username, first_name, last_name } = req.body;
+    const result = await authService.signup({
+      email,
+      password,
+      username,
+      first_name,
+      last_name
+    });
     return res.status(201).json({ status: "ok", ...result });
   } catch (err) {
     if (err instanceof ValidationError) {
