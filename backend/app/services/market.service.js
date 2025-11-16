@@ -210,3 +210,52 @@ export async function getMarketChartRange(symbol = 'BTC', { from, to, interval }
     source: `binance:${intv}`,
   };
 }
+
+/* ==============================
+ *  WebSocket helpers
+ * ============================== */
+
+/**
+ * Get spot price for a single symbol (for WebSocket updates)
+ * @param {string} symbol - 'BTC', 'ETH', etc.
+ * @returns {Promise<number>} - Current USD price
+ */
+export async function getSpotPrice(symbol) {
+  const data = await getPrices();
+  const price = data.prices[symbol?.toUpperCase()]?.usd;
+  if (!price) throw new Error(`Price not found for ${symbol}`);
+  return price;
+}
+
+/**
+ * Get candles with technical indicators (for WebSocket updates)
+ * @param {object} params - { symbol, tf, limit }
+ * @returns {Promise<Array>} - Candles with indicators
+ */
+export async function getCandles({ symbol, tf, limit = 200 }) {
+  const klines = await getKlines(symbol, { interval: tf, limit });
+
+  // Import technical indicators
+  const { SMA, RSI, BollingerBands } = await import('technicalindicators');
+
+  const closes = klines.map(k => k.c);
+  const ma20Arr = SMA.calculate({ period: 20, values: closes });
+  const ma50Arr = SMA.calculate({ period: 50, values: closes });
+  const rsiArr = RSI.calculate({ period: 14, values: closes });
+  const bbArr = BollingerBands.calculate({ period: 20, stdDev: 2, values: closes });
+
+  return klines.map((k, i) => ({
+    ts: k.t,
+    o: k.o,
+    h: k.h,
+    l: k.l,
+    c: k.c,
+    v: k.v,
+    ma20: ma20Arr[i - 19] ?? null,
+    ma50: ma50Arr[i - 49] ?? null,
+    rsi: rsiArr[i - 13] ?? null,
+    bbUpper: bbArr[i - 19]?.upper ?? null,
+    bbMiddle: bbArr[i - 19]?.middle ?? null,
+    bbLower: bbArr[i - 19]?.lower ?? null,
+  }));
+}

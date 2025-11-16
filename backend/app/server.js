@@ -3,10 +3,12 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { createServer } from "http";
 import { loadConfig } from "./core/config.js";
 import v1Router from "./api/index.js";
 import sequelize from "./core/db.js";
 import models from "./models/index.js";
+import websocketService from "./services/websocket.service.js";
 
 // ──────────────────────────────────────────────
 // Chargement config & initialisation app
@@ -97,8 +99,16 @@ async function start() {
     console.log("Synchronisation Sequelize terminée");
 
     const PORT = process.env.PORT || 8000;
-    app.listen(PORT, "0.0.0.0", () => {
+
+    // Create HTTP server for both Express and WebSocket
+    const server = createServer(app);
+
+    // Initialize WebSocket service
+    websocketService.initialize(server);
+
+    server.listen(PORT, "0.0.0.0", () => {
       console.log(`Learn2Trade backend running on port ${PORT}`);
+      console.log(`WebSocket server available at ws://localhost:${PORT}/ws`);
     });
   } catch (err) {
     console.error("Failed to start server:", err);
@@ -113,10 +123,13 @@ start();
 process.on("SIGTERM", async () => {
   console.log("SIGTERM reçu, arrêt du serveur...");
   try {
+    websocketService.shutdown();
+    console.log("WebSocket service fermé proprement");
+
     await sequelize.close();
     console.log("Connexion DB fermée proprement");
   } catch {
-    console.warn("Erreur lors de la fermeture de la DB");
+    console.warn("Erreur lors de la fermeture");
   }
   process.exit(0);
 });

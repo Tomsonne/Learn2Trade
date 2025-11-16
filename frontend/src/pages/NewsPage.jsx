@@ -1,8 +1,10 @@
 // src/pages/NewsPage.jsx
-import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import NewsCard from "../components/news/NewsCard.jsx";
 import SymbolFilter from "../components/news/SymbolFilter.jsx";
-import { Newspaper, RefreshCw, Search, TrendingUp } from "lucide-react";
+import { Newspaper, Search, TrendingUp } from "lucide-react";
+import { useNews } from "../hooks/useNews.js";
+import { useWebSocket } from "../hooks/useWebSocket.js";
 
 const TABS = [
   { label: "Tous", value: "ALL" },
@@ -17,97 +19,27 @@ const TABS = [
 ];
 
 export default function NewsPage() {
-  const [items, setItems]   = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState(null);
   const [tab, setTab] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const base = (
-  import.meta.env.VITE_API_BASE ||
-  (window.location.hostname.includes("localhost")
-    ? "http://localhost:8000/api/v1"
-    : "https://learn2trade-production.up.railway.app/api/v1")
-  ).replace(/\/$/, "");
+  // Use WebSocket for real-time news
+  const { items: allItems, loading, error } = useNews();
+  const { isConnected } = useWebSocket();
 
-  const currentCtrl = useRef(null);
+  // Filter by tab
+  const items = useMemo(() => {
+    if (tab === "ALL") return allItems;
 
-  const fetchNews = useCallback(async () => {
-    if (currentCtrl.current) currentCtrl.current.abort();
-    const ctrl = new AbortController();
-    currentCtrl.current = ctrl;
-
-    // DIAG: ne PAS envoyer le filtre à l'API pour vérifier qu'on reçoit bien des données
-    const params = new URLSearchParams({ limit: "50", t: String(Date.now()) });
-    const url = `${base}/news?${params.toString()}`;
-    console.log("[NEWS] URL =", url);
-
-    setLoading(true);
-    setError(null);
-    try {
-      const r = await fetch(url, { cache: "no-store", signal: ctrl.signal });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const json = await r.json();
-      console.log("[NEWS] JSON RAW =", json);
-
-      // Accepte 3 formes: tableau direct, {data: [...]}, ou {rows: [...]}
-      const list =
-        Array.isArray(json) ? json :
-        Array.isArray(json?.data) ? json.data :
-        Array.isArray(json?.rows) ? json.rows :
-        [];
-
-      // Post-filtre côté client si onglet ≠ ALL
-      const filtered = tab === "ALL"
-        ? list
-        : list.filter((n) => {
-            const raw = n.symbols;
-            const sym = Array.isArray(raw)
-              ? raw
-              : (typeof raw === "string"
-                  ? (() => { try { return JSON.parse(raw); } catch { return []; } })()
-                  : []);
-            return sym.includes(tab);
-          });
-
-      setItems(filtered);
-      if (!list.length) {
-        console.warn("[NEWS] Liste vide. Vérifie le tri/retour backend et le nom du champ (data/rows).");
-      }
-    } catch (e) {
-      if (e.name !== "AbortError") {
-        console.error("Fetch /news failed:", e);
-        setError(e.message || "Erreur de chargement");
-        setItems([]);
-      }
-    } finally {
-      if (currentCtrl.current === ctrl) currentCtrl.current = null;
-      setLoading(false);
-    }
-  }, [base, tab]);
-
-  useEffect(() => {
-    fetchNews();
-    const id = setInterval(fetchNews, 5 * 60 * 1000);
-    const onFocus = () => fetchNews();
-    window.addEventListener("focus", onFocus);
-    return () => {
-      clearInterval(id);
-      window.removeEventListener("focus", onFocus);
-      if (currentCtrl.current) currentCtrl.current.abort();
-    };
-  }, [fetchNews]);
-
-  const refreshAndReload = async () => {
-    try {
-      setLoading(true);
-      await fetch(`${base}/news/refresh?t=${Date.now()}`, { method: "POST", cache: "no-store" });
-    } catch (e) {
-      console.warn("refresh failed:", e);
-    } finally {
-      await fetchNews();
-    }
-  };
+    return allItems.filter((n) => {
+      const raw = n.symbols;
+      const sym = Array.isArray(raw)
+        ? raw
+        : (typeof raw === "string"
+            ? (() => { try { return JSON.parse(raw); } catch { return []; } })()
+            : []);
+      return sym.includes(tab);
+    });
+  }, [allItems, tab]);
 
   // Filtrage par recherche
   const filteredItems = useMemo(() => {
@@ -173,14 +105,12 @@ export default function NewsPage() {
             <span className="text-sm text-muted-foreground">Filtrer par crypto :</span>
           </div>
           <SymbolFilter options={TABS} value={tab} onChange={setTab} />
-          <button
-            onClick={refreshAndReload}
-            className="ml-auto flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm bg-accent text-accent-foreground hover:bg-muted transition-colors disabled:opacity-50"
-            disabled={loading}
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? "Actualisation..." : "Actualiser"}
-          </button>
+          <div className="ml-auto flex items-center gap-2 text-sm">
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+            <span className="text-muted-foreground">
+              {isConnected ? 'Connecté' : 'Déconnecté'}
+            </span>
+          </div>
         </div>
       </div>
 

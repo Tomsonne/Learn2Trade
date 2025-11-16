@@ -10,6 +10,7 @@ export default function CandleLite({
   series = [], // Données avec indicateurs (ma20, ma50, rsi, bbUpper, bbMiddle, bbLower)
   showIndicators = null, // "ma" | "rsi" | "bollinger" | "fibonacci" | null
   fibLevels = [], // Niveaux de Fibonacci à afficher
+  spotPrice = null, // Prix spot en temps réel pour mettre à jour la dernière bougie
 }) {
   const elRef = useRef(null);
   const chartRef = useRef(null);
@@ -21,6 +22,11 @@ export default function CandleLite({
   const bbMiddleSeriesRef = useRef(null);
   const bbLowerSeriesRef = useRef(null);
   const roRef = useRef(null);
+  const hasUserZoomedRef = useRef(false);
+  const isFirstDataLoadRef = useRef(true);
+  const previousDataLengthRef = useRef(0);
+  const previousDataRef = useRef(null);
+  const previousSpotPriceRef = useRef(null);
 
   // helpers couleur -> formats acceptés par lightweight-charts
   const getThemeColors = () => {
@@ -124,11 +130,35 @@ export default function CandleLite({
       },
     });
 
+    // Détecter quand l'utilisateur zoom ou scroll
+    const timeScale = chartRef.current.timeScale();
+    let initialRange = null;
+
+    const handleRangeChange = (range) => {
+      // Ignorer le premier appel qui vient du fitContent initial
+      if (initialRange === null) {
+        initialRange = range;
+        return;
+      }
+      // Si le range a changé de manière significative, c'est l'utilisateur qui a zoomé
+      if (range && initialRange && (
+        Math.abs((range.from - initialRange.from) / initialRange.from) > 0.01 ||
+        Math.abs((range.to - initialRange.to) / initialRange.to) > 0.01
+      )) {
+        hasUserZoomedRef.current = true;
+      }
+    };
+
+    timeScale.subscribeVisibleLogicalRangeChange(handleRangeChange);
+
     // auto-resize
     roRef.current = new ResizeObserver(([entry]) => {
       const { width, height: h } = entry.contentRect;
       chartRef.current?.applyOptions({ width, height: Math.max(200, h) });
-      chartRef.current?.timeScale().fitContent();
+      // Ne pas fitContent lors du resize si l'utilisateur a zoomé
+      if (!hasUserZoomedRef.current) {
+        chartRef.current?.timeScale().fitContent();
+      }
     });
     roRef.current.observe(el);
 
@@ -143,11 +173,17 @@ export default function CandleLite({
       bbUpperSeriesRef.current = null;
       bbMiddleSeriesRef.current = null;
       bbLowerSeriesRef.current = null;
+      // Réinitialiser les flags quand on recrée le graphique
+      hasUserZoomedRef.current = false;
+      isFirstDataLoadRef.current = true;
+      previousDataLengthRef.current = 0;
     };
   }, [height, tf]); // on recrée si la TF change (pattern simple et fiable)
 
   useEffect(() => {
     if (!seriesRef.current || !volumeSeriesRef.current) return;
+    if (!data || data.length === 0) return;
+
     const rows = (Array.isArray(data) ? data : [])
       .filter(d =>
         Number.isFinite(d?.time) &&
@@ -158,20 +194,121 @@ export default function CandleLite({
       )
       .sort((a, b) => a.time - b.time);
 
-    seriesRef.current.setData(rows);
+    if (rows.length === 0) return;
 
-    // Préparer les données de volume
     const volumeData = rows
       .filter(d => Number.isFinite(d?.volume))
       .map(d => ({
         time: d.time,
         value: d.volume,
-        color: d.close >= d.open ? '#26a69a' : '#ef5350', // vert si haussier, rouge si baissier
+        color: d.close >= d.open ? '#26a69a' : '#ef5350',
       }));
 
+    // Sauvegarder TOUJOURS le zoom avant toute modification
+    let savedRange = null;
+    if (chartRef.current) {
+      savedRange = chartRef.current.timeScale().getVisibleLogicalRange();
+    }
+
+    // Détecter si on peut faire une mise à jour optimisée (update au lieu de setData)
+    const canUseUpdate = previousDataRef.current &&
+                         previousDataRef.current.length === rows.length &&
+                         previousDataRef.current.length > 0 &&
+                         rows.length > 0;
+
+    if (canUseUpdate) {
+      // Comparer seulement la dernière bougie
+      const prevLast = previousDataRef.current[previousDataRef.current.length - 1];
+      const currLast = rows[rows.length - 1];
+
+      // Si seule la dernière bougie a changé, utiliser update() pour une animation fluide
+      if (prevLast.time === currLast.time &&
+          (prevLast.open !== currLast.open ||
+           prevLast.high !== currLast.high ||
+           prevLast.low !== currLast.low ||
+           prevLast.close !== currLast.close)) {
+
+        // Mise à jour fluide de la dernière bougie uniquement
+        seriesRef.current.update(currLast);
+
+        if (volumeData.length > 0) {
+          volumeSeriesRef.current.update(volumeData[volumeData.length - 1]);
+        }
+
+        // Sauvegarder les données actuelles
+        previousDataRef.current = rows;
+        return; // Pas besoin de faire setData, le zoom est préservé automatiquement
+      }
+    }
+
+    // Détecter si c'est un changement de dataset complet
+    const isNewDataset = isFirstDataLoadRef.current ||
+                         Math.abs(rows.length - previousDataLengthRef.current) > 5;
+
+    // Mettre à jour les données (setData complet)
+    seriesRef.current.setData(rows);
     volumeSeriesRef.current.setData(volumeData);
-    chartRef.current?.timeScale().fitContent();
+
+    // Restaurer le zoom de manière asynchrone après setData
+    // Utiliser requestAnimationFrame pour s'assurer que setData est terminé
+    requestAnimationFrame(() => {
+      if (!chartRef.current) return;
+
+      if (isNewDataset) {
+        // Nouveau dataset : fitContent seulement si l'utilisateur n'a jamais zoomé
+        if (!hasUserZoomedRef.current) {
+          chartRef.current.timeScale().fitContent();
+        } else if (savedRange) {
+          // Restaurer le zoom sauvegardé
+          chartRef.current.timeScale().setVisibleLogicalRange(savedRange);
+        }
+        isFirstDataLoadRef.current = false;
+      } else {
+        // Mise à jour incrémentale : TOUJOURS restaurer le zoom
+        if (savedRange) {
+          chartRef.current.timeScale().setVisibleLogicalRange(savedRange);
+        }
+      }
+    });
+
+    previousDataLengthRef.current = rows.length;
+    previousDataRef.current = rows;
   }, [data]);
+
+  // Effet séparé pour mettre à jour la dernière bougie avec le prix spot en temps réel
+  useEffect(() => {
+    if (!seriesRef.current || !volumeSeriesRef.current) return;
+    if (!previousDataRef.current || previousDataRef.current.length === 0) return;
+    if (typeof spotPrice !== "number") return;
+
+    // Ne mettre à jour que si le prix a vraiment changé
+    if (spotPrice === previousSpotPriceRef.current) return;
+    previousSpotPriceRef.current = spotPrice;
+
+    const lastCandle = previousDataRef.current[previousDataRef.current.length - 1];
+    if (!lastCandle) return;
+
+    // Créer la bougie mise à jour
+    const updatedCandle = {
+      time: lastCandle.time,
+      open: lastCandle.open,
+      high: Math.max(lastCandle.high || spotPrice, spotPrice),
+      low: Math.min(lastCandle.low || spotPrice, spotPrice),
+      close: spotPrice,
+    };
+
+    // Utiliser update() pour une animation fluide sans réinitialiser le zoom
+    seriesRef.current.update(updatedCandle);
+
+    // Mettre à jour aussi le volume si disponible
+    if (Number.isFinite(lastCandle.volume)) {
+      volumeSeriesRef.current.update({
+        time: lastCandle.time,
+        value: lastCandle.volume,
+        color: spotPrice >= lastCandle.open ? '#26a69a' : '#ef5350',
+      });
+    }
+  }, [spotPrice]);
 
   // Effet pour afficher/masquer les indicateurs selon la stratégie sélectionnée
   useEffect(() => {
@@ -312,7 +449,10 @@ export default function CandleLite({
       });
     }
 
-    chartRef.current.timeScale().fitContent();
+    // Ne pas réinitialiser le zoom si l'utilisateur a zoomé manuellement
+    if (!hasUserZoomedRef.current) {
+      chartRef.current.timeScale().fitContent();
+    }
   }, [showIndicators, series, fibLevels]);
 
   return <div ref={elRef} className="rounded-xl overflow-hidden w-full" style={{ height }} />;

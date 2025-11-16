@@ -30,13 +30,11 @@ export default function AssetAnalysisModal({ symbol, onClose }) {
   // Nettoyer le symbole: enlever USDT, USD, BUSD, etc.
   const cleanSymbol = symbol?.replace(/USDT|USD|BUSD|USDC/gi, "") || symbol;
 
-  const { price: spot } = useSpotPrice({ symbol: cleanSymbol, refreshMs: 60_000 });
+  const { price: spot } = useSpotPrice({ symbol: cleanSymbol });
 
   const { data: series = [], loading, error } = useMarketSeries({
     symbol: cleanSymbol,
     tf,
-    refreshMs: 60_000,
-    spotPrice: spot,
   });
 
   const candles = useMemo(
@@ -236,6 +234,7 @@ export default function AssetAnalysisModal({ symbol, onClose }) {
                   series={series}
                   showIndicators={chartIndicator}
                   fibLevels={fibLevels}
+                  spotPrice={spot}
                   locale="fr-FR"
                   timeZone="Europe/Paris"
                 />
