@@ -56,6 +56,37 @@ export const strategies = [
     example: "ETH: MA20 croise MA50 à 2800$ (Golden Cross). Entrée à 2850$. Stop à 2700$ (-5.3%). ETH monte jusqu'à 3600$ en 3 semaines. Death Cross apparaît → Sortie à 3550$ (+24.5%).",
   },
   {
+    id: "bollinger_bands",
+    title: "Stratégie Bandes de Bollinger",
+    level: "Débutant",
+    description:
+      "Stratégie basée sur les bandes de Bollinger pour identifier les zones de surachat/survente et les compressions de volatilité. Excellente pour les retournements et les breakouts.",
+    steps: [
+      "Les Bandes de Bollinger se composent de 3 lignes : MA20 (milieu), bande supérieure (+2σ), bande inférieure (-2σ)",
+      "Signal d'achat : Prix touche ou passe sous la bande inférieure (zone de survente)",
+      "Confirmez avec RSI < 30 ou volume élevé pour éviter les faux signaux",
+      "Entrez en position quand le prix rebondit au-dessus de la bande inférieure",
+      "Signal de vente : Prix touche la bande supérieure (zone de surachat) ou atteint la MA20 centrale",
+      "Squeeze (compression) : Quand les bandes se resserrent, préparez-vous à un breakout violent",
+      "Stop-loss : 2-3% sous la bande inférieure pour les achats",
+    ],
+    risk: "Faible à Moyen",
+    timeframe: "1H - 4H",
+    successRate: "65-72%",
+    advantages: [
+      "Visuellement très clair sur les graphiques",
+      "Fonctionne bien en range et en tendance",
+      "Identifie les zones de volatilité extrême",
+      "Squeeze annonce des mouvements importants",
+    ],
+    disadvantages: [
+      "Faux signaux en tendance très forte (prix peut longer la bande)",
+      "Nécessite confirmation avec d'autres indicateurs",
+      "Moins efficace sur marchés très calmes",
+    ],
+    example: "ETH consolide entre 2800-3000$. Bandes se resserrent (squeeze). Prix casse la bande supérieure à 3020$ avec volume 3x → Breakout confirmé. Entrée à 3050$. Stop à 2950$ (-3.3%). Les bandes s'élargissent. Target à la nouvelle bande supérieure 3300$ (+8.2%). Alternative : Prix touche bande inférieure à 2780$ + RSI 28. Rebond → Entrée 2820$. Stop 2720$ (-3.5%). Sort à MA20 centrale 2900$ (+2.8%).",
+  },
+  {
     id: "support_resistance",
     title: "Trading de Support et Résistance",
     level: "Intermédiaire",
