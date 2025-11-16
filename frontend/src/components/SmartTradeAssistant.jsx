@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
-import { PieChart, Lightbulb, AlertCircle, ChevronRight, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
+import { PieChart, Lightbulb, AlertCircle, ChevronRight, TrendingUp, TrendingDown, AlertTriangle, Activity } from 'lucide-react';
 import CardBase from './ui/CardBase';
 import CryptoLogo from './CryptoLogo';
 import MiniChart from './MiniChart';
 import { useCryptoData } from '../hooks/useCryptoData';
+import { useAdvancedSignals } from '../hooks/useAdvancedSignals';
 
 const TABS = [
   { id: 'analytics', label: 'Analytics', icon: PieChart },
