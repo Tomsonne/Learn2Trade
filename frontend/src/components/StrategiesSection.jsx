@@ -1,13 +1,129 @@
 import React from "react";
-import { Target, AlertTriangle, ThumbsUp, ThumbsDown, Lightbulb, TrendingUp } from "lucide-react";
+import { Target, AlertTriangle, ThumbsUp, ThumbsDown, Lightbulb, TrendingUp, Info } from "lucide-react";
+import RsiCard from "./cards/RsiCard";
+import MaCard from "./cards/MaCard";
+import BollingerBandsCard from "./cards/BollingerBandsCard";
+import FibonacciCard from "./cards/FibonacciCard";
+import Tooltip from "./ui/Tooltip";
 
 /**
  * Props:
  * - strategies: array
  * - selectedStrategy: object
  * - setSelectedStrategy: fn
+ * - series: array (données de marché avec indicateurs)
+ * - currentRSI: number
+ * - rsiSignal: object
+ * - maSignal: object
+ * - fmt: function (formatage prix)
+ * - spot: number (prix spot)
+ * - tf: string (timeframe)
+ * - last: object (dernière bougie avec indicateurs)
  */
-export default function StrategiesSection({ strategies, selectedStrategy, setSelectedStrategy }) {
+export default function StrategiesSection({
+  strategies,
+  selectedStrategy,
+  setSelectedStrategy,
+  series = [],
+  currentRSI = null,
+  rsiSignal = null,
+  maSignal = null,
+  fmt = (v) => v,
+  spot = null,
+  tf = "1h",
+  last = {},
+}) {
+  // Mapping stratégie -> card d'indicateur
+  const getIndicatorCard = () => {
+    switch (selectedStrategy.id) {
+      case "rsi_strategy":
+      case "rsi_divergence":
+        return <RsiCard series={series} rsiSignal={rsiSignal} currentRSI={currentRSI} tf={tf} />;
+
+      case "ma_crossover":
+        return <MaCard series={series} maSignal={maSignal} fmt={fmt} tf={tf} ma20={last?.ma20 ?? null} ma50={last?.ma50 ?? null} price={spot} />;
+
+      case "bollinger_bands":
+        return <BollingerBandsCard series={series} fmt={fmt} tf={tf} price={spot} currentRSI={currentRSI} />;
+
+      case "fibonacci_retracement":
+        return <FibonacciCard series={series} fmt={fmt} tf={tf} price={spot} currentRSI={currentRSI} />;
+
+      default:
+        return null;
+    }
+  };
+
+  // Glossaire des termes techniques avec explications
+  const glossary = {
+    "RSI": "Relative Strength Index : Indicateur mesurant la force d'une tendance sur une échelle de 0 à 100. < 30 = survente, > 70 = surachat.",
+    "confluence": "Confirmation d'un signal par plusieurs indicateurs différents. Plus il y a de confluence, plus le signal est fiable.",
+    "Golden Ratio": "Niveau 61.8% de Fibonacci, le plus fiable statistiquement pour les rebonds. Basé sur la suite mathématique de Fibonacci.",
+    "61.8%": "Niveau de Fibonacci le plus important (Golden Ratio). Zone où le prix rebondit le plus souvent.",
+    "retracement": "Correction temporaire du prix dans le sens inverse de la tendance principale avant de reprendre sa direction initiale.",
+    "swing high": "Point haut local significatif : prix le plus élevé avant une baisse notable.",
+    "swing low": "Point bas local significatif : prix le plus bas avant une hausse notable.",
+    "chandelier d'inversion": "Pattern de bougie qui annonce un retournement : hammer (marteau), doji (indécision), engulfing (engloutissement).",
+    "volume": "Quantité d'actifs échangés sur une période. Volume élevé = forte conviction du marché.",
+    "extension": "Projection des niveaux Fibonacci au-delà du mouvement initial pour identifier des cibles de prix (127.2%, 161.8%).",
+    "stop-loss": "Ordre automatique de vente si le prix baisse à un certain niveau pour limiter les pertes.",
+    "take profit": "Ordre automatique de vente quand le prix atteint un objectif pour sécuriser les gains.",
+  };
+
+  // Fonction pour détecter et entourer les termes du glossaire avec des tooltips
+  const renderStepWithTooltips = (step) => {
+    const terms = Object.keys(glossary).sort((a, b) => b.length - a.length); // Trier par longueur décroissante
+    let parts = [step];
+
+    terms.forEach(term => {
+      const newParts = [];
+      parts.forEach(part => {
+        if (typeof part === 'string') {
+          // Recherche insensible à la casse avec conservation de la casse originale
+          const regex = new RegExp(`\\b(${term})\\b`, 'gi');
+          const matches = [...part.matchAll(regex)];
+
+          if (matches.length > 0) {
+            let lastIndex = 0;
+            matches.forEach((match, idx) => {
+              // Texte avant le match
+              if (match.index > lastIndex) {
+                newParts.push(part.substring(lastIndex, match.index));
+              }
+              // Le terme avec tooltip
+              newParts.push(
+                <span key={`${term}-${idx}`} className="relative inline-flex items-center gap-1">
+                  <strong className="text-primary">{match[0]}</strong>
+                  <Tooltip
+                    content={
+                      <div className="max-w-xs">
+                        <p className="font-semibold mb-1">{term}</p>
+                        <p className="text-xs">{glossary[term]}</p>
+                      </div>
+                    }
+                  >
+                    <Info className="w-3 h-3 text-primary inline cursor-help" />
+                  </Tooltip>
+                </span>
+              );
+              lastIndex = match.index + match[0].length;
+            });
+            // Texte après le dernier match
+            if (lastIndex < part.length) {
+              newParts.push(part.substring(lastIndex));
+            }
+          } else {
+            newParts.push(part);
+          }
+        } else {
+          newParts.push(part);
+        }
+      });
+      parts = newParts;
+    });
+
+    return parts;
+  };
   return (
     <div className="space-y-6">
       <div className="bg-card rounded-2xl p-6 border border-border">
@@ -52,6 +168,17 @@ export default function StrategiesSection({ strategies, selectedStrategy, setSel
           ))}
         </div>
 
+        {/* Card de l'indicateur en temps réel pour cette stratégie */}
+        {getIndicatorCard() && (
+          <div className="mb-8">
+            <h3 className="text-lg font-medium text-card-foreground mb-4 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-primary" />
+              Indicateur en temps réel pour cette stratégie
+            </h3>
+            {getIndicatorCard()}
+          </div>
+        )}
+
         {/* Détails de la stratégie sélectionnée */}
         <div className="bg-accent rounded-xl p-6">
           <div className="flex items-center justify-between mb-6">
@@ -76,7 +203,7 @@ export default function StrategiesSection({ strategies, selectedStrategy, setSel
                   <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0">
                     {i + 1}
                   </div>
-                  <p className="text-sm text-muted-foreground flex-1">{step}</p>
+                  <p className="text-sm text-muted-foreground flex-1">{renderStepWithTooltips(step)}</p>
                 </div>
               ))}
             </div>

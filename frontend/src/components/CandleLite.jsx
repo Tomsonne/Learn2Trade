@@ -7,11 +7,19 @@ export default function CandleLite({
   data = [],
   height = 384,
   tf = "1h",
+  series = [], // Données avec indicateurs (ma20, ma50, rsi, bbUpper, bbMiddle, bbLower)
+  showIndicators = null, // "ma" | "rsi" | "bollinger" | "fibonacci" | null
+  fibLevels = [], // Niveaux de Fibonacci à afficher
 }) {
   const elRef = useRef(null);
   const chartRef = useRef(null);
   const seriesRef = useRef(null);
   const volumeSeriesRef = useRef(null);
+  const ma20SeriesRef = useRef(null);
+  const ma50SeriesRef = useRef(null);
+  const bbUpperSeriesRef = useRef(null);
+  const bbMiddleSeriesRef = useRef(null);
+  const bbLowerSeriesRef = useRef(null);
   const roRef = useRef(null);
 
   // helpers couleur -> formats acceptés par lightweight-charts
@@ -130,6 +138,11 @@ export default function CandleLite({
       chartRef.current = null;
       seriesRef.current = null;
       volumeSeriesRef.current = null;
+      ma20SeriesRef.current = null;
+      ma50SeriesRef.current = null;
+      bbUpperSeriesRef.current = null;
+      bbMiddleSeriesRef.current = null;
+      bbLowerSeriesRef.current = null;
     };
   }, [height, tf]); // on recrée si la TF change (pattern simple et fiable)
 
@@ -159,6 +172,148 @@ export default function CandleLite({
     volumeSeriesRef.current.setData(volumeData);
     chartRef.current?.timeScale().fitContent();
   }, [data]);
+
+  // Effet pour afficher/masquer les indicateurs selon la stratégie sélectionnée
+  useEffect(() => {
+    if (!chartRef.current) return;
+
+    // Nettoyer les anciennes séries d'indicateurs
+    if (ma20SeriesRef.current) {
+      chartRef.current.removeSeries(ma20SeriesRef.current);
+      ma20SeriesRef.current = null;
+    }
+    if (ma50SeriesRef.current) {
+      chartRef.current.removeSeries(ma50SeriesRef.current);
+      ma50SeriesRef.current = null;
+    }
+    if (bbUpperSeriesRef.current) {
+      chartRef.current.removeSeries(bbUpperSeriesRef.current);
+      bbUpperSeriesRef.current = null;
+    }
+    if (bbMiddleSeriesRef.current) {
+      chartRef.current.removeSeries(bbMiddleSeriesRef.current);
+      bbMiddleSeriesRef.current = null;
+    }
+    if (bbLowerSeriesRef.current) {
+      chartRef.current.removeSeries(bbLowerSeriesRef.current);
+      bbLowerSeriesRef.current = null;
+    }
+
+    if (!showIndicators || !series.length) return;
+
+    const getThemeColor = (cssVar, fallback) => {
+      const css = getComputedStyle(document.documentElement);
+      const hslValue = css.getPropertyValue(cssVar).trim();
+      if (!hslValue) return fallback;
+      const el = document.createElement("span");
+      el.style.color = `hsl(${hslValue})`;
+      document.body.appendChild(el);
+      const rgb = getComputedStyle(el).color;
+      document.body.removeChild(el);
+      return rgb;
+    };
+
+    // Afficher les moyennes mobiles
+    if (showIndicators === "ma") {
+      // MA20
+      ma20SeriesRef.current = chartRef.current.addLineSeries({
+        color: getThemeColor("--chart-1", "rgb(59, 130, 246)"),
+        lineWidth: 2,
+        title: "MA20",
+        lastValueVisible: true,
+        priceLineVisible: false,
+      });
+
+      // MA50
+      ma50SeriesRef.current = chartRef.current.addLineSeries({
+        color: getThemeColor("--chart-2", "rgb(99, 102, 241)"),
+        lineWidth: 2,
+        title: "MA50",
+        lastValueVisible: true,
+        priceLineVisible: false,
+      });
+
+      // Préparer les données MA20 et MA50
+      const ma20Data = series
+        .filter(d => Number.isFinite(d?.ts) && Number.isFinite(d?.ma20))
+        .map(d => ({ time: Math.floor(d.ts / 1000), value: d.ma20 }));
+
+      const ma50Data = series
+        .filter(d => Number.isFinite(d?.ts) && Number.isFinite(d?.ma50))
+        .map(d => ({ time: Math.floor(d.ts / 1000), value: d.ma50 }));
+
+      ma20SeriesRef.current.setData(ma20Data);
+      ma50SeriesRef.current.setData(ma50Data);
+    }
+
+    // Afficher les Bandes de Bollinger
+    if (showIndicators === "bollinger") {
+      // Bande supérieure
+      bbUpperSeriesRef.current = chartRef.current.addLineSeries({
+        color: "rgba(239, 68, 68, 0.8)", // rouge
+        lineWidth: 1.5,
+        lineStyle: 2, // dashed
+        title: "BB Sup",
+        lastValueVisible: false,
+        priceLineVisible: false,
+      });
+
+      // Bande moyenne (MA20)
+      bbMiddleSeriesRef.current = chartRef.current.addLineSeries({
+        color: getThemeColor("--chart-1", "rgb(59, 130, 246)"),
+        lineWidth: 2,
+        title: "BB Moy",
+        lastValueVisible: true,
+        priceLineVisible: false,
+      });
+
+      // Bande inférieure
+      bbLowerSeriesRef.current = chartRef.current.addLineSeries({
+        color: "rgba(34, 197, 94, 0.8)", // vert
+        lineWidth: 1.5,
+        lineStyle: 2, // dashed
+        title: "BB Inf",
+        lastValueVisible: false,
+        priceLineVisible: false,
+      });
+
+      // Préparer les données Bollinger
+      const bbUpperData = series
+        .filter(d => Number.isFinite(d?.ts) && Number.isFinite(d?.bbUpper))
+        .map(d => ({ time: Math.floor(d.ts / 1000), value: d.bbUpper }));
+
+      const bbMiddleData = series
+        .filter(d => Number.isFinite(d?.ts) && Number.isFinite(d?.bbMiddle))
+        .map(d => ({ time: Math.floor(d.ts / 1000), value: d.bbMiddle }));
+
+      const bbLowerData = series
+        .filter(d => Number.isFinite(d?.ts) && Number.isFinite(d?.bbLower))
+        .map(d => ({ time: Math.floor(d.ts / 1000), value: d.bbLower }));
+
+      bbUpperSeriesRef.current.setData(bbUpperData);
+      bbMiddleSeriesRef.current.setData(bbMiddleData);
+      bbLowerSeriesRef.current.setData(bbLowerData);
+    }
+
+    // Afficher les niveaux de Fibonacci
+    if (showIndicators === "fibonacci" && fibLevels.length > 0) {
+      // Pour Fibonacci, on utilise createPriceLine pour chaque niveau
+      fibLevels.forEach(level => {
+        if (Number.isFinite(level.value)) {
+          seriesRef.current?.createPriceLine({
+            price: level.value,
+            color: level.color || "rgb(234, 179, 8)",
+            lineWidth: level.percentage === 61.8 ? 2 : 1,
+            lineStyle: level.percentage === 0 || level.percentage === 100 ? 0 : 2, // solid ou dashed
+            axisLabelVisible: true,
+            title: level.name || `${level.percentage}%`,
+          });
+        }
+      });
+    }
+
+    chartRef.current.timeScale().fitContent();
+  }, [showIndicators, series, fibLevels]);
 
   return <div ref={elRef} className="rounded-xl overflow-hidden w-full" style={{ height }} />;
 }

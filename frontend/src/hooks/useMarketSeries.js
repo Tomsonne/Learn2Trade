@@ -1,6 +1,6 @@
 // src/hooks/useMarketSeries.js
 import { useEffect, useState, useCallback } from "react";
-import { SMA, RSI } from "technicalindicators";
+import { SMA, RSI, BollingerBands } from "technicalindicators";
 
 // Corrigé : détection auto backend
 const API =
@@ -49,15 +49,24 @@ export function useMarketSeries({
       const ma20Arr = SMA.calculate({ period: 20, values: closes });
       const ma50Arr = SMA.calculate({ period: 50, values: closes });
       const rsiArr  = RSI.calculate({ period: 14, values: closes });
+      const bbArr   = BollingerBands.calculate({
+        period: 20,
+        values: closes,
+        stdDev: 2
+      });
 
       // réaligne aux longueurs de rows
       const ma20 = padToLen(rows.length, ma20Arr);
       const ma50 = padToLen(rows.length, ma50Arr);
       const rsi  = padToLen(rows.length, rsiArr);
+      const bb   = padToLen(rows.length, bbArr);
 
       const enriched = rows.map((r, i) => ({
         ts: r.t, o: r.o, h: r.h, l: r.l, c: r.c, v: r.v,
         ma20: ma20[i], ma50: ma50[i], rsi: rsi[i],
+        bbUpper: bb[i]?.upper ?? null,
+        bbMiddle: bb[i]?.middle ?? null,
+        bbLower: bb[i]?.lower ?? null,
       }));
 
       // option : écraser le close de la dernière bougie avec le spot
