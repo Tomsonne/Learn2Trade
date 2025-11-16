@@ -9,6 +9,7 @@ import v1Router from "./api/index.js";
 import sequelize from "./core/db.js";
 import models from "./models/index.js";
 import websocketService from "./services/websocket.service.js";
+import { initializeSnapshotCron } from "./jobs/snapshot.cron.js";
 
 // ──────────────────────────────────────────────
 // Chargement config & initialisation app
@@ -105,6 +106,10 @@ async function start() {
 
     // Initialize WebSocket service
     websocketService.initialize(server);
+
+    // Initialize cron jobs
+    initializeSnapshotCron();
+    console.log("Cron jobs initialisés");
 
     server.listen(PORT, "0.0.0.0", () => {
       console.log(`Learn2Trade backend running on port ${PORT}`);

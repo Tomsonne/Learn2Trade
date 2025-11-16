@@ -5,6 +5,7 @@ import authRoutes from "./auth.routes.js";
 import positionRoutes from "./position.routes.js"
 import tradeRoutes from"./trade.routes.js"
 import assetRoutes from "./asset.route.js";
+import snapshotRoutes from "./snapshot.routes.js";
 
 const router = Router();
 
@@ -15,6 +16,7 @@ router.use("/auth", authRoutes);
 router.use("/position", positionRoutes);
 router.use("/trade", tradeRoutes);
 router.use("/assets", assetRoutes);
+router.use("/snapshots", snapshotRoutes);
 
 
 export default router;
