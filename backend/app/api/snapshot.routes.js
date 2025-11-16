@@ -6,12 +6,12 @@ import {
   getMyPortfolioMetrics,
   createAllUsersSnapshots,
 } from "../controllers/snapshot.controller.js";
-import { authenticate } from "../middlewares/auth.middleware.js";
+import { verifyAuth } from "./middlewares/auth.middleware.js";
 
 const router = Router();
 
 // Routes protégées (nécessitent authentification)
-router.use(authenticate);
+router.use(verifyAuth);
 
 /**
  * GET /api/v1/snapshots/history?days=30
